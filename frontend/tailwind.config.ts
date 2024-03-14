@@ -14,6 +14,10 @@ const config: Config = {
 
   darkMode: "class",
   theme: {
+    colors: {
+      'orange1': '#EFAA19',
+      'orange2': '#F0DDB6'
+    },
     extend: {},
   },
   plugins: [],

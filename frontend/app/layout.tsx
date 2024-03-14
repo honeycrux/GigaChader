@@ -1,8 +1,14 @@
 import { PrimeReactProvider } from "primereact/api";
-import Tailwind from "primereact/passthrough/tailwind";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+// import Tailwind from "primereact/passthrough/tailwind";
+// import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import "./globals.css";
 import "primeicons/primeicons.css";
+// import "primereact/resources/themes/lara-light-teal/theme.css";
+import "./theme/theme.css";
+import "./theme/custom-styles.css"
+import { Source_Sans_3 } from 'next/font/google'
+
+const sourceSans3 = Source_Sans_3({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -23,9 +29,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <PrimeReactProvider value={{ unstyled: true, pt: Tailwind }}>
-        <body>
-          <ThemeSwitcher />
+      <PrimeReactProvider>
+        <body className={sourceSans3.className}>
           {children}
         </body>
       </PrimeReactProvider>

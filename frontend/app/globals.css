@@ -8,7 +8,7 @@
   @tailwind utilities;
 }
 
-html {
+/* html {
   font-size: 14px;
 }
 
@@ -30,4 +30,4 @@ html.dark body {
 
 html.dark .card {
   background: #071426;
-}
+} */
