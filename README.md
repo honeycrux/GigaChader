@@ -33,14 +33,14 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 **To install or remove packages, please go to the respective folder (frontend/backend) before using `npm install`.**
 
 ### Web Server: Building Pages
-Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. Tailwind CSS will help greatly.
+Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. The UI Library [PrimeReact](https://primereact.org/) the CSS Library [Tailwind CSS](https://tailwindcss.com/) are used.
 
 ### Web Server: Interacting with the Backend (as a server action)
 To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
 
 If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/actions/api-client.ts`.
 
-While running backend, you may infer the usage of API endpoints using the swagger docs on `http://localhost:3007/docs/` or the contracts defined in `shared/contracts/`.
+While running backend, you may infer the usage of API endpoints using the swagger docs on [http://localhost:3007/docs/](http://localhost:3007/docs/) or the contracts defined in `shared/contracts/`.
 
 Please avoid interacting directly with the database with actions. The actions should serve as a layer to talk to the backend and tailor the result for the webpage.
 
@@ -70,6 +70,6 @@ Environment variables are modifiable values that will affect how the process beh
 
 This project has two env files, one for frontend (`frontend/.env`) and one for backend (`backend/.env`).
 
-Using environment variables in the project: Please import ENV from `frontend/lib/env.ts` or `backend/lib/env.ts`.
+To get environment variables in the project, use `process.env.VARIABLE_NAME`. All variables from the env file are of `string` type.
 
-We use runtime validation on the env files using Zod. When you change environment variables on the frontend or backend, if the type validation needs change, please update the respective `lib/env.ts` file.
+When changing environment variables on the frontend or backend, please update the respective `environment.d.ts` file so that we get nice autocomplete.

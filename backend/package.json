@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "ts-node --transpileOnly server.ts",
-    "dev": "nodemon server.ts"
+    "start": "ts-node -r dotenv/config --transpileOnly server.ts",
+    "dev": "nodemon -r dotenv/config server.ts"
   },
   "dependencies": {
     "@prisma/client": "5.7.1",

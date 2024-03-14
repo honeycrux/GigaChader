@@ -2,7 +2,6 @@
 
 import express from 'express'
 import { apiRouter } from './routes';
-import { ENV } from './lib/env';
 import { generateOpenApi } from '@ts-rest/open-api';
 import { apiContract } from "#/shared/contracts"
 import * as swaggerUi from 'swagger-ui-express';
@@ -20,7 +19,7 @@ createExpressEndpoints(apiContract, apiRouter, app);
 
 const openApiDocument = generateOpenApi(apiContract, {
   info: {
-    title: 'Posts API',
+    title: 'Backend API',
     version: '1.0.0',
   },
 });
@@ -29,8 +28,11 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 // start express app
 
-const server = app.listen(ENV.PORT, () =>
+if (!Number(process.env.PORT)) {
+  throw TypeError("process.env.PORT is not a number");
+}
+const server = app.listen(Number(process.env.PORT), () =>
   console.log(`
-🚀 Server ready at: ${ENV.BACKEND_API_BASEURL}
+🚀 Server ready at: ${process.env.BACKEND_API_BASEURL}
 ⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api`),
 );
