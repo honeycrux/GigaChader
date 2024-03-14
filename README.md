@@ -10,11 +10,11 @@ This is a monorepo containing several folders:
   - `lib/actions/`: Server actions
 - `backend/`: Backend services
   - `server.ts`: The main file that is run
-  - `prisma/`: Database schema and crud actions
+  - `prisma/`: Database schema and crud operations
   - `routes/`: Routes and functionalities of the API
   - `lib/`: Useful functionalities you define
 - `shared/`: Resources shared between `frontend/` and `backend/`
-  - `contracts/`: TS-REST contracts to provide typings for API communications
+  - `contracts/`: [TS-REST contracts](https://ts-rest.com/docs/core/) to provide typings for API communications
 
 ## Installation
 
@@ -33,16 +33,16 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 **To install or remove packages, please go to the respective folder (frontend/backend) before using `npm install`.**
 
 ### Web Server: Building Pages
-Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. TailwindCSS will help greatly.
+Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. Tailwind CSS will help greatly.
 
 ### Web Server: Interacting with the Backend (as a server action)
-To interact with the backend, please create an action in `frontend/lib/actions/` to do something complicated, e.g. interacting with the API layer provided by the backend.
+To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
 
 If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/actions/api-client.ts`.
 
-While running backend, you may refer to the usage of API endpoints on `http://localhost:3007/docs/`, or under the [contracts](https://ts-rest.com/docs/core/) defined in `shared/contracts/`.
+While running backend, you may infer the usage of API endpoints using the swagger docs on `http://localhost:3007/docs/` or the contracts defined in `shared/contracts/`.
 
-Please avoid interacting directly with the database with actions. The actions should serve as a layer to talk to the backend and tailor an output to frontend's need.
+Please avoid interacting directly with the database with actions. The actions should serve as a layer to talk to the backend and tailor the result for the webpage.
 
 If there are features you want from the backend services, please request it from the backend team.
 

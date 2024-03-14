@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "ts-node server.ts",
+    "start": "ts-node --transpileOnly server.ts",
     "dev": "nodemon server.ts"
   },
   "dependencies": {
@@ -14,6 +14,8 @@
     "dotenv": "^16.4.5",
     "express": "4.18.2",
     "swagger-ui-express": "^5.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -22,8 +24,6 @@
     "@types/swagger-ui-express": "^4.1.6",
     "nodemon": "^3.1.0",
     "prisma": "5.7.1",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
     "typescript": "5.3.3"
   }
 }

@@ -306,7 +306,7 @@ datasource db {
 </details>
 -->
 
-### Start the REST API server
+## Start the REST API server
 
 ```
 npm run dev
