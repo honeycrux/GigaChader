@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+const colors = require('tailwindcss/colors')
+
 const config: Config = {
   content: [
     "./index.html",
@@ -14,11 +16,28 @@ const config: Config = {
 
   darkMode: "class",
   theme: {
-    colors: {
-      'orange1': '#EFAA19',
-      'orange2': '#F0DDB6'
+    // colors: {
+    //   'orange1': '#EFAA19',
+    //   'orange2': '#F0DDB6',
+    //   transparent: 'transparent',
+    //   current: 'currentColor',
+    //   black: colors.black,
+    //   white: colors.white,
+    //   emerald: colors.emerald,
+    //   indigo: colors.indigo,
+    //   yellow: colors.yellow,
+    //   stone: colors.warmGray,
+    //   sky: colors.lightBlue,
+    //   neutral: colors.trueGray,
+    //   gray: colors.coolGray,
+    //   slate: colors.blueGray,
+    // },
+    extend: {
+      colors: {
+        'orange1': '#EFAA19',
+        'orange2': '#F0DDB6'
+      }
     },
-    extend: {},
   },
   plugins: [],
 };
