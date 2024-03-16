@@ -1,19 +1,19 @@
 "use client"
 
-import LoginBox from '@/components/authentication/LoginBox'
 import LogoSideBar from '@/components/authentication/LogoSideBar'
+import SignupSuccessBox from '@/components/authentication/SignupSuccessBox'
 
-const login = () => {    
+const signupSuccess = () => {    
     return (
         <>
         <div className="flex">
                 {/* left container */}
                 <LogoSideBar />
                 {/* right container */}
-                <LoginBox />
+                <SignupSuccessBox />
         </div>
         </>
     )
 }
 
-export default login
+export default signupSuccess

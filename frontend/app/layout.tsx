@@ -7,6 +7,7 @@ import "primeicons/primeicons.css";
 import "./theme/theme.css";
 import "./theme/custom-styles.css"
 import { Source_Sans_3 } from 'next/font/google'
+import { AuthProvider } from "./Providers";
 
 const sourceSans3 = Source_Sans_3({ subsets: ["latin"] });
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       </head>
       <PrimeReactProvider>
         <body className={sourceSans3.className}>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </body>
       </PrimeReactProvider>
     </html>
