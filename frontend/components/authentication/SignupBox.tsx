@@ -63,7 +63,8 @@ const SignupBox = () => {
             <p className="text-2xl">Email address</p>
             <InputText className="custom-shadow-border-light" value={email} onChange={(e) => setEmail(e.target.value)} />
             {/* <br className='my-2' /> */}
-            <p className="text-2xl">Password</p>
+            <p className="text-2xl !mb-0">Password</p>
+            <p className="!m-0">Use longer than 6 characters</p>
             <InputText className="custom-shadow-border-light" value={password} onChange={(e) => setPassword(e.target.value)} />
             {error ? <div className="text-red-600">{error}</div> : <br className="!my-5" />}
             <div className="flex w-full justify-center">

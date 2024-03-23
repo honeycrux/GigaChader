@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import placeholder_profilePic from "@/resource/placeholder_profilePic.png";
+import placeholder_profilePic from "@/public/placeholder_profilePic.png";
 import { FileUpload } from "primereact/fileupload";
 import { useRef, useState } from "react";
 import { Toast } from "primereact/toast";

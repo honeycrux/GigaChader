@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import gigachader from "@/resource/gigachader.png"
+import gigachader from "@/public/gigachader.png"
 
 const LogoSideBar = () => {
   return (
