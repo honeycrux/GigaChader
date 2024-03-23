@@ -1,10 +1,12 @@
 declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      BACKEND_API_BASEURL: string;
-      PORT: string;
+    namespace NodeJS {
+        interface ProcessEnv {
+            BACKEND_URL: string;
+            FRONTEND_URL: string;
+            PORT: string;
+            MONGODB_URL: string;
+        }
     }
-  }
 }
 
-export {}
+export {};

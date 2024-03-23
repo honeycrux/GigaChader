@@ -8,10 +8,8 @@
     "paths": {
       "@/*": ["./*"],
       "#/shared/*": ["../shared/*"]
-    }
-  },
-  "ts-node": {
-    "require": ["tsconfig-paths/register"]
+    },
+    "skipLibCheck": true
   },
   "exclude": ["node_modules"]
 }

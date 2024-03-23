@@ -35,6 +35,13 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 ### Web Server: Building Pages
 Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. The UI Library [PrimeReact](https://primereact.org/) the CSS Library [Tailwind CSS](https://tailwindcss.com/) are used.
 
+### Web Server: Protecting Routes
+Use validateUser from `@/lib/actions/auth`.
+
+For server side component, use `const auth = validateUser();`. For client side component, use `const auth = use(validateUser);`.
+
+Check for absence of a session using `if ("error" in auth)`. Check user information using the `auth.user` object.
+
 ### Web Server: Interacting with the Backend (as a server action)
 To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
 
@@ -59,9 +66,15 @@ If your API route is `http://localhost:3007/api/[feature]/[endpoint]`, follow th
 - Check if the defined subroute is added under `routes/api.ts`
 You can use tools like [Postman](https://www.postman.com/) to make API calls for test.
 
+### Backend: Protecting Routes
+A user validation middleware (`backend/middlewares/auth.ts`) runs before calling any route in the application.
+
+Check for absence of a session using `!res.locals.session || !res.locals.user`. Check user information using the `res.locals.user` object.
+
 ### Backend: Database Model & Migration
+To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`.
 
-
+With MongoDB, no "migration" is needed, though check data integrity by yourself when changes are made.
 
 ### Changes to Environment Variables
 Environment variables are modifiable values that will affect how the process behave. The env file can contain sensitive information such as credentials.

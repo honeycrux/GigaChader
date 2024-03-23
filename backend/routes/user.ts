@@ -7,4 +7,4 @@ const userRouter = s.router(apiContract.user, {
 
 });
 
-export { userRouter }
+export { userRouter };

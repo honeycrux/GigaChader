@@ -5,17 +5,12 @@ import "./globals.css";
 import "primeicons/primeicons.css";
 // import "primereact/resources/themes/lara-light-teal/theme.css";
 import "./theme/theme.css";
-import "./theme/custom-styles.css"
-import { Source_Sans_3 } from 'next/font/google'
-import { AuthProvider } from "./Providers";
+import "./theme/custom-styles.css";
+import { Source_Sans_3 } from "next/font/google";
 
 const sourceSans3 = Source_Sans_3({ subsets: ["latin"] });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -31,11 +26,7 @@ export default function RootLayout({
         />
       </head>
       <PrimeReactProvider>
-        <body className={sourceSans3.className}>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </body>
+        <body className={sourceSans3.className}>{children}</body>
       </PrimeReactProvider>
     </html>
   );
