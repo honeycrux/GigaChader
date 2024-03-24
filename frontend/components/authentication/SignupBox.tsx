@@ -11,6 +11,7 @@ const SignupBox = () => {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [bIsSignupLoading, setbIsSignupLoading] = useState(false);
   // useEffect(() => {
   //   console.log("email: " + email);
   //   console.log("password: " + password);
@@ -28,6 +29,7 @@ const SignupBox = () => {
     }
 
     try {
+      setbIsSignupLoading(prevbIsSignupLoading => true);
       const res = await signup({
         username: userName,
         displayName,
@@ -41,10 +43,12 @@ const SignupBox = () => {
         console.log("Registration successful.");
         router.push("/signup/success");
       } else {
+      setbIsSignupLoading(prevbIsSignupLoading => false);
         console.log("Registration failed.");
         setError(res.error);
       }
     } catch (error) {
+      setbIsSignupLoading(prevbIsSignupLoading => false);
       console.log("Error during registration: ", error);
     }
   };
@@ -68,7 +72,7 @@ const SignupBox = () => {
             <InputText className="custom-shadow-border-light" value={password} onChange={(e) => setPassword(e.target.value)} />
             {error ? <div className="text-red-600">{error}</div> : <br className="!my-5" />}
             <div className="flex w-full justify-center">
-              <Button className="px-20" label="Sign up" />
+              <Button className="px-20" label="Sign up" loading={bIsSignupLoading} />
             </div>
           </form>
         </div>

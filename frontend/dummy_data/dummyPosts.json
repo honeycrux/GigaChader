@@ -1,0 +1,65 @@
+[
+    {
+        "id": "1",
+        "currentUserId": "123",
+        "parentId": null,
+        "content": "This is a dummy post 1",
+        "author": {
+            "username": "author1",
+            "displayName": "Author 1",
+            "image": "/path/to/image1.jpg",
+            "id": "456"
+        },
+        "createdAt": "2022-01-01T00:00:00.000Z",
+        "comments": [
+            {
+                "author": {
+                    "image": "/path/to/comment-author-image1.jpg"
+                }
+            }
+        ],
+        "isComment": false
+    },
+    {
+        "id": "2",
+        "currentUserId": "123",
+        "parentId": null,
+        "content": "This is a dummy post 2",
+        "author": {
+            "username": "author2",
+            "displayName": "Author 2",
+            "image": "/path/to/image2.jpg",
+            "id": "457"
+        },
+        "createdAt": "2022-01-02T00:00:00.000Z",
+        "comments": [
+            {
+                "author": {
+                    "image": "/path/to/comment-author-image2.jpg"
+                }
+            }
+        ],
+        "isComment": false
+    },
+    {
+        "id": "3",
+        "currentUserId": "123",
+        "parentId": null,
+        "content": "This is a dummy post 3",
+        "author": {
+            "username": "author3",
+            "displayName": "Author 3",
+            "image": "/path/to/image3.jpg",
+            "id": "458"
+        },
+        "createdAt": "2022-01-03T00:00:00.000Z",
+        "comments": [
+            {
+                "author": {
+                    "image": "/path/to/comment-author-image3.jpg"
+                }
+            }
+        ],
+        "isComment": false
+    }
+]

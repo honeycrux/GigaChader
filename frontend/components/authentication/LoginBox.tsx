@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/actions/auth";
 import { cookies } from "next/headers";
@@ -14,14 +14,17 @@ const LoginBox = () => {
   //   console.log("password: " + password);
   // }, [email, password])
   const [error, setError] = useState("");
+  const [bIsLoginLoading, setBIsLoginLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      setBIsLoginLoading(prevBIsLoading => true);
       const res = await login({ email, password });
 
       if (res !== true) {
+        setBIsLoginLoading(prevBIsLoading => false);
         setError("Invalid credentials. Please try again.");
         return;
       }
@@ -53,6 +56,7 @@ const LoginBox = () => {
                 }}
                 className="px-20"
                 label="Continue"
+                loading={bIsLoginLoading}
               />
             </div>
 

@@ -1,10 +1,13 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Image } from 'primereact/image';
 import cheem from "@/public/cheem.jpg";
 import { Avatar } from 'primereact/avatar';
+import { InputTextarea } from 'primereact/inputtextarea';
+import PostBox from "@/components/home/PostBox";
+import dummyPost from "@/dummy_data/dummyPosts.json";
 
 const home = () => {
     const toast = useRef<Toast>(null);
@@ -13,6 +16,7 @@ const home = () => {
             toast.current.show({ severity: "info", summary: "Success", detail: "Fake add post" });
         }
     }
+    
   return (
     // force page size to fit screen
     <div className='w-screen h-screen'>
@@ -46,29 +50,7 @@ const home = () => {
                         <Button label="Add" onClick={handleAddPost} />
                     </div>
                     
-                    <div className="flex flex-col w-full bg-orange2 rounded-2xl p-4">
-                        {/* <Image src="/cheem.jpg"
-                                height="12"
-                                alt="profile picture"
-                                className='object-cover rounded-full aspect-square'>
-                        </Image> */}
-                        <div className="flex">
-                            <div className="flex flex-col items-center">
-                                <Avatar className="mr-2" image="/cheem.jpg" shape="circle" size="large" />
-                                <div className="relative mt-2 grow w-0.5 rounded-full bg-gray-600" />
-                            </div>
-                            <div className="whitespace-pre-wrap">
-                                <div>
-                                    <span className="mr-2">Cheem</span>
-                                    <span className="text-gray-600">@cheem</span>
-                                </div>
-                                <div>
-                                    <p>DOGE to the mooooon&#10;&#13;The price's been skyrocketting for the last 12 hours</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p>date here</p>
-                    </div>
+                    {dummyPost.map((post, index) => <PostBox key={index} {...post} />)}
                 </div>
             </main>
             {/* main content end */}
