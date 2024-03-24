@@ -1,5 +1,18 @@
-// To update client to reflect changes to this file:
+// Doc: https://www.prisma.io/docs/orm/overview/databases/mongodb
+
+// To update client (code type definition) to reflect changes to this file:
 // npx prisma generate
+
+// To update the schema of the actual database to reflect changes to this file:
+// (You may be warned of data loss in the process)
+// npx prisma db push
+
+// Project conventions:
+//   - All models in titlecase
+//   - All fields in lowercase
+//   - All relations explicitly named (@relation(name: ""))
+//   - All fields that is an array type has plural field names
+//   - Written order: attributes, foreign keys, relations
 
 generator client {
   provider = "prisma-client-js"
@@ -10,20 +23,240 @@ datasource db {
   url      = env("MONGODB_URI")
 }
 
+//////////////////////
+// Group A: User-related
+//////////////////////
+
+// Some fields in this model are used by lucia-auth
 model User {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  sessions    Session[]
-  username    String    @unique
-  displayName String
-  email       String    @unique
-  password    String
-  salt        String
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  username  String          @unique
+  email     String          @unique
+  password  String
+  createdAt DateTime        @default(now()) @db.Date
+  updatedAt DateTime        @updatedAt
+  userInfo  UserInformation
+
+  followerIds     String[] @db.ObjectId
+  followedUserIds String[] @db.ObjectId
+  likedPostIds    String[] @db.ObjectId
+  savedPostIds    String[] @db.ObjectId
+
+  followers              User[]               @relation(name: "UserFollowers", fields: [followerIds], references: [id])
+  followedUsers          User[]               @relation(name: "UserFollowers", fields: [followedUserIds], references: [id])
+  sessions               Session[]            @relation(name: "UserSession")
+  profile                Profile?             @relation(name: "UserProfile")
+  cryptoProfile          CryptoProfile?       @relation(name: "UserCryptoProfile")
+  comments               Comment[]            @relation(name: "UserComment")
+  posts                  Post[]               @relation(name: "UserPost")
+  likedPosts             Post[]               @relation(name: "PostLikes", fields: [likedPostIds], references: [id])
+  savedPosts             Post[]               @relation(name: "PostSaves", fields: [savedPostIds], references: [id])
+  digitalTransactions    DigitalTransaction[] @relation(name: "UserDigitalTransaction")
+  sentDirectMessages     DirectMessage[]      @relation(name: "DirectMessageSender")
+  receivedDirectMessages DirectMessage[]      @relation(name: "DirectMessageReceiver")
+  moderationRecords      ModerationRecord[]   @relation(name: "UserModerationRecord")
+  moderationHits         ModerationRecord[]   @relation(name: "UserModerationHit")
+  pollVotes              PollVote[]           @relation(name: "UserPollVote")
 }
 
+// This model is used by lucia-auth
 model Session {
   trueId    String   @id @default(auto()) @map("_id") @db.ObjectId
   id        String   @unique
-  userId    String   @db.ObjectId
   expiresAt DateTime @db.Date
-  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  userId String @db.ObjectId
+
+  user User @relation(name: "UserSession", references: [id], fields: [userId], onDelete: Cascade)
+}
+
+type UserInformation {
+  displayName    String
+  role           Role   @default(USER)
+  digitalBalance Float  @default(0)
+}
+
+enum Role {
+  USER
+  VERIFIED_USER
+  ADMIN
+}
+
+model Profile {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @default("")
+  imageUrl  String?
+  bio       String   @default("")
+  updatedAt DateTime @updatedAt
+
+  userId String @unique @db.ObjectId
+
+  user User @relation(name: "UserProfile", references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model CryptoProfile {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  walletAddress    String
+  supportedCryptos CryptoHolding[]
+  updatedAt        DateTime        @updatedAt
+
+  userId String @unique @db.ObjectId
+
+  user User @relation(name: "UserCryptoProfile", references: [id], fields: [userId], onDelete: Cascade)
+}
+
+type CryptoHolding {
+  crypto String
+  amount Float
+}
+
+model DigitalTransaction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  amount    Float
+  createdAt DateTime @default(now())
+
+  initiatorId String @db.ObjectId
+
+  initiator User @relation(name: "UserDigitalTransaction", references: [id], fields: [initiatorId], onDelete: Cascade)
+}
+
+model DirectMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+
+  senderId   String @db.ObjectId
+  receiverId String @db.ObjectId
+
+  sender   User @relation(name: "DirectMessageSender", references: [id], fields: [senderId], onDelete: Cascade)
+  receiver User @relation(name: "DirectMessageReceiver", references: [id], fields: [receiverId], onDelete: NoAction)
+}
+
+//////////////////////
+// Group B: Post-related
+//////////////////////
+
+model Post {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  content     String
+  createdAt   DateTime     @default(now())
+  pollOptions PollOption[]
+  UserMedia   UserMedia[]
+
+  authorId          String   @db.ObjectId
+  repostingPostId   String?  @db.ObjectId
+  parentCommunityId String?  @db.ObjectId
+  likedByUserIds    String[] @db.ObjectId
+  savedByUserIds    String[] @db.ObjectId
+
+  postHashtags    PostHashtag[]      @relation(name: "PostHashtag")
+  author          User               @relation(name: "UserPost", fields: [authorId], references: [id], onDelete: NoAction)
+  repostingPost   Post?              @relation(name: "Repost", references: [id], fields: [repostingPostId], onDelete: NoAction, onUpdate: NoAction)
+  repostedOnPosts Post[]             @relation(name: "Repost")
+  likedByUsers    User[]             @relation(name: "PostLikes", fields: [likedByUserIds], references: [id])
+  savedByUsers    User[]             @relation(name: "PostSaves", fields: [savedByUserIds], references: [id])
+  parentCommunity Community?         @relation(name: "CommunityPost", references: [id], fields: [parentCommunityId], onDelete: NoAction)
+  comment         Comment[]          @relation(name: "PostComment")
+  moderationHits  ModerationRecord[] @relation(name: "PostModerationHit")
+  pollVotes       PollVote[]         @relation(name: "PostPollVote")
+}
+
+model Comment {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  createdAt DateTime    @default(now())
+  UserMedia UserMedia[]
+
+  parentPostId String @db.ObjectId
+  authorId     String @db.ObjectId
+
+  parentPost     Post               @relation(name: "PostComment", references: [id], fields: [parentPostId], onDelete: Cascade)
+  author         User               @relation(name: "UserComment", references: [id], fields: [authorId], onDelete: NoAction)
+  moderationHits ModerationRecord[] @relation(name: "CommentModerationHit")
+}
+
+type PollOption {
+  description String
+}
+
+type UserMedia {
+  url     String
+  type    UserMediaType
+  altText String
+}
+
+enum UserMediaType {
+  IMAGE
+  VIDEO
+}
+
+model PollVote {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  optionNumber Int
+
+  parentPostId String @db.ObjectId
+  voterId      String @db.ObjectId
+
+  parentPost Post @relation(name: "PostPollVote", references: [id], fields: [parentPostId], onDelete: Cascade)
+  voter      User @relation(name: "UserPollVote", references: [id], fields: [voterId], onDelete: NoAction)
+
+  @@unique([parentPostId, voterId])
+}
+
+model PostHashtag {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  tagText String
+
+  parentPostId String @db.ObjectId
+
+  parentPost Post @relation(name: "PostHashtag", references: [id], fields: [parentPostId], onDelete: Cascade)
+
+  @@unique([tagText, parentPostId])
+}
+
+model Community {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  handle        String   @unique
+  displayedName String
+  imageUrl      String?
+  description   String   @default("")
+  isExclusive   Boolean
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  posts          Post[]             @relation(name: "CommunityPost")
+  moderationHits ModerationRecord[] @relation(name: "CommunityModerationHit")
+}
+
+//////////////////////
+// Group C: Moderation
+//////////////////////
+
+model ModerationRecord {
+  id         String                 @id @default(auto()) @map("_id") @db.ObjectId
+  descriptor String
+  comment    String
+  targetType ModerationTargetType[]
+  details    Json[] // Mock-up: [{ table: { field: { field: { from: "", to: "" | null } } } }]
+  createdAt  DateTime               @default(now())
+
+  initiatorId       String  @db.ObjectId
+  targetUserId      String? @db.ObjectId
+  targetPostId      String? @db.ObjectId
+  targetCommentId   String? @db.ObjectId
+  targetCommunityId String? @db.ObjectId
+
+  initiator       User       @relation(name: "UserModerationRecord", references: [id], fields: [initiatorId], onDelete: NoAction)
+  targetUser      User?      @relation(name: "UserModerationHit", references: [id], fields: [targetUserId], onDelete: NoAction)
+  targetPost      Post?      @relation(name: "PostModerationHit", references: [id], fields: [targetPostId], onDelete: NoAction)
+  targetComment   Comment?   @relation(name: "CommentModerationHit", references: [id], fields: [targetCommentId], onDelete: NoAction)
+  targetCommunity Community? @relation(name: "CommunityModerationHit", references: [id], fields: [targetCommunityId], onDelete: NoAction)
+}
+
+enum ModerationTargetType {
+  User
+  Post
+  Comment
+  Community
 }

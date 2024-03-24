@@ -40,12 +40,12 @@ Use validateUser from `@/lib/actions/auth`.
 
 For server side component, use `const auth = validateUser();`. For client side component, use `const auth = use(validateUser);`.
 
-Check for absence of a session using `if ("error" in auth)`. Check user information using the `auth.user` object.
+Check for absence of a session using the condition `"error" in auth`. Check user information using the `auth.user` object.
 
 ### Web Server: Interacting with the Backend (as a server action)
 To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
 
-If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/actions/api-client.ts`.
+If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/apiClient.ts`.
 
 While running backend, you may infer the usage of API endpoints using the swagger docs on [http://localhost:3007/docs/](http://localhost:3007/docs/) or the contracts defined in `shared/contracts/`.
 
@@ -62,19 +62,19 @@ But if you want to do it, use [next route handlers](https://nextjs.org/docs/app/
 If your API route is `http://localhost:3007/api/[feature]/[endpoint]`, follow these steps:
 - The source of truth for API endpoints is the [contracts](https://ts-rest.com/docs/core/), so first define the endpoint in the subcontract `shared/contracts/[feature].ts`
 - Check if the defined subcontract is added under `shared/contracts/index.ts`
-- Now, implement the endpoint in the subroute `routes/api/[feature].ts`
-- Check if the defined subroute is added under `routes/api.ts`
-You can use tools like [Postman](https://www.postman.com/) to make API calls for test.
+- Now, implement the endpoint in the subroute `routes/[feature].ts`
+- Check if the defined subroute is added under `routes/index.ts`
+You can use tools like [Insomnia](https://insomnia.rest/) to make API calls for test.
 
 ### Backend: Protecting Routes
 A user validation middleware (`backend/middlewares/auth.ts`) runs before calling any route in the application.
 
-Check for absence of a session using `!res.locals.session || !res.locals.user`. Check user information using the `res.locals.user` object.
+Check for absence of a session using the condition `!res.locals.session || !res.locals.user`. Check user information using the `res.locals.user` object.
 
 ### Backend: Database Model & Migration
-To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`.
+To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`, and update the database schema by running `npx prisma db push`.
 
-With MongoDB, no "migration" is needed, though check data integrity by yourself when changes are made.
+[Other tips for working with Prisma+MongoDB](https://www.prisma.io/docs/orm/overview/databases/mongodb/)
 
 ### Changes to Environment Variables
 Environment variables are modifiable values that will affect how the process behave. The env file can contain sensitive information such as credentials.

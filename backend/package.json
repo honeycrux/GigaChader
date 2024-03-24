@@ -6,11 +6,12 @@
     "start": "tsx -r dotenv/config server.ts",
     "dev": "tsx watch -r dotenv/config server.ts",
     "debug": "set DEBUG=express:* && npm run dev",
-    "prisma:gen": "prisma generate"
+    "prisma:gen": "prisma generate",
+    "prisma:push": "prisma db push"
   },
   "dependencies": {
     "@lucia-auth/adapter-prisma": "^4.0.1",
-    "@prisma/client": "5.7.1",
+    "@prisma/client": "^5.11.0",
     "@ts-rest/core": "^3.33.0",
     "@ts-rest/express": "^3.33.0",
     "@ts-rest/open-api": "^3.33.0",
@@ -27,7 +28,7 @@
     "@types/express": "4.17.21",
     "@types/node": "20.10.6",
     "@types/swagger-ui-express": "^4.1.6",
-    "prisma": "5.7.1",
+    "prisma": "^5.11.0",
     "typescript": "5.3.3"
   }
 }

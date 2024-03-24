@@ -6,7 +6,7 @@ import { generateOpenApi } from "@ts-rest/open-api";
 import { apiContract } from "#/shared/contracts";
 import * as swaggerUi from "swagger-ui-express";
 import { createExpressEndpoints } from "@ts-rest/express";
-import { csrfProtection, validateUser } from "./middlewares/auth";
+import { createLog, csrfProtection, validateUser } from "./middlewares/auth";
 
 // construct express app
 
@@ -16,7 +16,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use(csrfProtection, validateUser);
+app.use(csrfProtection, validateUser, createLog);
 
 createExpressEndpoints(apiContract, apiRouter, app);
 

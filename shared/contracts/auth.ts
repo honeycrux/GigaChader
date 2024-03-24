@@ -13,9 +13,13 @@ const authUserObject = z.object({
     user: z.object({
         id: z.string(),
         username: z.string(),
-        displayName: z.string(),
         email: z.string(),
         password: z.string(),
+        userInfo: z.object({
+            displayName: z.string(),
+            digitalBalance: z.number(),
+            role: z.union([z.literal("USER"), z.literal("VERIFIED_USER"), z.literal("ADMIN")]),
+        }),
     }),
 });
 

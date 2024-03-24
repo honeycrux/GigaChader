@@ -87,10 +87,11 @@ const authRouter = s.router(apiContract.auth, {
             const user = await prismaClient.user.create({
                 data: {
                     username: username,
-                    displayName: displayName,
                     email: email,
                     password: hashedPassword,
-                    salt: "",
+                    userInfo: {
+                        displayName: displayName,
+                    },
                 },
             });
 
@@ -192,8 +193,6 @@ const authRouter = s.router(apiContract.auth, {
     },
 
     validate: async ({ res }) => {
-        console.log(res.locals.session);
-        console.log(res.locals.user);
         if (!res.locals.session || !res.locals.user) {
             return {
                 status: 401,
