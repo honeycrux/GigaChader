@@ -1,4 +1,4 @@
-
+import dummyPost from "@/dummy_data/dummyPosts.json";
 
 export function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -14,4 +14,8 @@ export function formatDate(dateString: string) {
     const formattedDateTime = `${time} - ${formattedDate}`;
     
     return formattedDateTime;
+}
+
+export function fakeFetchPost(id: string) {
+    return dummyPost.find(post => post.id === id);
 }

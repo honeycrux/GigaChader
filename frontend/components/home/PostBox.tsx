@@ -6,11 +6,12 @@ import { Image } from 'primereact/image';
 import { Avatar } from 'primereact/avatar';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 
 interface Props {
     id: string;
-    currentUserId: string;
-    parentId: string | null;
+    currentUserId: string;  // for checking if the current user can delete a post
+    parentId: string | null; // for comments
     content: string;
     author: {
       username: string;
@@ -85,12 +86,14 @@ const PostBox = (
                             onClick={handleHeartClick}
                             className="cursor-pointer"
                     />
-                    <Image src="/comment.svg"
-                            width="24"
-                            alt="comment"
-                            onClick={handleCommentClick}
-                            className="cursor-pointer"
-                    />
+                    <Link href={`/post/${id}`}>
+                        <Image src="/comment.svg"
+                                width="24"
+                                alt="comment"
+                                // onClick={handleCommentClick}
+                                className="cursor-pointer"
+                        />
+                    </Link>
                 </div>
             </div>
         </div>
