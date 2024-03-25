@@ -6,6 +6,7 @@
     "start": "tsx -r dotenv/config server.ts",
     "dev": "tsx watch -r dotenv/config server.ts",
     "debug": "set DEBUG=express:* && npm run dev",
+    "postinstall": "npm run prisma:gen",
     "prisma:gen": "prisma generate",
     "prisma:push": "prisma db push"
   },

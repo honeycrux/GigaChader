@@ -47,7 +47,6 @@ model User {
   sessions               Session[]            @relation(name: "UserSession")
   profile                Profile?             @relation(name: "UserProfile")
   cryptoProfile          CryptoProfile?       @relation(name: "UserCryptoProfile")
-  comments               Comment[]            @relation(name: "UserComment")
   posts                  Post[]               @relation(name: "UserPost")
   likedPosts             Post[]               @relation(name: "PostLikes", fields: [likedPostIds], references: [id])
   savedPosts             Post[]               @relation(name: "PostSaves", fields: [savedPostIds], references: [id])
@@ -146,6 +145,7 @@ model Post {
 
   authorId          String   @db.ObjectId
   repostingPostId   String?  @db.ObjectId
+  parentPostId      String?  @db.ObjectId
   parentCommunityId String?  @db.ObjectId
   likedByUserIds    String[] @db.ObjectId
   savedByUserIds    String[] @db.ObjectId
@@ -154,26 +154,13 @@ model Post {
   author          User               @relation(name: "UserPost", fields: [authorId], references: [id], onDelete: NoAction)
   repostingPost   Post?              @relation(name: "Repost", references: [id], fields: [repostingPostId], onDelete: NoAction, onUpdate: NoAction)
   repostedOnPosts Post[]             @relation(name: "Repost")
+  parentPost      Post?              @relation(name: "PostTree", references: [id], fields: [parentPostId], onDelete: NoAction, onUpdate: NoAction)
+  childPosts      Post[]             @relation(name: "PostTree")
   likedByUsers    User[]             @relation(name: "PostLikes", fields: [likedByUserIds], references: [id])
   savedByUsers    User[]             @relation(name: "PostSaves", fields: [savedByUserIds], references: [id])
   parentCommunity Community?         @relation(name: "CommunityPost", references: [id], fields: [parentCommunityId], onDelete: NoAction)
-  comment         Comment[]          @relation(name: "PostComment")
   moderationHits  ModerationRecord[] @relation(name: "PostModerationHit")
   pollVotes       PollVote[]         @relation(name: "PostPollVote")
-}
-
-model Comment {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  content   String
-  createdAt DateTime    @default(now())
-  UserMedia UserMedia[]
-
-  parentPostId String @db.ObjectId
-  authorId     String @db.ObjectId
-
-  parentPost     Post               @relation(name: "PostComment", references: [id], fields: [parentPostId], onDelete: Cascade)
-  author         User               @relation(name: "UserComment", references: [id], fields: [authorId], onDelete: NoAction)
-  moderationHits ModerationRecord[] @relation(name: "CommentModerationHit")
 }
 
 type PollOption {
@@ -244,19 +231,16 @@ model ModerationRecord {
   initiatorId       String  @db.ObjectId
   targetUserId      String? @db.ObjectId
   targetPostId      String? @db.ObjectId
-  targetCommentId   String? @db.ObjectId
   targetCommunityId String? @db.ObjectId
 
   initiator       User       @relation(name: "UserModerationRecord", references: [id], fields: [initiatorId], onDelete: NoAction)
   targetUser      User?      @relation(name: "UserModerationHit", references: [id], fields: [targetUserId], onDelete: NoAction)
   targetPost      Post?      @relation(name: "PostModerationHit", references: [id], fields: [targetPostId], onDelete: NoAction)
-  targetComment   Comment?   @relation(name: "CommentModerationHit", references: [id], fields: [targetCommentId], onDelete: NoAction)
   targetCommunity Community? @relation(name: "CommunityModerationHit", references: [id], fields: [targetCommunityId], onDelete: NoAction)
 }
 
 enum ModerationTargetType {
   User
   Post
-  Comment
   Community
 }
