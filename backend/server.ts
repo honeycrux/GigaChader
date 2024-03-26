@@ -7,6 +7,7 @@ import { apiContract } from "#/shared/contracts";
 import * as swaggerUi from "swagger-ui-express";
 import { createExpressEndpoints } from "@ts-rest/express";
 import { createLog, csrfProtection, validateUser } from "./middlewares/auth";
+import { downloadBlob } from "./lib/storage";
 
 // construct express app
 
@@ -30,6 +31,23 @@ const openApiDocument = generateOpenApi(apiContract, {
 });
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+
+// set up image endpoint
+
+app.get("/image/*", async (req, res) => {
+    const url = req.url;
+    const key = url.replace(/^\/image\//, "");
+    console.log(key);
+    const response = await downloadBlob(key);
+    if (!response) {
+        return res.status(404).end();
+    }
+    const readStream = response?.readableStreamBody;
+    if (!readStream) {
+        return res.status(404).end();
+    }
+    readStream.pipe(res);
+});
 
 // start express app
 

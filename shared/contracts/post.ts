@@ -2,7 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 
 const c = initContract();
-export const userContract = c.router({
+export const postContract = c.router({
     // example:
     // getPosts: {
     //   method: 'GET',

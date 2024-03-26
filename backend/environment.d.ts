@@ -5,6 +5,7 @@ declare global {
             FRONTEND_URL: string;
             PORT: string;
             MONGODB_URL: string;
+            AZURE_STORAGE_CONNECTION_STRING: string;
         }
     }
 }

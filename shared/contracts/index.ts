@@ -1,11 +1,13 @@
 // import all contracts and merge them into one big contract
 
-import { initContract } from '@ts-rest/core';
-import { userContract } from './user'
-import { authContract } from './auth'
+import { initContract } from "@ts-rest/core";
+import { authContract } from "./auth";
+import { postContract } from "./post";
+import { userContract } from "./user";
 
 const c = initContract();
 export const apiContract = c.router({
-    user: userContract,
     auth: authContract,
+    post: postContract,
+    user: userContract,
 });
