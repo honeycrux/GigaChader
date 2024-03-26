@@ -16,21 +16,19 @@ const home = () => {
             toast.current.show({ severity: "info", summary: "Success", detail: "Fake add post" });
         }
     }
-
-    const [selectedButton, setSelectedButton] = useState('Home');
-
-    return (
-        // force page size to fit screen
-        <div className='w-screen h-screen'>
-            <Toast ref={toast}></Toast>
-            {/* header start */}
-            <nav className="flex bg-orange2 h-16 items-center [&>*]:mx-2">
-                {/* border-4 border-black */}
-                <p className='!mx-0'>header</p>
-                <p>item1</p>
-                <p>item2</p>
-            </nav>
-            {/* header end */}
+    
+  return (
+    // force page size to fit screen
+    <div className='w-screen h-screen'>
+        <Toast ref={toast}></Toast>
+        {/* header start */}
+        <nav className="flex bg-orange2 h-16 items-center [&>*]:mx-2">
+            {/* border-4 border-black */}
+            <p className='!mx-0'>header</p>
+            <p>item1</p>
+            <p>item2</p>
+        </nav>
+        {/* header end */}
 
             {/* define size of area below navbar */}
             <div className='flex h-[calc(100%-4rem)]'>
