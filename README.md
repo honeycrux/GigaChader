@@ -72,15 +72,20 @@ A user validation middleware (`backend/middlewares/auth.ts`) runs before calling
 Check for absence of a session using the condition `!res.locals.session || !res.locals.user`. Check user information using the `res.locals.user` object.
 
 Besides checking manually, there is a shorthand to use a middleware for routes that should respond with "403 (Forbidden)" when the user role level is not enough. In that case, one should add a [route middleware](https://ts-rest.com/docs/express/middleware#route-middleware). The object `protectedRoute` containing protection middleware for each user level can be imported from the file `backend/middlewares/auth.ts`.
+```
+middleware: [(req, res, next) => {
+    protectRoute.user(req, res, next);
+}],
+```
 
 ## Backend: Media Upload
 > Media upload is hard.
 
 Media are uploaded to Azure Blob Storage.
 
-When using storage programmatically from routes, please use defined functions on `/backend/lib/mediaHandler.ts`. Please avoid directly calling the underlying `/backend/lib/storage.ts`.
+When using storage programmatically from routes, please use defined functions on `backend/lib/data/mediaHandler.ts`. Please avoid directly calling the underlying `backend/lib/data/storage.ts`.
 
-See `/routes/(example-of-media-upload).ts` as an example for defining a route that needs to handle image uploading.
+See `backend/routes/(example-of-media-upload).ts` as an example for defining a route that needs to handle image uploading.
 
 ### Backend: Database Model & Migration
 To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`, and update the database schema by running `npx prisma db push`.

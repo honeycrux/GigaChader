@@ -7,10 +7,9 @@ import { apiContract } from "#/shared/contracts";
 import * as swaggerUi from "swagger-ui-express";
 import { createExpressEndpoints } from "@ts-rest/express";
 import { csrfProtection, validateUser } from "@/middlewares/auth";
-import { downloadBlob } from "@/lib/storage";
 import { createLog } from "@/middlewares/logger";
 import { uploadErrorHandler } from "./middlewares/mediaUpload";
-import { downloadMedia } from "./lib/mediaHandler";
+import { downloadMedia } from "./lib/data/mediaHandler";
 
 // construct express app
 

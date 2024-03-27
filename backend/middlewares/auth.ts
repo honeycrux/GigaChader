@@ -1,10 +1,10 @@
 // src/middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { lucia } from "@/lib/auth";
+import { lucia } from "@/lib/user/auth";
 import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
-import { Prisma, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 
 /* App-level middleware */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {
@@ -44,7 +44,7 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 }
 
 /* Route-level middleware - authorize or block with 403 (forbidden) for protected routes - add when necessary */
-async function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
+function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
     return (req: Request, res: Response, next: NextFunction) => {
         console.log(`[middleware] protectRoute level=${restrictionLevel}`);
         if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user?.userInfo.role) === -1) {

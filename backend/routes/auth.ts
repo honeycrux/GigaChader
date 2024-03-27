@@ -1,9 +1,9 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
-import { lucia } from "@/lib/auth";
+import { lucia } from "@/lib/user/auth";
 import { Argon2id } from "oslo/password";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { prismaClient } from "@/lib/db";
+import { prismaClient } from "@/lib/data/db";
 import { z } from "zod";
 
 const s = initServer();
