@@ -3,6 +3,6 @@ import { apiContract } from "#/shared/contracts";
 
 const s = initServer();
 
-const postRouter = s.router(apiContract.user, {});
+const postRouter = s.router(apiContract.post, {});
 
 export { postRouter };

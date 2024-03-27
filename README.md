@@ -35,7 +35,7 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 ### Web Server: Building Pages
 Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. The UI Library [PrimeReact](https://primereact.org/) the CSS Library [Tailwind CSS](https://tailwindcss.com/) are used.
 
-### Web Server: Protecting Routes
+### Web Server: User Information / Protecting Routes
 Use validateUser from `@/lib/actions/auth`.
 
 For server side component, use `const auth = validateUser();`. For client side component, use `const auth = use(validateUser);`.
@@ -66,10 +66,21 @@ If your API route is `http://localhost:3007/api/[feature]/[endpoint]`, follow th
 - Check if the defined subroute is added under `routes/index.ts`
 You can use tools like [Insomnia](https://insomnia.rest/) to make API calls for test.
 
-### Backend: Protecting Routes
-A user validation middleware (`backend/middlewares/auth.ts`) runs before calling any route in the application.
+### Backend: User Information / Protecting Routes
+A user validation middleware (`backend/middlewares/auth.ts`) runs before calling any route in the application, populating `res.locals` with user and session information if exists.
 
 Check for absence of a session using the condition `!res.locals.session || !res.locals.user`. Check user information using the `res.locals.user` object.
+
+Besides checking manually, there is a shorthand to use a middleware for routes that should respond with "403 (Forbidden)" when the user role level is not enough. In that case, one should add a [route middleware](https://ts-rest.com/docs/express/middleware#route-middleware). The object `protectedRoute` containing protection middleware for each user level can be imported from the file `backend/middlewares/auth.ts`.
+
+## Backend: Media Upload
+> Media upload is hard.
+
+Media are uploaded to Azure Blob Storage.
+
+When using storage programmatically from routes, please use defined functions on `/backend/lib/mediaHandler.ts`. Please avoid directly calling the underlying `/backend/lib/storage.ts`.
+
+See `/routes/(example-of-media-upload).ts` as an example for defining a route that needs to handle image uploading.
 
 ### Backend: Database Model & Migration
 To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`, and update the database schema by running `npx prisma db push`.

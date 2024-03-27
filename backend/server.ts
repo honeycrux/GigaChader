@@ -1,13 +1,16 @@
 // express server
 
 import express from "express";
-import { apiRouter } from "./routes";
+import { apiRouter } from "@/routes";
 import { generateOpenApi } from "@ts-rest/open-api";
 import { apiContract } from "#/shared/contracts";
 import * as swaggerUi from "swagger-ui-express";
 import { createExpressEndpoints } from "@ts-rest/express";
-import { createLog, csrfProtection, validateUser } from "./middlewares/auth";
-import { downloadBlob } from "./lib/storage";
+import { csrfProtection, validateUser } from "@/middlewares/auth";
+import { downloadBlob } from "@/lib/storage";
+import { createLog } from "@/middlewares/logger";
+import { uploadErrorHandler } from "./middlewares/mediaUpload";
+import { downloadMedia } from "./lib/mediaHandler";
 
 // construct express app
 
@@ -17,9 +20,11 @@ const app = express();
 
 app.use(express.json());
 
-app.use(csrfProtection, validateUser, createLog);
+app.use(csrfProtection, validateUser, createLog, uploadErrorHandler);
 
-createExpressEndpoints(apiContract, apiRouter, app);
+createExpressEndpoints(apiContract, apiRouter, app, {
+    globalMiddleware: [],
+});
 
 // generate swagger docs
 
@@ -32,13 +37,12 @@ const openApiDocument = generateOpenApi(apiContract, {
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
-// set up image endpoint
+// special endpoint: set up image endpoint
 
 app.get("/image/*", async (req, res) => {
     const url = req.url;
-    const key = url.replace(/^\/image\//, "");
-    console.log(key);
-    const response = await downloadBlob(key);
+    console.log(url);
+    const response = await downloadMedia({ url });
     if (!response) {
         return res.status(404).end();
     }

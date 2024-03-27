@@ -6,7 +6,7 @@ export const postContract = c.router({
     // example:
     // getPosts: {
     //   method: 'GET',
-    //   path: '/api/user/posts',
+    //   path: '/api/post/fetch',
     //   responses: {
     //     200: c.type<string>(),
     //   },

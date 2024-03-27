@@ -1,18 +1,10 @@
+/* Implements (server-agnostic) storage */
+
 import { BlobServiceClient } from "@azure/storage-blob";
 import { Readable } from "stream";
 
-// define existing containers
+// initialize blob service client
 
-type ExistingContainerName = "avatar" | "media";
-
-// this should be used when constructing storage programmatically
-// e.g. downloadBlob(storage.avatar(myBlobName))
-export const storage: Record<ExistingContainerName, (blobName: string) => string> = {
-    avatar: (blobName: string) => `avatar/${blobName}`,
-    media: (blobName: string) => `media/${blobName}`,
-};
-
-// initialize
 let blobServiceClient: BlobServiceClient;
 
 try {
@@ -23,7 +15,7 @@ try {
     console.warn("App running without blobServiceClient, image storage/retrieval will fail");
 }
 
-// functions
+// define blob storage functions
 
 function storagePathResolver(path: string): [string, string] {
     const [containerName, ...rest] = path.split("/");
@@ -51,6 +43,7 @@ export async function uploadBlob(storagePath: string, filebuf: Buffer) {
     const readableStream = Readable.from(filebuf);
     const uploadBlobResponse = await blockBlobClient.uploadStream(readableStream);
     console.log(`Blob was uploaded successfully. requestId: ${uploadBlobResponse.requestId}`);
+    return uploadBlobResponse;
 }
 
 export async function downloadBlob(storagePath: string) {

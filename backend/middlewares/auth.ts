@@ -4,6 +4,7 @@ import { lucia } from "@/lib/auth";
 import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
+import { Prisma, Role } from "@prisma/client";
 
 /* App-level middleware */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {
@@ -20,7 +21,7 @@ export async function csrfProtection(req: Request, res: Response, next: NextFunc
     return next();
 }
 
-/* App-level middleware */
+/* App-level middleware - populates user information in res.locals */
 export async function validateUser(req: Request, res: Response, next: NextFunction) {
     console.log("[middleware] validateUser");
     const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
@@ -42,14 +43,24 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
     return next();
 }
 
-/* App-level middleware */
-export function createLog(req: Request, res: Response, next: NextFunction) {
-    console.log("[middleware] createLog");
-    res.on("finish", function () {
-        console.log(req.method, decodeURI(req.url), res.statusCode, res.statusMessage);
-    });
-    next();
+/* Route-level middleware - authorize or block with 403 (forbidden) for protected routes - add when necessary */
+async function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        console.log(`[middleware] protectRoute level=${restrictionLevel}`);
+        if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user?.userInfo.role) === -1) {
+            return res.status(403).json({
+                error: "Unauthorized",
+            });
+        }
+        return next();
+    };
 }
+// To get a specific authorization middleware, use this object (e.g. protectRoute.admin)
+export const protectRoute: Record<Lowercase<Role>, ReturnType<typeof protectionFunction>> = {
+    admin: protectionFunction("ADMIN", ["ADMIN"]),
+    verified_user: protectionFunction("VERIFIED_USER", ["ADMIN", "VERIFIED_USER"]),
+    user: protectionFunction("USER", ["ADMIN", "VERIFIED_USER", "USER"]),
+};
 
 declare global {
     namespace Express {
