@@ -20,11 +20,6 @@ interface Props {
       id: string;
     };
     createdAt: string;
-    comments: {
-      author: {
-        image: string;
-      };
-    }[];
     isComment?: boolean;
   }
 
@@ -36,7 +31,6 @@ const PostBox = (
         content,
         author,
         createdAt,
-        comments,
         isComment,
       }: Props) => {
     const toast = useRef<Toast>(null);

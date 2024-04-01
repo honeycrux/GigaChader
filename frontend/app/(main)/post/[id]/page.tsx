@@ -34,7 +34,6 @@ const postDetails = ({ params }: { params: { id: string } }) => {
                 content={post.content}
                 author={post.author}
                 createdAt={post.createdAt}
-                comments={post.comments}
             />
             <div className="flex flex-col w-full mt-4">
                 <p className="text-xl">Comment</p>

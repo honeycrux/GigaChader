@@ -22,7 +22,7 @@ const home = () => {
     <>
         <Toast ref={toast}></Toast>
         {/* main content start */}
-        <main className='flex w-full justify-center'>
+        <main className='flex w-full justify-center overflow-y-auto'>
             {/* main content with margin */}
             <div className="flex flex-col w-[60%] space-y-4">
                 <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">

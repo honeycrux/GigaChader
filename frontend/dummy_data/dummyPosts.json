@@ -11,13 +11,6 @@
             "id": "456"
         },
         "createdAt": "2022-01-01T00:00:00.000Z",
-        "comments": [
-            {
-                "author": {
-                    "image": "/path/to/comment-author-image1.jpg"
-                }
-            }
-        ],
         "isComment": false
     },
     {
@@ -32,13 +25,6 @@
             "id": "457"
         },
         "createdAt": "2022-01-02T00:00:00.000Z",
-        "comments": [
-            {
-                "author": {
-                    "image": "/path/to/comment-author-image2.jpg"
-                }
-            }
-        ],
         "isComment": false
     },
     {
@@ -53,13 +39,146 @@
             "id": "458"
         },
         "createdAt": "2022-01-03T00:00:00.000Z",
-        "comments": [
-            {
-                "author": {
-                    "image": "/path/to/comment-author-image3.jpg"
-                }
-            }
-        ],
         "isComment": false
-    }
+    },
+{
+    "id": "4",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 4",
+    "author": {
+        "username": "author4",
+        "displayName": "Author 4",
+        "image": "/path/to/image4.jpg",
+        "id": "459"
+    },
+    "createdAt": "2022-01-04T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "5",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 5",
+    "author": {
+        "username": "author5",
+        "displayName": "Author 5",
+        "image": "/path/to/image5.jpg",
+        "id": "460"
+    },
+    "createdAt": "2022-01-05T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "6",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 6",
+    "author": {
+        "username": "author6",
+        "displayName": "Author 6",
+        "image": "/path/to/image6.jpg",
+        "id": "461"
+    },
+    "createdAt": "2022-01-06T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "7",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 7",
+    "author": {
+        "username": "author7",
+        "displayName": "Author 7",
+        "image": "/path/to/image7.jpg",
+        "id": "462"
+    },
+    "createdAt": "2022-01-07T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "8",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 8",
+    "author": {
+        "username": "author8",
+        "displayName": "Author 8",
+        "image": "/path/to/image8.jpg",
+        "id": "463"
+    },
+    "createdAt": "2022-01-08T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "9",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 9",
+    "author": {
+        "username": "author9",
+        "displayName": "Author 9",
+        "image": "/path/to/image9.jpg",
+        "id": "464"
+    },
+    "createdAt": "2022-01-09T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "10",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 10",
+    "author": {
+        "username": "author10",
+        "displayName": "Author 10",
+        "image": "/path/to/image10.jpg",
+        "id": "465"
+    },
+    "createdAt": "2022-01-10T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "11",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 11",
+    "author": {
+        "username": "author11",
+        "displayName": "Author 11",
+        "image": "/path/to/image11.jpg",
+        "id": "466"
+    },
+    "createdAt": "2022-01-11T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "12",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 12",
+    "author": {
+        "username": "author12",
+        "displayName": "Author 12",
+        "image": "/path/to/image12.jpg",
+        "id": "467"
+    },
+    "createdAt": "2022-01-12T00:00:00.000Z",
+    "isComment": false
+},
+{
+    "id": "13",
+    "currentUserId": "123",
+    "parentId": null,
+    "content": "This is a dummy post 13",
+    "author": {
+        "username": "author13",
+        "displayName": "Author 13",
+        "image": "/path/to/image13.jpg",
+        "id": "468"
+    },
+    "createdAt": "2022-01-13T00:00:00.000Z",
+    "isComment": false
+}
 ]
