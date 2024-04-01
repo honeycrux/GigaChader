@@ -23,9 +23,9 @@ function Onboarding() {
     }
   };
 
-  const [displayName, setDisplayName] = useState("same as placeholderUserName by default");
-  const [userName, setUserName] = useState("placeholderUserName");
-  const [bio, setBio] = useState("placeholder Bio");
+  const [displayName, setDisplayName] = useState("Chad");
+  const [userName, setUserName] = useState("@chadmaster");
+  const [bio, setBio] = useState("All in or nothing.");
 
   return (
     <>
@@ -40,8 +40,9 @@ function Onboarding() {
               <FileUpload mode="basic" name="profilePic_upload[]" url="" accept="image/*" chooseLabel="Upload Profile Picture" onUpload={onUpload} auto />
             </div>
             <div className="[&>*]:my-2">
-              <p className="!mt-4 text-xl">Username:</p>
-              <p className="text-xl">{userName}</p>
+              <p className="!mt-4 text-xl">Username: &nbsp;
+                <span className="text-gray-600">{userName}</span>
+              </p>
               <p className="text-xl">Display name</p>
               <InputText className="custom-shadow-border-light w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
               <p className="text-xl">Bio</p>

@@ -24,8 +24,9 @@ const postDetails = ({ params }: { params: { id: string } }) => {
     }
     
     return (
-        <>
+        <div className="flex flex-col w-[60%]">
             <Toast ref={toast}></Toast>
+            <br className="mt-10" />
             <PostBox
                 id={post.id}
                 currentUserId={post.author.id}
@@ -35,13 +36,13 @@ const postDetails = ({ params }: { params: { id: string } }) => {
                 createdAt={post.createdAt}
                 comments={post.comments}
             />
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full mt-4">
                 <p className="text-xl">Comment</p>
                 <InputTextarea value={commentContent} onChange={(e) => setCommentContent(e.target.value)}
                 rows={4} cols={30} autoResize className="mb-2" />
                 <Button label="Submit" className="w-fit" onClick={handleCommentSubmit} />
             </div>
-        </>
+        </div>
     )
 }
 
