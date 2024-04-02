@@ -5,6 +5,7 @@ import { Argon2id } from "oslo/password";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { prismaClient } from "@/lib/data/db";
 import { z } from "zod";
+import { validateUser } from "@/middlewares/auth";
 
 const s = initServer();
 
@@ -89,9 +90,11 @@ const authRouter = s.router(apiContract.auth, {
                     username: username,
                     email: email,
                     password: hashedPassword,
-                    userInfo: {
+                    accountInfoLastUpdated: new Date(),
+                    userConfig: {
                         displayName: displayName,
                     },
+                    userCryptoInfo: {},
                 },
             });
 
@@ -173,42 +176,48 @@ const authRouter = s.router(apiContract.auth, {
         };
     },
 
-    logout: async ({ res }) => {
-        if (!res.locals.session) {
+    logout: {
+        middleware: [validateUser],
+        handler: async ({ res }) => {
+            if (!res.locals.session) {
+                return {
+                    status: 401,
+                    body: {
+                        success: true,
+                    },
+                };
+            }
+            await lucia.invalidateSession(res.locals.session.id);
+            res.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize());
             return {
-                status: 401,
+                status: 200,
                 body: {
                     success: true,
                 },
             };
-        }
-        await lucia.invalidateSession(res.locals.session.id);
-        res.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize());
-        return {
-            status: 200,
-            body: {
-                success: true,
-            },
-        };
+        },
     },
 
-    validate: async ({ res }) => {
-        if (!res.locals.session || !res.locals.user) {
+    validate: {
+        middleware: [validateUser],
+        handler: async ({ res }) => {
+            if (!res.locals.session || !res.locals.user) {
+                return {
+                    status: 401,
+                    body: {
+                        session: null,
+                        user: null,
+                    },
+                };
+            }
             return {
-                status: 401,
+                status: 200,
                 body: {
-                    session: null,
-                    user: null,
+                    session: res.locals.session,
+                    user: res.locals.user,
                 },
             };
-        }
-        return {
-            status: 200,
-            body: {
-                session: res.locals.session,
-                user: res.locals.user,
-            },
-        };
+        },
     },
 });
 

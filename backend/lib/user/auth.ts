@@ -14,10 +14,9 @@ export const lucia = new Lucia(adapter, {
     },
     getUserAttributes: (databaseUserAttributes) => {
         return {
+            // only essential attributes
             username: databaseUserAttributes.username,
-            email: databaseUserAttributes.email,
-            password: databaseUserAttributes.password,
-            userInfo: databaseUserAttributes.userInfo,
+            role: databaseUserAttributes.role,
         };
     },
 });
@@ -31,9 +30,8 @@ declare module "lucia" {
 
 type DatabaseUserAttributes = Prisma.UserGetPayload<{
     select: {
+        // only essential attributes
         username: true;
-        email: true;
-        password: true;
-        userInfo: true;
+        role: true;
     };
 }>;

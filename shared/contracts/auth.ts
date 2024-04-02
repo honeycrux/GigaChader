@@ -1,29 +1,16 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
+import { userRoleSchema, userSessionSchema } from "#/shared/models/user";
 
 const c = initContract();
 
 const authUserObject = z.object({
-    session: z.object({
-        id: z.string(),
-        expiresAt: z.date(),
-        fresh: z.boolean(),
-        userId: z.string(),
-    }),
+    session: userSessionSchema,
     user: z.object({
-        id: z.string(),
         username: z.string(),
-        email: z.string(),
-        password: z.string(),
-        userInfo: z.object({
-            displayName: z.string(),
-            digitalBalance: z.number(),
-            role: z.union([z.literal("USER"), z.literal("VERIFIED_USER"), z.literal("ADMIN")]),
-        }),
+        role: userRoleSchema,
     }),
 });
-
-export type IAuthUserObject = z.infer<typeof authUserObject>;
 
 const authFailObject = z.object({
     session: z.null(),
@@ -91,9 +78,8 @@ export const authContract = c.router({
     },
 
     validate: {
-        method: "POST",
+        method: "GET",
         path: "/api/auth/validate",
-        body: z.object({}),
         responses: {
             200: authUserObject,
             401: authFailObject,

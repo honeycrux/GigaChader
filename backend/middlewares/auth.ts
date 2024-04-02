@@ -21,7 +21,7 @@ export async function csrfProtection(req: Request, res: Response, next: NextFunc
     return next();
 }
 
-/* App-level middleware - populates user information in res.locals */
+/* Route-level middleware - populates user information in res.locals */
 export async function validateUser(req: Request, res: Response, next: NextFunction) {
     console.log("[middleware] validateUser");
     const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
@@ -45,9 +45,9 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 
 /* Route-level middleware - authorize or block with 403 (forbidden) for protected routes - add when necessary */
 function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         console.log(`[middleware] protectRoute level=${restrictionLevel}`);
-        if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user?.userInfo.role) === -1) {
+        if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user.role) === -1) {
             return res.status(403).json({
                 error: "Unauthorized",
             });

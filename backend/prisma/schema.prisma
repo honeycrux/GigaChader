@@ -13,6 +13,7 @@
 //   - All relations explicitly named (@relation(name: ""))
 //   - All fields that is an array type has plural field names
 //   - Written order: attributes, foreign keys, relations
+//   - "updatedAt" fields are updated automatically, while "lastUpdated" fields should be manually updated
 
 generator client {
   provider = "prisma-client-js"
@@ -29,13 +30,16 @@ datasource db {
 
 // Some fields in this model are used by lucia-auth
 model User {
-  id        String          @id @default(auto()) @map("_id") @db.ObjectId
-  username  String          @unique
-  email     String          @unique
-  password  String
-  createdAt DateTime        @default(now()) @db.Date
-  updatedAt DateTime        @updatedAt
-  userInfo  UserInformation
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  username               String         @unique
+  email                  String         @unique
+  password               String
+  createdAt              DateTime       @default(now()) @db.Date
+  accountInfoLastUpdated DateTime
+  role                   Role           @default(USER)
+  digitalBalance         Float          @default(0)
+  userConfig             UserConfig
+  userCryptoInfo         UserCryptoInfo
 
   followerIds     String[] @db.ObjectId
   followedUserIds String[] @db.ObjectId
@@ -45,8 +49,6 @@ model User {
   followers              User[]               @relation(name: "UserFollowers", fields: [followerIds], references: [id])
   followedUsers          User[]               @relation(name: "UserFollowers", fields: [followedUserIds], references: [id])
   sessions               Session[]            @relation(name: "UserSession")
-  profile                Profile?             @relation(name: "UserProfile")
-  cryptoProfile          CryptoProfile?       @relation(name: "UserCryptoProfile")
   posts                  Post[]               @relation(name: "UserPost")
   likedPosts             Post[]               @relation(name: "PostLikes", fields: [likedPostIds], references: [id])
   savedPosts             Post[]               @relation(name: "PostSaves", fields: [savedPostIds], references: [id])
@@ -58,6 +60,31 @@ model User {
   pollVotes              PollVote[]           @relation(name: "UserPollVote")
 }
 
+enum Role {
+  USER
+  VERIFIED_USER
+  ADMIN
+}
+
+type UserConfig {
+  displayName String   @default("")
+  imageUrl    String?
+  bio         String   @default("")
+  lastUpdated DateTime @default(now()) @db.Date
+}
+
+type UserCryptoInfo {
+  walletAddress   String?
+  cryptoBookmarks String[]
+  cryptoHoldings  CryptoHolding[]
+  lastUpdated     DateTime        @default(now()) @db.Date
+}
+
+type CryptoHolding {
+  symbol String
+  amount Float
+}
+
 // This model is used by lucia-auth
 model Session {
   trueId    String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -67,46 +94,6 @@ model Session {
   userId String @db.ObjectId
 
   user User @relation(name: "UserSession", references: [id], fields: [userId], onDelete: Cascade)
-}
-
-type UserInformation {
-  displayName    String
-  role           Role   @default(USER)
-  digitalBalance Float  @default(0)
-}
-
-enum Role {
-  USER
-  VERIFIED_USER
-  ADMIN
-}
-
-model Profile {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String   @default("")
-  imageUrl  String?
-  bio       String   @default("")
-  updatedAt DateTime @updatedAt
-
-  userId String @unique @db.ObjectId
-
-  user User @relation(name: "UserProfile", references: [id], fields: [userId], onDelete: Cascade)
-}
-
-model CryptoProfile {
-  id               String          @id @default(auto()) @map("_id") @db.ObjectId
-  walletAddress    String
-  supportedCryptos CryptoHolding[]
-  updatedAt        DateTime        @updatedAt
-
-  userId String @unique @db.ObjectId
-
-  user User @relation(name: "UserCryptoProfile", references: [id], fields: [userId], onDelete: Cascade)
-}
-
-type CryptoHolding {
-  crypto String
-  amount Float
 }
 
 model DigitalTransaction {
