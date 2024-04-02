@@ -1,24 +1,40 @@
 "use client";
 
-import { validateUser } from '@/lib/actions/auth';
+import { logout, validateUser } from '@/lib/actions/auth';
 import { Image } from 'primereact/image';
-import { use, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
+import { checkAuth } from '@/lib/utils';
+import axios from 'axios';
+import { useRouter } from "next/navigation";
 
-interface Props {
-  displayName: string;
-}
-
-const HeaderNavbar = ({displayName}: Props) => {
+const HeaderNavbar = () => {
+  const auth = checkAuth();
   const op = useRef(null);
   const toast = useRef<Toast>(null);
+  const [displayName, setDisplayName] = useState<string>('');
+  const router = useRouter();
+  
+
+  useEffect(() => {
+    const wrapper = async () => {
+      if (!auth || "error" in auth) {
+        setDisplayName('guest');
+      } else {
+        const userinfo = await axios(process.env.NEXT_PUBLIC_BACKEND_URL + '/testapi/userinfo/' + auth.user.username);
+        // console.log(userinfo);
+        setDisplayName(userinfo.data.userConfig.displayName);
+      }
+    }
+
+    wrapper();
+  }, [auth]);
 
   const handleLogout = () => {
-    if (toast.current) {
-        toast.current.show({ severity: "info", summary: "Success", detail: "Fake logout" });
-    }
+    logout();
+    router.replace('/');
   }
 
   return (

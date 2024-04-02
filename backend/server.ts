@@ -1,6 +1,6 @@
 // express server
 
-import express from "express";
+import express, {Request, Response} from "express";
 import { apiRouter } from "@/routes";
 import { generateOpenApi } from "@ts-rest/open-api";
 import { apiContract } from "#/shared/contracts";
@@ -10,6 +10,9 @@ import { csrfProtection } from "@/middlewares/auth";
 import { createLog } from "@/middlewares/logger";
 import { uploadErrorHandler } from "./middlewares/mediaUpload";
 import { downloadMedia } from "./lib/data/mediaHandler";
+import { prismaClient } from "@/lib/data/db";
+import { getPersonalUserInfo } from "./lib/user/user";
+// import cors from '@types/cors';
 
 // construct express app
 
@@ -24,6 +27,12 @@ app.use(csrfProtection, createLog, uploadErrorHandler);
 createExpressEndpoints(apiContract, apiRouter, app, {
     globalMiddleware: [],
 });
+
+// force allow frontend to fetch data from backend
+const cors = require('cors');
+app.use(cors({
+    origin: process.env.FRONTEND_URL
+}));
 
 // generate swagger docs
 
@@ -57,6 +66,17 @@ app.get("/image/*", async (req, res) => {
     }
     readStream.pipe(res);
 });
+
+app.get("/testapi/userinfo/:username", async (req: Request, res: Response) => {
+    getPersonalUserInfo({ username: req.params.username }).then((result) => {
+        if (!result) {
+            return res.status(404).end();
+        }
+
+        return res.json(result);
+    });
+});
+
 
 // start express app
 

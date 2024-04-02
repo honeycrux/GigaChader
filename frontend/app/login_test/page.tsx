@@ -2,12 +2,13 @@
 
 import { Button } from "primereact/button";
 import { logout, validateUser } from "@/lib/actions/auth";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
+import { checkAuth } from "@/lib/utils";
 
 function LoginTest() {
-  const auth = use(validateUser());
+  const auth = checkAuth();
 
-  if ("error" in auth) {
+  if (!auth || "error" in auth) {
     console.log("Login failed");
     return (
       <>
@@ -21,7 +22,7 @@ function LoginTest() {
     <>
       <p>login success</p>
       {/* <p>name: {session?.user?.name}</p> */}
-      <p>email: {auth.user.email}</p>
+      <p>email: {auth.user.username}</p>
       <Button onClick={() => logout()} label="Sign out" />
     </>
   );
