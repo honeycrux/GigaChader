@@ -27,7 +27,7 @@ export const personalUserInfoSchema = z.object({
 export type PersonalUserInfo = z.infer<typeof personalUserInfoSchema>;
 
 // scope: information for user profile
-export const userProfileInfoSchema = z.object({
+export const userProfileSchema = z.object({
     username: z.string(),
     userConfig: z.object({
         displayName: z.string(),
@@ -43,7 +43,7 @@ export const userProfileInfoSchema = z.object({
     }),
 });
 
-export type UserProfileInfo = z.infer<typeof userProfileInfoSchema>;
+export type UserProfile = z.infer<typeof userProfileSchema>;
 
 // scope: the most basic information for displaying any user on the platform
 export const simpleUserInfoSchema = z.object({

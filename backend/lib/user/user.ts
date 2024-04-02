@@ -1,5 +1,5 @@
 import { prismaClient } from "../data/db";
-import { PersonalUserInfo, SimpleUserInfo, UserProfileInfo } from "#/shared/models/user";
+import { PersonalUserInfo, SimpleUserInfo, UserProfile } from "#/shared/models/user";
 
 export async function getPersonalUserInfo(props: { username: string }): Promise<PersonalUserInfo | null> {
     const data = await prismaClient.user.findUnique({
@@ -33,7 +33,7 @@ export async function getPersonalUserInfo(props: { username: string }): Promise<
     return personalUserInfo;
 }
 
-export async function getUserInfo(props: { username: string }): Promise<UserProfileInfo | null> {
+export async function getUserProfile(props: { username: string }): Promise<UserProfile | null> {
     const data = await prismaClient.user.findUnique({
         select: {
             username: true,
