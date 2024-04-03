@@ -16,7 +16,6 @@ export const personalUserInfoSchema = z.object({
         bio: z.string(),
     }),
     userCryptoInfo: z.object({
-        cryptoBookmarks: z.array(z.string()),
         cryptoHoldings: z.array(
             z.object({
                 symbol: z.string(),
@@ -36,6 +35,7 @@ export const userProfileSchema = z.object({
         imageUrl: z.nullable(z.string()),
     }),
     userCryptoInfo: z.object({
+        // note: cryptoHoldings (data structure for display) will be redesigned
         cryptoHoldings: z.array(
             z.object({
                 symbol: z.string(),
@@ -43,6 +43,9 @@ export const userProfileSchema = z.object({
             })
         ),
     }),
+    followerCount: z.number(),
+    followedUserCount: z.number(),
+    postCount: z.number(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;
@@ -50,10 +53,8 @@ export type UserProfile = z.infer<typeof userProfileSchema>;
 // scope: the most basic information for displaying any user on the platform
 export const simpleUserInfoSchema = z.object({
     username: z.string(),
-    userConfig: z.object({
-        displayName: z.string(),
-        imageUrl: z.nullable(z.string()),
-    }),
+    displayName: z.string(),
+    imageUrl: z.nullable(z.string()),
 });
 
 export type SimpleUserInfo = z.infer<typeof simpleUserInfoSchema>;

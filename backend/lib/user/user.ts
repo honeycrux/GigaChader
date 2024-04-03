@@ -1,3 +1,6 @@
+// The endpoints created on this page creates each response schema related to: User
+// They serve both as reusable query points and samples to use in your own queries.
+
 import { prismaClient } from "../data/db";
 import { PersonalUserInfo, SimpleUserInfo, UserProfile } from "#/shared/models/user";
 
@@ -26,7 +29,6 @@ export async function getPersonalUserInfo(props: { username: string }): Promise<
             bio: userConfig.bio,
         },
         userCryptoInfo: {
-            cryptoBookmarks: userCryptoInfo.cryptoBookmarks,
             cryptoHoldings: userCryptoInfo.cryptoHoldings,
         },
     };
@@ -39,13 +41,13 @@ export async function getUserProfile(props: { username: string }): Promise<UserP
             username: true,
             userConfig: true,
             userCryptoInfo: true,
-            // _count: {
-            //     select: {
-            //         followers: true,
-            //         followedUsers: true,
-            //         posts: true,
-            //     },
-            // },
+            _count: {
+                select: {
+                    followers: true,
+                    followedUsers: true,
+                    posts: true,
+                },
+            },
         },
         where: {
             username: props.username,
@@ -54,7 +56,13 @@ export async function getUserProfile(props: { username: string }): Promise<UserP
     if (!data) {
         return null;
     }
-    return data;
+    const { _count, ...rest } = data;
+    return {
+        ...rest,
+        followerCount: _count.followers,
+        followedUserCount: _count.followedUsers,
+        postCount: _count.posts,
+    };
 }
 
 export async function getSimpleUserInfo(props: { username: string }): Promise<SimpleUserInfo | null> {
@@ -73,10 +81,8 @@ export async function getSimpleUserInfo(props: { username: string }): Promise<Si
     const { userConfig, ...rest } = data;
     const simpleUserInfo: SimpleUserInfo = {
         ...rest,
-        userConfig: {
-            displayName: userConfig.displayName,
-            imageUrl: userConfig.imageUrl,
-        },
+        displayName: userConfig.displayName,
+        imageUrl: userConfig.imageUrl,
     };
     return simpleUserInfo;
 }

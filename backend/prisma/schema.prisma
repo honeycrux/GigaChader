@@ -128,7 +128,7 @@ model Post {
   content     String
   createdAt   DateTime     @default(now())
   pollOptions PollOption[]
-  UserMedia   UserMedia[]
+  userMedia   UserMedia[]
 
   authorId          String   @db.ObjectId
   repostingPostId   String?  @db.ObjectId
