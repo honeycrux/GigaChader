@@ -46,16 +46,23 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 /* Route-level middleware - authorize or block with 403 (forbidden) for protected routes - add when necessary */
 function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
     return async (req: Request, res: Response, next: NextFunction) => {
-        await validateUser(req, res, next);
-        console.log(`[middleware] protectRoute level=${restrictionLevel}`);
-        if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user.role) === -1) {
-            return res.status(403).json({
-                error: "Unauthorized",
-            });
-        }
-        return next();
+        await validateUser(req, res, function () {
+            const result = (res: string) => `[middleware] protectRoute level=${restrictionLevel} result=${res}`;
+            if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user.role) === -1) {
+                console.log(result("failed"));
+                return res
+                    .status(401)
+                    .json({
+                        error: "Unauthorized",
+                    })
+                    .end();
+            }
+            console.log(result("success"));
+            return next();
+        });
     };
 }
+
 // To get a specific authorization middleware, use this object (e.g. protectRoute.admin)
 export const protectRoute: Record<Lowercase<Role>, ReturnType<typeof protectionFunction>> = {
     admin: protectionFunction("ADMIN", ["ADMIN"]),

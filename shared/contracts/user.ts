@@ -15,10 +15,7 @@ export const userContract = c.router({
     },
     getProfile: {
         method: "GET",
-        path: "/api/user/profile",
-        query: z.object({
-            username: z.string(),
-        }),
+        path: "/api/user/profile/:username",
         responses: {
             200: userProfileSchema.nullable(),
         },

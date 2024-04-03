@@ -10,6 +10,7 @@ const userRouter = s.router(apiContract.user, {
         middleware: [protectRoute.user],
         handler: async ({ res }) => {
             const userinfo = await getPersonalUserInfo({ username: res.locals.user!.username });
+            console.log("handler getInfo");
             return {
                 status: 200,
                 body: userinfo,
@@ -17,7 +18,7 @@ const userRouter = s.router(apiContract.user, {
         },
     },
     getProfile: {
-        handler: async ({ query: { username } }) => {
+        handler: async ({ params: { username } }) => {
             const userinfo = await getUserProfile({ username });
             return {
                 status: 200,
