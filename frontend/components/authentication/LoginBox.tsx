@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/actions/auth";
-import { cookies } from "next/headers";
+import { useAuthContext } from "@/providers/auth-provider";
+import ErrorBoundary from "next/dist/client/components/error-boundary";
 
 const LoginBox = () => {
+  const { login } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // useEffect(() => {
@@ -20,11 +21,11 @@ const LoginBox = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      setBIsLoginLoading(prevBIsLoading => true);
+      setBIsLoginLoading((prevBIsLoading) => true);
       const res = await login({ email, password });
 
       if (res !== true) {
-        setBIsLoginLoading(prevBIsLoading => false);
+        setBIsLoginLoading((prevBIsLoading) => false);
         setError("Invalid credentials. Please try again.");
         return;
       }

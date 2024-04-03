@@ -5,6 +5,8 @@ import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
 import { Role } from "@prisma/client";
+import { TsRestRequestHandler } from "@ts-rest/express";
+import { AppRoute, AppRouter } from "@ts-rest/core";
 
 /* App-level middleware */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {
@@ -22,7 +24,7 @@ export async function csrfProtection(req: Request, res: Response, next: NextFunc
 }
 
 /* Route-level middleware - populates user information in res.locals */
-export async function validateUser(req: Request, res: Response, next: NextFunction) {
+export async function validateUser(req: Pick<Request, "headers">, res: Pick<Response, "locals" | "appendHeader">, next: NextFunction) {
     console.log("[middleware] validateUser");
     const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
     if (!sessionId) {
@@ -45,7 +47,7 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 
 /* Route-level middleware - authorize or block with 403 (forbidden) for protected routes - add when necessary */
 function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async (req: any, res: Pick<Response, "status" | "json" | "end" | "locals" | "appendHeader">, next: NextFunction) => {
         await validateUser(req, res, function () {
             const result = (res: string) => `[middleware] protectRoute level=${restrictionLevel} result=${res}`;
             if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user.role) === -1) {

@@ -1,17 +1,16 @@
 "use client";
 
-import { logout } from "@/lib/actions/auth";
 import { Image } from "primereact/image";
 import { useEffect, useRef, useState } from "react";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { checkAuth } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { axiosClient } from "@/lib/apiClient";
+import { getUserInfo } from "@/lib/actions/user";
+import { useAuthContext } from "@/providers/auth-provider";
 
 const HeaderNavbar = () => {
-  const auth = checkAuth();
+  const { user, logout } = useAuthContext();
   const op = useRef(null);
   const toast = useRef<Toast>(null);
   const [displayName, setDisplayName] = useState<string>("");
@@ -19,17 +18,22 @@ const HeaderNavbar = () => {
 
   useEffect(() => {
     const wrapper = async () => {
-      if (!auth || "error" in auth) {
+      if (!user) {
         setDisplayName("guest");
       } else {
-        const userinfo = await axiosClient.get("/api/user/info");
-        // console.log(userinfo);
-        setDisplayName(userinfo.data.userConfig.displayName);
+        const userinfo = await getUserInfo();
+        if ("error" in userinfo) {
+          setDisplayName("guest");
+        } else {
+          setDisplayName(userinfo.userConfig.displayName);
+          // console.log("from HeaderNavbar");
+          // console.log(userinfo);
+        }
       }
     };
 
     wrapper();
-  }, [auth]);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -49,7 +53,7 @@ const HeaderNavbar = () => {
           <span className="text-xl font-bold">GigaChader</span>
         </a>
 
-        <button
+        {user && (<button
           className="flex items-center space-x-2 
           transition duration-300 ease-in-out hover:bg-[hsl(40,32%,71%)] 
           rounded-md p-2"
@@ -57,7 +61,7 @@ const HeaderNavbar = () => {
         >
           <Image src="/placeholder_profilePic.png" alt="user profile pic" width="50" />
           <span>{displayName}</span>
-        </button>
+        </button>)}
       </nav>
       {/* header end */}
     </>

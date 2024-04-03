@@ -1,14 +1,13 @@
 "use client";
 
 import { Button } from "primereact/button";
-import { logout, validateUser } from "@/lib/actions/auth";
-import { use, useEffect, useState } from "react";
-import { checkAuth } from "@/lib/utils";
+import { logout } from "@/lib/actions/auth";
+import { useAuthContext } from "@/providers/auth-provider";
 
 function LoginTest() {
-  const auth = checkAuth();
+  const { user } = useAuthContext();
 
-  if (!auth || "error" in auth) {
+  if (!user) {
     console.log("Login failed");
     return (
       <>
@@ -16,13 +15,13 @@ function LoginTest() {
       </>
     );
   }
-  console.log("user: " + JSON.stringify(auth.user));
+  console.log("user: " + JSON.stringify(user));
 
   return (
     <>
       <p>login success</p>
       {/* <p>name: {session?.user?.name}</p> */}
-      <p>email: {auth.user.username}</p>
+      <p>email: {user.username}</p>
       <Button onClick={() => logout()} label="Sign out" />
     </>
   );
