@@ -4,8 +4,8 @@ const nextConfig = {
     return [
       // set a proxy to backend
       {
-        source: process.env.BACKEND_PROXY + "/:path*",
-        destination: process.env.BACKEND_URL + "/:path*",
+        source: process.env.NEXT_PUBLIC_BACKEND_PROXY + "/:path*",
+        destination: process.env.NEXT_PUBLIC_BACKEND_URL + "/:path*",
       },
     ];
   },

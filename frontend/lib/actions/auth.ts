@@ -56,9 +56,7 @@ export async function logout() {
 }
 
 export async function validateUser() {
-  const { body, status } = await apiClient.auth.validate({
-    body: {},
-  });
+  const { body, status } = await apiClient.auth.validate();
   if (status === 200) {
     return body;
   } else if (status === 401) {

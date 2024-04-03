@@ -1,10 +1,10 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      BACKEND_URL: string;
-      BACKEND_PROXY: string;
+      NEXT_PUBLIC_BACKEND_URL: string;
+      NEXT_PUBLIC_BACKEND_PROXY: string;
     }
   }
 }
 
-export {}
+export {};

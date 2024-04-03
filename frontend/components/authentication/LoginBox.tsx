@@ -29,7 +29,7 @@ const LoginBox = () => {
         return;
       }
 
-      router.push("/login_test");
+      router.replace("/home");
     } catch (error) {
       console.error("Error: " + error);
     }
