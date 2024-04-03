@@ -15,6 +15,7 @@ This is a monorepo containing several folders:
   - `lib/`: Useful functionalities you define
 - `shared/`: Resources shared between `frontend/` and `backend/`
   - `contracts/`: [TS-REST contracts](https://ts-rest.com/docs/core/) to provide typings for API communications
+  - `models/`: Zod schemas and typescript models for some standardized request/response types used in contracts
 
 ## Installation
 
@@ -38,9 +39,13 @@ Use the [next app router](https://nextjs.org/docs/app/building-your-application/
 ### Web Server: User Information / Protecting Routes
 Use validateUser from `@/lib/actions/auth`.
 
-For server side component, use `const auth = validateUser();`. For client side component, use `const auth = use(validateUser);`.
+For client components (with `"use client";` at top of script):
+- Use useAuthContext from `@/providers/auth-provider`. Call `const { user } = useAuthContext();`.
+- Check for absence of a session using the condition `!user`. If user is not null, user exists.
 
-Check for absence of a session using the condition `"error" in auth`. Check user information using the `auth.user` object.
+[UNTESTED; NOT REALLY RECOMMENDED] For server components:
+- Use validateUser from `@/lib/actions/auth`. Call `const auth = await validateUser();`.
+- Check for absence of a session using the condition `"error" in auth`. Check user information using the `auth.user` object.
 
 ### Web Server: Interacting with the Backend (as a server action)
 To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
@@ -72,7 +77,7 @@ About middleware:
 - If you need to run middleware on the routes, see example on `backend/routes/(example-of-validate-user).ts` in which the validateUser middleware is run.
 
 ### Backend: User Information / Protecting Routes
-- If user validation is needed, add the validateUser middleware  to the route.
+- If user validation is needed, add the validateUser middleware to the route.
 - If user validation plus a role level check is required, add the protectRoute.rolename middleware. The route will return "403 (Forbidden)" when the user role level is not enough.
 - See examples on `backend/routes/(example-of-validate-user).ts`.
 - The middlewares are defined in `backend/middlewares/auth.ts`.

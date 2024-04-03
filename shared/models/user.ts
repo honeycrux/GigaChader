@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const userRoleSchema = z.union([z.literal("USER"), z.literal("VERIFIED_USER"), z.literal("ADMIN")]);
 
+export type UserRole = z.infer<typeof userRoleSchema>;
+
 // scope: personal information that only the owner has access to
 // and are useful for displaying or configuring in places other than user profile
 export const personalUserInfoSchema = z.object({

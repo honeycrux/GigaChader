@@ -4,6 +4,7 @@ import "primeicons/primeicons.css";
 import "./theme/theme.css";
 import "./theme/custom-styles.css";
 import { Source_Sans_3 } from "next/font/google";
+import { AuthContextProvider } from "@/providers/auth-provider";
 
 const sourceSans3 = Source_Sans_3({ subsets: ["latin"] });
 
@@ -22,9 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <PrimeReactProvider>
-        <body className={sourceSans3.className}>{children}</body>
-      </PrimeReactProvider>
+      <AuthContextProvider>
+        <PrimeReactProvider>
+          <body className={sourceSans3.className}>{children}</body>
+        </PrimeReactProvider>
+      </AuthContextProvider>
     </html>
   );
 }

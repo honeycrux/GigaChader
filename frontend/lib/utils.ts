@@ -1,6 +1,6 @@
 import dummyPost from "@/dummy_data/dummyPosts.json";
-import { useEffect, useState } from "react";
-import { validateUser } from "@/lib/actions/auth";
+// import { useEffect, useState } from "react";
+// import { validateUser } from "@/lib/actions/auth";
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -22,13 +22,13 @@ export function fakeFetchPost(id: string) {
   return dummyPost.find((post) => post.id === id);
 }
 
-export function checkAuth() {
-  const [auth, setAuth] = useState<Awaited<ReturnType<typeof validateUser>>>();
-  useEffect(() => {
-    validateUser().then((data) => {
-      setAuth(data);
-    });
-  }, []);
-
-  return auth;
-}
+// export function checkAuth() {
+//   const [auth, setAuth] = useState<Awaited<ReturnType<typeof validateUser>>>();
+//   useEffect(() => {
+//     validateUser().then((data) => {
+//       setAuth(data);
+//     });
+//   }, []);
+//
+//   return auth;
+// }
