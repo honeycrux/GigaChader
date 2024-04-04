@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { personalUserInfoSchema, simpleUserInfoSchema, userProfileSchema } from "../models/user";
+import { personalUserInfoSchema, simpleUserInfoSchema, userConfigProps, userProfileSchema } from "../models/user";
 import { postInfoSchema } from "../models/post";
 import { z } from "zod";
 
@@ -106,7 +106,20 @@ export const userContract = c.router({
         summary: "Search for users by username",
     },
 
-    postFollow: {
+    userConfig: {
+        method: "POST",
+        path: "/api/user/configure",
+        body: userConfigProps,
+        responses: {
+            200: userProfileSchema,
+            400: z.object({
+                error: z.string(),
+            }),
+        },
+        summary: "Change a user's own settings",
+    },
+
+    userFollow: {
         method: "POST",
         path: "/api/user/follow",
         body: z.object({

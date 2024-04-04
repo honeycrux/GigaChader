@@ -7,7 +7,7 @@ const tobyte = (sizeInMegabyte: number) => sizeInMegabyte * 1000000;
 
 /* Route-level middlewares for avatar upload */
 
-const avatarUploadMulter = multer({
+const profileUploadMulter = multer({
     storage: storage,
     limits: {
         fileSize: tobyte(5),
@@ -22,9 +22,13 @@ const avatarUploadMulter = multer({
     },
 });
 
-export const avatarUploadMiddleware = avatarUploadMulter.fields([{ name: "avatar", maxCount: 1 }]);
-export type AvatarUploadFiles = {
+export const profileUploadMiddleware = profileUploadMulter.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "banner", maxCount: 1 },
+]);
+export type ProfileUploadFiles = {
     avatar: Express.Multer.File[];
+    banner: Express.Multer.File[];
 };
 
 /* Route-level middlewares for media upload */

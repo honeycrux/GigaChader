@@ -4,6 +4,9 @@ import { protectRoute } from "@/middlewares/auth";
 import { stdPersonalUserInfo, stdSimpleUserInfo, stdUserProfile } from "@/lib/objects/user";
 import { prismaClient } from "@/lib/data/db";
 import { stdPostInfo } from "@/lib/objects/post";
+import { ProfileUploadFiles, profileUploadMiddleware } from "@/middlewares/mediaUpload";
+import { Prisma } from "@prisma/client";
+import { compressAndUploadMedia, deleteMedia } from "@/lib/data/mediaHandler";
 
 const s = initServer();
 
@@ -295,7 +298,139 @@ const userRouter = s.router(apiContract.user, {
         },
     },
 
-    postFollow: {
+    userConfig: {
+        middleware: [protectRoute.user, profileUploadMiddleware],
+        handler: async ({ req, res, body: { username, displayName, bio, deleteAvatar, deleteBanner, cryptoBookmarks, cryptoHoldings } }) => {
+            const changeObject: Prisma.UserUpdateInput = {};
+            if (username) {
+                const existing = await prismaClient.user.findUnique({
+                    select: {
+                        id: true,
+                    },
+                    where: {
+                        username: username,
+                    },
+                });
+                if (existing) {
+                    return {
+                        status: 400,
+                        body: { error: `Username ${username} was taken` },
+                    };
+                }
+                changeObject.username = username;
+                changeObject.accountInfoLastUpdated = new Date();
+            }
+
+            // handle changes to userConfig
+            const files = req.files as ProfileUploadFiles;
+            const avatarFile = files.avatar[0];
+            const bannerFile = files.banner[0];
+            if (displayName || bio || deleteAvatar || deleteBanner || avatarFile || bannerFile) {
+                let newImageUrl: string | undefined;
+                let newBannerUrl: string | undefined;
+
+                if (avatarFile) {
+                    const data = await prismaClient.user.findUnique({
+                        select: {
+                            userConfig: {
+                                select: { imageUrl: true },
+                            },
+                        },
+                        where: {
+                            id: res.locals.user!.id,
+                        },
+                    });
+                    if (data?.userConfig.imageUrl) {
+                        // Delete image from storage
+                        const res = await deleteMedia({ url: data.userConfig.imageUrl });
+                        if (!res) {
+                            return {
+                                status: 400,
+                                body: { error: "Something went wrong when changing avatar" },
+                            };
+                        }
+                        // Upload media
+                        const res2 = await compressAndUploadMedia({
+                            maxPixelSize: 300,
+                            container: "avatar",
+                            file: avatarFile,
+                            type: "image",
+                        });
+                        newImageUrl = res2.url;
+                    }
+                }
+                if (bannerFile) {
+                    const data = await prismaClient.user.findUnique({
+                        select: {
+                            userConfig: {
+                                select: { bannerUrl: true },
+                            },
+                        },
+                        where: {
+                            id: res.locals.user!.id,
+                        },
+                    });
+                    if (data?.userConfig.bannerUrl) {
+                        // Delete image from storage
+                        const res = await deleteMedia({ url: data.userConfig.bannerUrl });
+                        if (!res) {
+                            return {
+                                status: 400,
+                                body: { error: "Something went wrong when changing banner" },
+                            };
+                        }
+                        // Upload media
+                        const res2 = await compressAndUploadMedia({
+                            maxPixelSize: 1080,
+                            container: "avatar",
+                            file: bannerFile,
+                            type: "image",
+                        });
+                        newBannerUrl = res2.url;
+                    }
+                }
+
+                changeObject.userConfig = {
+                    displayName: displayName,
+                    imageUrl: newImageUrl ? newImageUrl : deleteAvatar ? null : undefined,
+                    bannerUrl: newBannerUrl ? newBannerUrl : deleteBanner ? null : undefined,
+                    bio: bio,
+                    lastUpdated: new Date(),
+                };
+            }
+
+            // handle changes to userCryptoInfo
+            if (cryptoBookmarks || cryptoHoldings) {
+                changeObject.userCryptoInfo = {
+                    cryptoBookmarks: cryptoBookmarks,
+                    cryptoHoldings: cryptoHoldings,
+                    lastUpdated: new Date(),
+                };
+            }
+
+            // commit changes
+            const data = await prismaClient.user.update({
+                data: changeObject,
+                select: stdUserProfile.select,
+                where: {
+                    id: res.locals.user!.id,
+                },
+            });
+            if (!data) {
+                return {
+                    status: 400,
+                    body: { error: "Failed to push changes to user config" },
+                };
+            }
+            const userinfo = await stdUserProfile.filter(data);
+            return {
+                status: 200,
+                body: userinfo,
+            };
+        },
+    },
+
+    userFollow: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { username, set } }) => {
             const userdata = await prismaClient.user.findUnique({

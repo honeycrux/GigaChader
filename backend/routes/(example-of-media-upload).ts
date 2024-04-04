@@ -1,11 +1,11 @@
-// import { avatarUploadMiddleware, AvatarUploadFiles } from "@/middlewares/mediaUpload";
+// import { profileUploadMiddleware, ProfileUploadFiles } from "@/middlewares/mediaUpload";
 // import { compressAndUploadMedia } from "@/lib/mediaHandler";
 
 // const someRouter = s.router(apiContract.something, {
 //     someField: {
-//         middleware: [avatarUploadMiddleware],
+//         middleware: [profileUploadMiddleware],
 //         handler: async ({ req, res }) => {
-//             const files = req.files as AvatarUploadFiles;
+//             const files = req.files as ProfileUploadFiles;
 //             const avatarFile = files.avatar[0];
 //             if (avatarFile) {
 //                 /* TODO: Delete the old avatar here */

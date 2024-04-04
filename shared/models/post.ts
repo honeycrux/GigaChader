@@ -30,3 +30,18 @@ export const simplePostInfoSchema = z.object({
 });
 
 export type SimplePostInfo = z.infer<typeof simplePostInfoSchema>;
+
+export const postCreationPropsSchema = z.object({
+    content: z.string(),
+    repostingPostId: z.optional(z.string()),
+    parentPostId: z.optional(z.string()),
+    mediaProps: z.optional(
+        z.array(
+            z.object({
+                altText: z.optional(z.string()),
+            })
+        )
+    ),
+});
+
+export type PostCreationProps = z.infer<typeof postCreationPropsSchema>;

@@ -9,25 +9,39 @@ const stdPersonalInfoSelectObj = {
     username: true,
     email: true,
     role: true,
-    userConfig: true,
-    userCryptoInfo: true,
+    userConfig: {
+        select: {
+            displayName: true,
+            imageUrl: true,
+            bannerUrl: true,
+            bio: true,
+        },
+    },
+    userCryptoInfo: {
+        select: {
+            cryptoHoldings: true,
+            cryptoBookmarks: true,
+        },
+    },
 };
 
 export const stdPersonalUserInfo = new StandardizedQuery<
     typeof stdPersonalInfoSelectObj,
-    Omit<PersonalUserInfo, "userCryptoInfo"> & { userCryptoInfo: { cryptoHoldings: { symbol: string; amount: number }[] } },
+    Omit<PersonalUserInfo, "userCryptoInfo"> & { userCryptoInfo: { cryptoBookmarks: string[]; cryptoHoldings: { cryptoId: string; amount: number }[] } },
     PersonalUserInfo
 >({
     select: stdPersonalInfoSelectObj,
     filter: async function (data) {
-        const { userConfig, userCryptoInfo, ...rest } = data;
-        const cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
-            return d.symbol;
+        const { userCryptoInfo, ...rest } = data;
+
+        // Handle crypto holdings
+        let cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
+            return d.cryptoId;
         });
         let cryptodata = await prismaClient.crypto.findMany({
             select: stdCryptoInfo.select,
             where: {
-                symbol: {
+                cryptoId: {
                     in: cryptolist,
                 },
             },
@@ -36,20 +50,32 @@ export const stdPersonalUserInfo = new StandardizedQuery<
             cryptodata = [];
         }
         const cryptoHoldings = cryptodata.map((crypto) => {
-            let holding = userCryptoInfo.cryptoHoldings.find((a) => a.symbol === crypto.symbol);
+            let holding = userCryptoInfo.cryptoHoldings.find((a) => a.cryptoId === crypto.cryptoId);
             return {
                 crypto: crypto,
                 amount: holding!.amount,
             };
         });
+
+        // Handle crypto bookmarks
+        const cryptolist2 = userCryptoInfo.cryptoBookmarks;
+        let cryptodata2 = await prismaClient.crypto.findMany({
+            select: stdCryptoInfo.select,
+            where: {
+                cryptoId: {
+                    in: cryptolist2,
+                },
+            },
+        });
+        if (!cryptodata2) {
+            cryptodata2 = [];
+        }
+        const cryptoBookmarks = cryptodata2;
+
         const personalUserInfo: PersonalUserInfo = {
             ...rest,
-            userConfig: {
-                displayName: userConfig.displayName,
-                imageUrl: userConfig.imageUrl,
-                bio: userConfig.bio,
-            },
             userCryptoInfo: {
+                cryptoBookmarks: cryptoBookmarks,
                 cryptoHoldings: cryptoHoldings,
             },
         };
@@ -71,8 +97,19 @@ export const stdPersonalUserInfo = new StandardizedQuery<
 
 const stdUserProfileSelectObj = {
     username: true,
-    userConfig: true,
-    userCryptoInfo: true,
+    userConfig: {
+        select: {
+            displayName: true,
+            imageUrl: true,
+            bannerUrl: true,
+        },
+    },
+    userCryptoInfo: {
+        select: {
+            cryptoHoldings: true,
+            cryptoBookmarks: true,
+        },
+    },
     _count: {
         select: {
             followers: true,
@@ -84,7 +121,7 @@ const stdUserProfileSelectObj = {
 export const stdUserProfile = new StandardizedQuery<
     typeof stdUserProfileSelectObj,
     Omit<UserProfile, "followerCount" | "followedUserCount" | "postCount" | "userCryptoInfo"> & {
-        userCryptoInfo: { cryptoHoldings: { symbol: string; amount: number }[] };
+        userCryptoInfo: { cryptoBookmarks: string[]; cryptoHoldings: { cryptoId: string; amount: number }[] };
         _count: { followers: number; followedUsers: number; posts: number };
     },
     UserProfile
@@ -92,13 +129,15 @@ export const stdUserProfile = new StandardizedQuery<
     select: stdUserProfileSelectObj,
     filter: async function (data) {
         const { userCryptoInfo, _count, ...rest } = data;
-        const cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
-            return d.symbol;
+
+        // Handle crypto holdings
+        let cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
+            return d.cryptoId;
         });
         let cryptodata = await prismaClient.crypto.findMany({
             select: stdCryptoInfo.select,
             where: {
-                symbol: {
+                cryptoId: {
                     in: cryptolist,
                 },
             },
@@ -107,15 +146,34 @@ export const stdUserProfile = new StandardizedQuery<
             cryptodata = [];
         }
         const cryptoHoldings = cryptodata.map((crypto) => {
-            let holding = userCryptoInfo.cryptoHoldings.find((a) => a.symbol === crypto.symbol);
+            let holding = userCryptoInfo.cryptoHoldings.find((a) => a.cryptoId === crypto.cryptoId);
             return {
                 crypto: crypto,
                 amount: holding!.amount,
             };
         });
+
+        // Handle crypto bookmarks
+        const cryptolist2 = userCryptoInfo.cryptoBookmarks;
+        let cryptodata2 = await prismaClient.crypto.findMany({
+            select: stdCryptoInfo.select,
+            where: {
+                cryptoId: {
+                    in: cryptolist2,
+                },
+            },
+        });
+        if (!cryptodata2) {
+            cryptodata2 = [];
+        }
+        const cryptoBookmarks = cryptodata2;
+
         return {
             ...rest,
-            userCryptoInfo: { cryptoHoldings: cryptoHoldings },
+            userCryptoInfo: {
+                cryptoBookmarks: cryptoBookmarks,
+                cryptoHoldings: cryptoHoldings,
+            },
             followerCount: _count.followers,
             followedUserCount: _count.followedUsers,
             postCount: _count.posts,
@@ -137,7 +195,12 @@ export const stdUserProfile = new StandardizedQuery<
 
 const stdSimpleUserInfoSelectObj = {
     username: true,
-    userConfig: true,
+    userConfig: {
+        select: {
+            displayName: true,
+            imageUrl: true,
+        },
+    },
 };
 
 export const stdSimpleUserInfo = new StandardizedQuery<

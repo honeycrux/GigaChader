@@ -69,20 +69,21 @@ enum Role {
 type UserConfig {
   displayName String   @default("")
   imageUrl    String?
+  bannerUrl   String?
   bio         String   @default("")
   lastUpdated DateTime @default(now()) @db.Date
 }
 
 type UserCryptoInfo {
   walletAddress   String?
-  cryptoBookmarks String[]
+  cryptoBookmarks String[] // remark: list of cryptoIds
   cryptoHoldings  CryptoHolding[]
   lastUpdated     DateTime        @default(now()) @db.Date
 }
 
 type CryptoHolding {
-  symbol String
-  amount Float
+  cryptoId String
+  amount   Float
 }
 
 // This model is used by lucia-auth
@@ -157,7 +158,7 @@ type PollOption {
 type UserMedia {
   url     String
   type    UserMediaType
-  altText String
+  altText String?
 }
 
 enum UserMediaType {
@@ -180,7 +181,7 @@ model PollVote {
 
 model PostHashtag {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
-  tagText String
+  tagText String @unique
 
   parentPostId String @db.ObjectId
 
@@ -194,6 +195,7 @@ model Community {
   handle        String   @unique
   displayedName String
   imageUrl      String?
+  bannerUrl     String?
   description   String   @default("")
   isExclusive   Boolean
   createdAt     DateTime @default(now())
