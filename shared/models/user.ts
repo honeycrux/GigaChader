@@ -1,3 +1,4 @@
+import { cryptoInfoSchema } from "#/shared/models/crypto";
 import { z } from "zod";
 
 export const userRoleSchema = z.union([z.literal("USER"), z.literal("VERIFIED_USER"), z.literal("ADMIN")]);
@@ -18,7 +19,7 @@ export const personalUserInfoSchema = z.object({
     userCryptoInfo: z.object({
         cryptoHoldings: z.array(
             z.object({
-                symbol: z.string(),
+                crypto: cryptoInfoSchema,
                 amount: z.number(),
             })
         ),
@@ -35,10 +36,9 @@ export const userProfileSchema = z.object({
         imageUrl: z.nullable(z.string()),
     }),
     userCryptoInfo: z.object({
-        // note: cryptoHoldings (data structure for display) will be redesigned
         cryptoHoldings: z.array(
             z.object({
-                symbol: z.string(),
+                crypto: cryptoInfoSchema,
                 amount: z.number(),
             })
         ),

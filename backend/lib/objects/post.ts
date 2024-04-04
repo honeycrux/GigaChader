@@ -1,5 +1,5 @@
-// The endpoints created on this page creates each response schema related to: Post
-// They serve both as reusable query points and samples to use in your own queries.
+// This file defines standardized query objects for: Post
+// These are useful for making Prisma selections and data transformations to the standard response types.
 
 import { PostInfo, SimplePostInfo } from "#/shared/models/post";
 import { prismaClient, StandardizedQuery } from "../data/db";
@@ -34,11 +34,11 @@ export const stdPostInfo = new StandardizedQuery<
     PostInfo
 >({
     select: stdPostInfoSelectObj,
-    filter: function (data) {
+    filter: async function (data) {
         const { _count, author, ...rest } = data;
         return {
             ...rest,
-            author: stdSimpleUserInfo.filter(author),
+            author: await stdSimpleUserInfo.filter(author),
             likeCount: _count.likedByUsers,
             repostCount: _count.repostedOnPosts,
             commentCount: _count.childPosts,
@@ -72,11 +72,11 @@ export const stdSimplePostInfo = new StandardizedQuery<
     SimplePostInfo
 >({
     select: stdSimplePostInfoSelectObj,
-    filter: function (data) {
+    filter: async function (data) {
         const { author, ...rest } = data;
         return {
             ...rest,
-            author: stdSimpleUserInfo.filter(author),
+            author: await stdSimpleUserInfo.filter(author),
         };
     },
     sample: async function (props: { postId: string }) {

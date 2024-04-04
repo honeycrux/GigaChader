@@ -3,6 +3,7 @@ import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { stdPostInfo } from "@/lib/objects/post";
 import { stdSimpleUserInfo } from "@/lib/objects/user";
+import { protectRoute } from "@/middlewares/auth";
 
 const s = initServer();
 
@@ -21,8 +22,8 @@ const postRouter = s.router(apiContract.post, {
         handler: async ({ query: { postId, from, limit } }) => {
             const data = await prismaClient.user.findMany({
                 take: limit,
-                skip: 1,
                 cursor: from ? { username: from } : undefined,
+                skip: from ? 1 : undefined,
                 select: stdSimpleUserInfo.select,
                 orderBy: {
                     username: "asc",
@@ -39,9 +40,11 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const userlist = data.map((d) => {
-                return stdSimpleUserInfo.filter(d);
-            });
+            const userlist = await Promise.all(
+                data.map((d) => {
+                    return stdSimpleUserInfo.filter(d);
+                })
+            );
             return {
                 status: 200,
                 body: userlist,
@@ -53,8 +56,8 @@ const postRouter = s.router(apiContract.post, {
         handler: async ({ query: { postId, from, limit } }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
-                skip: 1,
                 cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
@@ -69,9 +72,11 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postlist = data.map((d) => {
-                return stdPostInfo.filter(d);
-            });
+            const postlist = await Promise.all(
+                data.map((d) => {
+                    return stdPostInfo.filter(d);
+                })
+            );
             return {
                 status: 200,
                 body: postlist,
@@ -83,8 +88,8 @@ const postRouter = s.router(apiContract.post, {
         handler: async ({ query: { postId, from, limit } }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
-                skip: 1,
                 cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
@@ -99,12 +104,95 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postlist = data.map((d) => {
-                return stdPostInfo.filter(d);
-            });
+            const postlist = await Promise.all(
+                data.map((d) => {
+                    return stdPostInfo.filter(d);
+                })
+            );
             return {
                 status: 200,
                 body: postlist,
+            };
+        },
+    },
+
+    getGlobalFeeds: {
+        handler: async ({ query: { from, limit } }) => {
+            const data = await prismaClient.post.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                select: stdPostInfo.select,
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const postlist = await Promise.all(
+                data.map((d) => {
+                    return stdPostInfo.filter(d);
+                })
+            );
+            return {
+                status: 200,
+                body: postlist,
+            };
+        },
+    },
+
+    postLike: {
+        middleware: [protectRoute.user],
+        handler: async ({ res, body: { postId, set } }) => {
+            const data = await prismaClient.post.update({
+                data: {
+                    likedByUsers: set ? { connect: { id: res.locals.user!.id } } : { disconnect: { id: res.locals.user!.id } },
+                },
+                select: stdPostInfo.select,
+                where: {
+                    id: postId,
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const postinfo = await stdPostInfo.filter(data);
+            return {
+                status: 200,
+                body: postinfo,
+            };
+        },
+    },
+
+    postSave: {
+        middleware: [protectRoute.user],
+        handler: async ({ res, body: { postId, set } }) => {
+            const data = await prismaClient.post.update({
+                data: {
+                    savedByUsers: set ? { connect: { id: res.locals.user!.id } } : { disconnect: { id: res.locals.user!.id } },
+                },
+                select: stdPostInfo.select,
+                where: {
+                    id: postId,
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const postinfo = await stdPostInfo.filter(data);
+            return {
+                status: 200,
+                body: postinfo,
             };
         },
     },

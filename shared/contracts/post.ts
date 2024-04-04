@@ -55,4 +55,43 @@ export const postContract = c.router({
         },
         summary: "Get reposts of a user",
     },
+
+    getGlobalFeeds: {
+        method: "GET",
+        path: "/api/post/global-feeds",
+        query: z.object({
+            from: z.optional(z.string()),
+            limit: z.optional(z.number().int().min(1)),
+        }),
+        responses: {
+            200: z.array(postInfoSchema).nullable(),
+        },
+        summary: "Get global feeds",
+    },
+
+    postLike: {
+        method: "POST",
+        path: "/api/post/like",
+        body: z.object({
+            postId: z.string(),
+            set: z.boolean(),
+        }),
+        responses: {
+            200: postInfoSchema.nullable(),
+        },
+        summary: "Add or remove a like to/from a post",
+    },
+
+    postSave: {
+        method: "POST",
+        path: "/api/post/save",
+        body: z.object({
+            postId: z.string(),
+            set: z.boolean(),
+        }),
+        responses: {
+            200: postInfoSchema.nullable(),
+        },
+        summary: "Save or unsave a post",
+    },
 });

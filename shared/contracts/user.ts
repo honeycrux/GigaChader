@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { personalUserInfoSchema, userProfileSchema } from "../models/user";
+import { personalUserInfoSchema, simpleUserInfoSchema, userProfileSchema } from "../models/user";
 import { postInfoSchema } from "../models/post";
 import { z } from "zod";
 
@@ -37,22 +37,32 @@ export const userContract = c.router({
         summary: "Get user's own feeds, or global feeds for guests",
     },
 
-    postFollow: {
-        method: "POST",
-        path: "/api/user/follow",
-        body: z.object({
+    getFollows: {
+        method: "GET",
+        path: "/api/user/follows",
+        query: z.object({
             username: z.string(),
-            set: z.boolean(),
+            from: z.optional(z.string()),
+            limit: z.optional(z.number().int().min(1)),
         }),
         responses: {
-            200: z.object({
-                success: z.boolean(),
-            }),
-            400: z.object({
-                error: z.string(),
-            }),
+            200: z.array(simpleUserInfoSchema).nullable(),
         },
-        summary: "Add or remove a user follow",
+        summary: "Get followers of a user",
+    },
+
+    getFollowedUsers: {
+        method: "GET",
+        path: "/api/user/followed-users",
+        query: z.object({
+            username: z.string(),
+            from: z.optional(z.string()),
+            limit: z.optional(z.number().int().min(1)),
+        }),
+        responses: {
+            200: z.array(simpleUserInfoSchema).nullable(),
+        },
+        summary: "Get followed users of a user",
     },
 
     getPosts: {
@@ -80,5 +90,37 @@ export const userContract = c.router({
             200: z.array(postInfoSchema).nullable(),
         },
         summary: "Get user's own saved posts",
+    },
+
+    userSearch: {
+        method: "GET",
+        path: "/api/user/search",
+        query: z.object({
+            query: z.string(),
+            from: z.optional(z.string()),
+            limit: z.optional(z.number().int().min(1)),
+        }),
+        responses: {
+            200: z.array(simpleUserInfoSchema).nullable(),
+        },
+        summary: "Search for users by username",
+    },
+
+    postFollow: {
+        method: "POST",
+        path: "/api/user/follow",
+        body: z.object({
+            username: z.string(),
+            set: z.boolean(),
+        }),
+        responses: {
+            200: z.object({
+                success: z.boolean(),
+            }),
+            400: z.object({
+                error: z.string(),
+            }),
+        },
+        summary: "Add or remove a user follow",
     },
 });

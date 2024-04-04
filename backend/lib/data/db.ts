@@ -2,7 +2,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 export const prismaClient = new PrismaClient();
 
-type FilterFunction<SelectedT, ResponseT> = (data: SelectedT) => ResponseT;
+type FilterFunction<SelectedT, ResponseT> = (data: SelectedT) => Promise<ResponseT>;
 
 type SampleFunction<ResponseT, K extends Record<string, any> = any> = (props: K) => Promise<ResponseT | null>;
 
