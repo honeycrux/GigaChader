@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+
 import { InputText } from 'primereact/inputtext';
 import { PrimeIcons } from 'primereact/api';
 import { useSearchParams, usePathname,useRouter } from 'next/navigation';
@@ -55,8 +55,10 @@ const search = () => {
                   <img src="/placeholder_profilePic.png" alt="user profile pic" width="50" />
                 </td>
                 <td>
-                  <td className="text-xl">Display name</td>
-                  <td className="text-xl">Username</td>
+                  Display name
+                </td>
+                <td>
+                  Username
                 </td>
               </tr>
             )}
