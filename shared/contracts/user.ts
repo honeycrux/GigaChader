@@ -60,8 +60,8 @@ export const userContract = c.router({
         path: "/api/user/posts",
         query: z.object({
             username: z.string(),
-            from: z.string(),
-            limit: z.number().int().min(1),
+            from: z.optional(z.string()),
+            limit: z.optional(z.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
@@ -73,8 +73,8 @@ export const userContract = c.router({
         method: "GET",
         path: "/api/user/saved-posts",
         query: z.object({
-            from: z.string(),
-            limit: z.number().int().min(1),
+            from: z.optional(z.string()),
+            limit: z.optional(z.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),

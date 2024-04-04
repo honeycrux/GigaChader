@@ -1,8 +1,9 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { protectRoute } from "@/middlewares/auth";
-import { getPersonalUserInfo, getUserProfile } from "@/lib/user/user";
+import { stdPersonalUserInfo, stdUserProfile } from "@/lib/objects/user";
 import { prismaClient } from "@/lib/data/db";
+import { stdPostInfo } from "@/lib/objects/post";
 
 const s = initServer();
 
@@ -10,16 +11,17 @@ const userRouter = s.router(apiContract.user, {
     getInfo: {
         middleware: [protectRoute.user],
         handler: async ({ res }) => {
-            const userinfo = await getPersonalUserInfo({ username: res.locals.user!.username });
+            const userinfo = await stdPersonalUserInfo.sample({ username: res.locals.user!.username });
             return {
                 status: 200,
                 body: userinfo,
             };
         },
     },
+
     getProfile: {
         handler: async ({ params: { username } }) => {
-            const userinfo = await getUserProfile({ username });
+            const userinfo = await stdUserProfile.sample({ username });
             return {
                 status: 200,
                 body: userinfo,
@@ -53,35 +55,11 @@ const userRouter = s.router(apiContract.user, {
             });
             const data = await prismaClient.post.findMany({
                 take: limit,
-                cursor: {
-                    id: from,
-                },
+                cursor: from ? { id: from } : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: {
-                    id: true,
-                    content: true,
-                    createdAt: true,
-                    userMedia: true,
-                    author: {
-                        select: {
-                            // refer: simple user info
-                            username: true,
-                            userConfig: true,
-                        },
-                    },
-                    repostingPostId: true,
-                    parentPostId: true,
-                    _count: {
-                        select: {
-                            likedByUsers: true,
-                            repostedOnPosts: true,
-                            childPosts: true,
-                            savedByUsers: true,
-                        },
-                    },
-                },
+                select: stdPostInfo.select,
                 where: {
                     authorId: {
                         in: listOfFollowedUserIds,
@@ -95,19 +73,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const postlist = data.map((d) => {
-                const { _count, author, ...rest } = d;
-                return {
-                    ...rest,
-                    author: {
-                        username: author.username,
-                        displayName: author.userConfig.displayName,
-                        imageUrl: author.userConfig.imageUrl,
-                    },
-                    likeCount: _count.likedByUsers,
-                    repostCount: _count.repostedOnPosts,
-                    commentCount: _count.childPosts,
-                    saveCount: _count.savedByUsers,
-                };
+                return stdPostInfo.filter(d);
             });
             return {
                 status: 200,
@@ -137,9 +103,7 @@ const userRouter = s.router(apiContract.user, {
             }
             const data = await prismaClient.user.update({
                 data: {
-                    followedUserIds: {
-                        push: userdata.id,
-                    },
+                    followedUsers: set ? { connect: [{ username }] } : { disconnect: [{ username }] },
                 },
                 select: {
                     _count: {
@@ -187,35 +151,11 @@ const userRouter = s.router(apiContract.user, {
             }
             const data = await prismaClient.post.findMany({
                 take: limit,
-                cursor: {
-                    id: from,
-                },
+                cursor: from ? { id: from } : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: {
-                    id: true,
-                    content: true,
-                    createdAt: true,
-                    userMedia: true,
-                    author: {
-                        select: {
-                            // refer: simple user info
-                            username: true,
-                            userConfig: true,
-                        },
-                    },
-                    repostingPostId: true,
-                    parentPostId: true,
-                    _count: {
-                        select: {
-                            likedByUsers: true,
-                            repostedOnPosts: true,
-                            childPosts: true,
-                            savedByUsers: true,
-                        },
-                    },
-                },
+                select: stdPostInfo.select,
                 where: {
                     authorId: userdata.id,
                 },
@@ -227,19 +167,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const postlist = data.map((d) => {
-                const { _count, author, ...rest } = d;
-                return {
-                    ...rest,
-                    author: {
-                        username: author.username,
-                        displayName: author.userConfig.displayName,
-                        imageUrl: author.userConfig.imageUrl,
-                    },
-                    likeCount: _count.likedByUsers,
-                    repostCount: _count.repostedOnPosts,
-                    commentCount: _count.childPosts,
-                    saveCount: _count.savedByUsers,
-                };
+                return stdPostInfo.filter(d);
             });
             return {
                 status: 200,
@@ -253,35 +181,11 @@ const userRouter = s.router(apiContract.user, {
         handler: async ({ res, query: { from, limit } }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
-                cursor: {
-                    id: from,
-                },
+                cursor: from ? { id: from } : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: {
-                    id: true,
-                    content: true,
-                    createdAt: true,
-                    userMedia: true,
-                    author: {
-                        select: {
-                            // refer: simple user info
-                            username: true,
-                            userConfig: true,
-                        },
-                    },
-                    repostingPostId: true,
-                    parentPostId: true,
-                    _count: {
-                        select: {
-                            likedByUsers: true,
-                            repostedOnPosts: true,
-                            childPosts: true,
-                            savedByUsers: true,
-                        },
-                    },
-                },
+                select: stdPostInfo.select,
                 where: {
                     savedByUserIds: {
                         has: res.locals.user!.id,
@@ -295,19 +199,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const postlist = data.map((d) => {
-                const { _count, author, ...rest } = d;
-                return {
-                    ...rest,
-                    author: {
-                        username: author.username,
-                        displayName: author.userConfig.displayName,
-                        imageUrl: author.userConfig.imageUrl,
-                    },
-                    likeCount: _count.likedByUsers,
-                    repostCount: _count.repostedOnPosts,
-                    commentCount: _count.childPosts,
-                    saveCount: _count.savedByUsers,
-                };
+                return stdPostInfo.filter(d);
             });
             return {
                 status: 200,

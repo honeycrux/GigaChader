@@ -1,6 +1,6 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
-import { lucia } from "@/lib/user/auth";
+import { lucia } from "@/lib/helpers/auth";
 import { Argon2id } from "oslo/password";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { prismaClient } from "@/lib/data/db";

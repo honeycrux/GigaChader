@@ -1,6 +1,6 @@
 // src/middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { lucia } from "@/lib/user/auth";
+import { lucia } from "@/lib/helpers/auth";
 import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
