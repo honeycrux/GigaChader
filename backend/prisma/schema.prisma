@@ -231,3 +231,22 @@ enum ModerationTargetType {
   Post
   Community
 }
+
+//////////////////////
+// Group D: Others
+//////////////////////
+
+model Crypto {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cryptoId  String   @unique
+  symbol    String
+  name      String
+  priceUsd  Float
+  updatedAt DateTime @updatedAt
+}
+
+model SystemMetadata {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  key   String @unique
+  value Json
+}

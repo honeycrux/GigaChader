@@ -5,6 +5,7 @@ import { apiContract } from "#/shared/contracts";
 import { authRouter } from "./auth";
 import { postRouter } from "./post";
 import { userRouter } from "./user";
+import { cryptoRouter } from "./crypto";
 
 // construct all API routes
 
@@ -14,6 +15,7 @@ const apiRouter = s.router(apiContract, {
     auth: authRouter,
     post: postRouter,
     user: userRouter,
+    crypto: cryptoRouter,
 });
 
 export { apiRouter };

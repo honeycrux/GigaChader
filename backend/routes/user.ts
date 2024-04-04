@@ -1,7 +1,7 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { protectRoute } from "@/middlewares/auth";
-import { stdPersonalUserInfo, stdUserProfile } from "@/lib/objects/user";
+import { stdPersonalUserInfo, stdSimpleUserInfo, stdUserProfile } from "@/lib/objects/user";
 import { prismaClient } from "@/lib/data/db";
 import { stdPostInfo } from "@/lib/objects/post";
 
@@ -56,6 +56,7 @@ const userRouter = s.router(apiContract.user, {
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
@@ -72,12 +73,224 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const postlist = data.map((d) => {
-                return stdPostInfo.filter(d);
-            });
+            const postlist = await Promise.all(
+                data.map((d) => {
+                    return stdPostInfo.filter(d);
+                })
+            );
             return {
                 status: 200,
                 body: postlist,
+            };
+        },
+    },
+
+    getFollows: {
+        handler: async ({ query: { username, from, limit } }) => {
+            const userdata = await prismaClient.user.findUnique({
+                select: {
+                    id: true,
+                },
+                where: {
+                    username: username,
+                },
+            });
+            if (!userdata) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const data = await prismaClient.user.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                orderBy: {
+                    username: "asc",
+                },
+                select: stdSimpleUserInfo.select,
+                where: {
+                    followers: {
+                        some: {
+                            id: userdata.id,
+                        },
+                    },
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const userlist = await Promise.all(
+                data.map((d) => {
+                    return stdSimpleUserInfo.filter(d);
+                })
+            );
+            return {
+                status: 200,
+                body: userlist,
+            };
+        },
+    },
+
+    getFollowedUsers: {
+        handler: async ({ query: { username, from, limit } }) => {
+            const userdata = await prismaClient.user.findUnique({
+                select: {
+                    id: true,
+                },
+                where: {
+                    username: username,
+                },
+            });
+            if (!userdata) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const data = await prismaClient.user.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                orderBy: {
+                    username: "asc",
+                },
+                select: stdSimpleUserInfo.select,
+                where: {
+                    followedUsers: {
+                        some: {
+                            id: userdata.id,
+                        },
+                    },
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const userlist = await Promise.all(
+                data.map((d) => {
+                    return stdSimpleUserInfo.filter(d);
+                })
+            );
+            return {
+                status: 200,
+                body: userlist,
+            };
+        },
+    },
+
+    getPosts: {
+        handler: async ({ query: { username, from, limit } }) => {
+            const userdata = await prismaClient.user.findUnique({
+                select: {
+                    id: true,
+                },
+                where: {
+                    username: username,
+                },
+            });
+            if (!userdata) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const data = await prismaClient.post.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                select: stdPostInfo.select,
+                where: {
+                    authorId: userdata.id,
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const postlist = await Promise.all(
+                data.map((d) => {
+                    return stdPostInfo.filter(d);
+                })
+            );
+            return {
+                status: 200,
+                body: postlist,
+            };
+        },
+    },
+
+    getSavedPosts: {
+        middleware: [protectRoute.user],
+        handler: async ({ res, query: { from, limit } }) => {
+            const data = await prismaClient.post.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                select: stdPostInfo.select,
+                where: {
+                    savedByUserIds: {
+                        has: res.locals.user!.id,
+                    },
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const postlist = await Promise.all(
+                data.map((d) => {
+                    return stdPostInfo.filter(d);
+                })
+            );
+            return {
+                status: 200,
+                body: postlist,
+            };
+        },
+    },
+
+    userSearch: {
+        handler: async ({ query: { query, from, limit } }) => {
+            const data = await prismaClient.user.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                select: stdSimpleUserInfo.select,
+                where: {
+                    OR: [{ username: { contains: query } }],
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const userlist = await Promise.all(
+                data.map((d) => {
+                    return stdSimpleUserInfo.filter(d);
+                })
+            );
+            return {
+                status: 200,
+                body: userlist,
             };
         },
     },
@@ -129,81 +342,6 @@ const userRouter = s.router(apiContract.user, {
                 body: {
                     success: true,
                 },
-            };
-        },
-    },
-
-    getPosts: {
-        handler: async ({ query: { username, from, limit } }) => {
-            const userdata = await prismaClient.user.findUnique({
-                select: {
-                    id: true,
-                },
-                where: {
-                    username: username,
-                },
-            });
-            if (!userdata) {
-                return {
-                    status: 200,
-                    body: null,
-                };
-            }
-            const data = await prismaClient.post.findMany({
-                take: limit,
-                cursor: from ? { id: from } : undefined,
-                orderBy: {
-                    createdAt: "desc",
-                },
-                select: stdPostInfo.select,
-                where: {
-                    authorId: userdata.id,
-                },
-            });
-            if (!data) {
-                return {
-                    status: 200,
-                    body: null,
-                };
-            }
-            const postlist = data.map((d) => {
-                return stdPostInfo.filter(d);
-            });
-            return {
-                status: 200,
-                body: postlist,
-            };
-        },
-    },
-
-    getSavedPosts: {
-        middleware: [protectRoute.user],
-        handler: async ({ res, query: { from, limit } }) => {
-            const data = await prismaClient.post.findMany({
-                take: limit,
-                cursor: from ? { id: from } : undefined,
-                orderBy: {
-                    createdAt: "desc",
-                },
-                select: stdPostInfo.select,
-                where: {
-                    savedByUserIds: {
-                        has: res.locals.user!.id,
-                    },
-                },
-            });
-            if (!data) {
-                return {
-                    status: 200,
-                    body: null,
-                };
-            }
-            const postlist = data.map((d) => {
-                return stdPostInfo.filter(d);
-            });
-            return {
-                status: 200,
-                body: postlist,
             };
         },
     },
