@@ -1,49 +1,81 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { Image } from 'primereact/image';
 import { Avatar } from 'primereact/avatar';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { apiClient } from "@/lib/apiClient";
 
 interface Props {
     id: string;
-    currentUserId: string;  // for checking if the current user can delete a post
-    parentId: string | null; // for comments
+    currentUserName: string;  // for checking if the current user can delete a post
+    parentPostId: string | null; // for comments
     content: string;
     author: {
       username: string;
       displayName: string;
-      image: string;
+      imageUrl: string;
       id: string;
     };
     createdAt: string;
     isComment?: boolean;
+    commentCount: number;
+    likeCount: number;
   }
 
 const PostBox = (
     {
         id,
-        currentUserId,
-        parentId,
+        currentUserName,
+        parentPostId,
         content,
         author,
         createdAt,
         isComment,
-      }: Props) => {
+        commentCount,
+        likeCount,
+      }: any) => {
     const toast = useRef<Toast>(null);
     const [heartPath, setHeartPath] = useState("/heart.svg");
     const bisLiked = useRef(false);
+    const [likeCountInternal, setlikeCountInternal] = useState(likeCount);
 
-    const handleHeartClick = () => {
+    const checkLiked = async () => {
+        const res = await apiClient.post.getLikes({ query: { postId: id } });
+        // bisLiked.current = res.body;
+        console.log("post content:");
+        console.log(content);
+        console.log(res.body);
+        // @ts-ignore
+        bisLiked.current = res.body.some((user: { username: string }) => user.username === currentUserName);
+        // @ts-ignore
+        setlikeCountInternal(res.body.length);
+        
+        if (bisLiked.current) {
+            setHeartPath("/heart_red.svg");
+        } else {
+            setHeartPath("/heart.svg");
+        }
+    }
+
+    useEffect(() => {
+        
+        checkLiked();
+    }, [id]);
+
+    const handleHeartClick = async () => {
         bisLiked.current = !bisLiked.current;
         if (bisLiked.current) {
             setHeartPath("/heart_red.svg");
         } else {
             setHeartPath("/heart.svg");
         }
+        const res = await apiClient.post.postLike({ body: { postId: id, set: bisLiked.current }});
+        console.log(res);
+        checkLiked();
     }
 
     const [commentContent, setCommentContent] = useState("");
@@ -73,13 +105,13 @@ const PostBox = (
                 <div>
                     <p>{content}</p>
                 </div>
-                <div className="inline-flex [&>*]:mr-2">
-                    <Image src={heartPath}
+                <div className="inline-flex [&>*]:mr-2 items-end">
+                    {currentUserName && (<Image src={heartPath}
                             width="24"
                             alt="heart"
                             onClick={handleHeartClick}
                             className="cursor-pointer"
-                    />
+                    />)}
                     <Link href={`/post/${id}`}>
                         <Image src="/comment.svg"
                                 width="24"
@@ -88,6 +120,9 @@ const PostBox = (
                                 className="cursor-pointer"
                         />
                     </Link>
+                    <span className="text-gray-600 text-sm">
+                        {likeCountInternal} like(s), {commentCount} comment(s)
+                    </span>
                 </div>
             </div>
         </div>
