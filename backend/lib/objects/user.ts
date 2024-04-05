@@ -35,7 +35,7 @@ export const stdPersonalUserInfo = new StandardizedQuery<
         const { userCryptoInfo, ...rest } = data;
 
         // Handle crypto holdings
-        let cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
+        const cryptolist = (userCryptoInfo.cryptoHoldings || []).map((d) => {
             return d.cryptoId;
         });
         let cryptodata = await prismaClient.crypto.findMany({
@@ -58,7 +58,7 @@ export const stdPersonalUserInfo = new StandardizedQuery<
         });
 
         // Handle crypto bookmarks
-        const cryptolist2 = userCryptoInfo.cryptoBookmarks;
+        const cryptolist2 = userCryptoInfo.cryptoBookmarks || [];
         let cryptodata2 = await prismaClient.crypto.findMany({
             select: stdCryptoInfo.select,
             where: {
@@ -134,7 +134,6 @@ export const stdUserProfile = new StandardizedQuery<
         const cryptolist = (userCryptoInfo.cryptoHoldings || []).map((d) => {
             return d.cryptoId;
         });
-        console.log("cryptolist", cryptolist);
         let cryptodata = await prismaClient.crypto.findMany({
             select: stdCryptoInfo.select,
             where: {
@@ -156,7 +155,6 @@ export const stdUserProfile = new StandardizedQuery<
 
         // Handle crypto bookmarks
         const cryptolist2 = userCryptoInfo.cryptoBookmarks || [];
-        console.log("cryptolist2", cryptolist2);
         let cryptodata2 = await prismaClient.crypto.findMany({
             select: stdCryptoInfo.select,
             where: {
