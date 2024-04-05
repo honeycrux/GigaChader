@@ -26,59 +26,58 @@ const stdPersonalInfoSelectObj = {
 };
 
 export const stdPersonalUserInfo = new StandardizedQuery<
-    // typeof stdPersonalInfoSelectObj,
-    // Omit<PersonalUserInfo, "userCryptoInfo"> & { userCryptoInfo: { cryptoBookmarks: string[]; cryptoHoldings: { cryptoId: string; amount: number }[] } },
-    // PersonalUserInfo
-    any, any, any
+    typeof stdPersonalInfoSelectObj,
+    Omit<PersonalUserInfo, "userCryptoInfo"> & { userCryptoInfo: { cryptoBookmarks: string[]; cryptoHoldings: { cryptoId: string; amount: number }[] } },
+    PersonalUserInfo
 >({
     select: stdPersonalInfoSelectObj,
     filter: async function (data) {
         const { userCryptoInfo, ...rest } = data;
 
-        // // Handle crypto holdings
-        // let cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
-        //     return d.cryptoId;
-        // });
-        // let cryptodata = await prismaClient.crypto.findMany({
-        //     select: stdCryptoInfo.select,
-        //     where: {
-        //         cryptoId: {
-        //             in: cryptolist,
-        //         },
-        //     },
-        // });
-        // if (!cryptodata) {
-        //     cryptodata = [];
-        // }
-        // const cryptoHoldings = cryptodata.map((crypto) => {
-        //     let holding = userCryptoInfo.cryptoHoldings.find((a) => a.cryptoId === crypto.cryptoId);
-        //     return {
-        //         crypto: crypto,
-        //         amount: holding!.amount,
-        //     };
-        // });
+        // Handle crypto holdings
+        let cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
+            return d.cryptoId;
+        });
+        let cryptodata = await prismaClient.crypto.findMany({
+            select: stdCryptoInfo.select,
+            where: {
+                cryptoId: {
+                    in: cryptolist,
+                },
+            },
+        });
+        if (!cryptodata) {
+            cryptodata = [];
+        }
+        const cryptoHoldings = cryptodata.map((crypto) => {
+            let holding = userCryptoInfo.cryptoHoldings.find((a) => a.cryptoId === crypto.cryptoId);
+            return {
+                crypto: crypto,
+                amount: holding!.amount,
+            };
+        });
 
-        // // Handle crypto bookmarks
-        // const cryptolist2 = userCryptoInfo.cryptoBookmarks;
-        // let cryptodata2 = await prismaClient.crypto.findMany({
-        //     select: stdCryptoInfo.select,
-        //     where: {
-        //         cryptoId: {
-        //             in: cryptolist2,
-        //         },
-        //     },
-        // });
-        // if (!cryptodata2) {
-        //     cryptodata2 = [];
-        // }
-        // const cryptoBookmarks = cryptodata2;
+        // Handle crypto bookmarks
+        const cryptolist2 = userCryptoInfo.cryptoBookmarks;
+        let cryptodata2 = await prismaClient.crypto.findMany({
+            select: stdCryptoInfo.select,
+            where: {
+                cryptoId: {
+                    in: cryptolist2,
+                },
+            },
+        });
+        if (!cryptodata2) {
+            cryptodata2 = [];
+        }
+        const cryptoBookmarks = cryptodata2;
 
         const personalUserInfo: PersonalUserInfo = {
             ...rest,
-            // userCryptoInfo: {
-            //     cryptoBookmarks: cryptoBookmarks,
-            //     cryptoHoldings: cryptoHoldings,
-            // },
+            userCryptoInfo: {
+                cryptoBookmarks: cryptoBookmarks,
+                cryptoHoldings: cryptoHoldings,
+            },
         };
         return personalUserInfo;
     },
@@ -120,62 +119,63 @@ const stdUserProfileSelectObj = {
     },
 };
 export const stdUserProfile = new StandardizedQuery<
-    // typeof stdUserProfileSelectObj,
-    // Omit<UserProfile, "followerCount" | "followedUserCount" | "postCount" | "userCryptoInfo"> & {
-    //     userCryptoInfo: { cryptoBookmarks: string[]; cryptoHoldings: { cryptoId: string; amount: number }[] };
-    //     _count: { followers: number; followedUsers: number; posts: number };
-    // },
-    // UserProfile
-    any, any, any
+    typeof stdUserProfileSelectObj,
+    Omit<UserProfile, "followerCount" | "followedUserCount" | "postCount" | "userCryptoInfo"> & {
+        userCryptoInfo: { cryptoBookmarks: string[]; cryptoHoldings: { cryptoId: string; amount: number }[] };
+        _count: { followers: number; followedUsers: number; posts: number };
+    },
+    UserProfile
 >({
     select: stdUserProfileSelectObj,
     filter: async function (data) {
         const { userCryptoInfo, _count, ...rest } = data;
 
-        // // Handle crypto holdings
-        // let cryptolist = userCryptoInfo.cryptoHoldings.map((d) => {
-        //     return d.cryptoId;
-        // });
-        // let cryptodata = await prismaClient.crypto.findMany({
-        //     select: stdCryptoInfo.select,
-        //     where: {
-        //         cryptoId: {
-        //             in: cryptolist,
-        //         },
-        //     },
-        // });
-        // if (!cryptodata) {
-        //     cryptodata = [];
-        // }
-        // const cryptoHoldings = cryptodata.map((crypto) => {
-        //     let holding = userCryptoInfo.cryptoHoldings.find((a) => a.cryptoId === crypto.cryptoId);
-        //     return {
-        //         crypto: crypto,
-        //         amount: holding!.amount,
-        //     };
-        // });
+        // Handle crypto holdings
+        const cryptolist = (userCryptoInfo.cryptoHoldings || []).map((d) => {
+            return d.cryptoId;
+        });
+        console.log("cryptolist", cryptolist);
+        let cryptodata = await prismaClient.crypto.findMany({
+            select: stdCryptoInfo.select,
+            where: {
+                cryptoId: {
+                    in: cryptolist,
+                },
+            },
+        });
+        if (!cryptodata) {
+            cryptodata = [];
+        }
+        const cryptoHoldings = cryptodata.map((crypto) => {
+            let holding = userCryptoInfo.cryptoHoldings.find((a) => a.cryptoId === crypto.cryptoId);
+            return {
+                crypto: crypto,
+                amount: holding!.amount,
+            };
+        });
 
-        // // Handle crypto bookmarks
-        // const cryptolist2 = userCryptoInfo.cryptoBookmarks;
-        // let cryptodata2 = await prismaClient.crypto.findMany({
-        //     select: stdCryptoInfo.select,
-        //     where: {
-        //         cryptoId: {
-        //             in: cryptolist2,
-        //         },
-        //     },
-        // });
-        // if (!cryptodata2) {
-        //     cryptodata2 = [];
-        // }
-        // const cryptoBookmarks = cryptodata2;
+        // Handle crypto bookmarks
+        const cryptolist2 = userCryptoInfo.cryptoBookmarks || [];
+        console.log("cryptolist2", cryptolist2);
+        let cryptodata2 = await prismaClient.crypto.findMany({
+            select: stdCryptoInfo.select,
+            where: {
+                cryptoId: {
+                    in: cryptolist2,
+                },
+            },
+        });
+        if (!cryptodata2) {
+            cryptodata2 = [];
+        }
+        const cryptoBookmarks = cryptodata2;
 
         return {
             ...rest,
-            // userCryptoInfo: {
-            //     cryptoBookmarks: cryptoBookmarks,
-            //     cryptoHoldings: cryptoHoldings,
-            // },
+            userCryptoInfo: {
+                cryptoBookmarks: cryptoBookmarks,
+                cryptoHoldings: cryptoHoldings,
+            },
             followerCount: _count.followers,
             followedUserCount: _count.followedUsers,
             postCount: _count.posts,
