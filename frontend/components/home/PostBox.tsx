@@ -24,6 +24,7 @@ interface Props {
     isComment?: boolean;
     commentCount: number;
     likeCount: number;
+    bVisitParentPost?: boolean;
   }
 
 const PostBox = (
@@ -37,6 +38,7 @@ const PostBox = (
         isComment,
         commentCount,
         likeCount,
+        bVisitParentPost
       }: any) => {
     const toast = useRef<Toast>(null);
     const [heartPath, setHeartPath] = useState("/heart.svg");
@@ -46,9 +48,9 @@ const PostBox = (
     const checkLiked = async () => {
         const res = await apiClient.post.getLikes({ query: { postId: id } });
         // bisLiked.current = res.body;
-        console.log("post content:");
-        console.log(content);
-        console.log(res.body);
+        // console.log("post content:");
+        // console.log(content);
+        // console.log(res.body);
         // @ts-ignore
         bisLiked.current = res.body.some((user: { username: string }) => user.username === currentUserName);
         // @ts-ignore
@@ -99,8 +101,9 @@ const PostBox = (
             </div>
             <div className="whitespace-pre-wrap">
                 <div>
-                    <span className="mr-2">{author.displayName}</span>
-                    <span className="text-gray-600">@{author.username}</span>
+                    <Link className="mr-2 hover:underline" href={`/profile/${author.username}`}>{author.displayName} &nbsp;
+                        <span className="text-gray-600">@{author.username}</span>
+                    </Link>
                 </div>
                 <div>
                     <p>{content}</p>
@@ -112,13 +115,12 @@ const PostBox = (
                             onClick={handleHeartClick}
                             className="cursor-pointer"
                     />)}
-                    <Link href={`/post/${id}`}>
-                        <Image src="/comment.svg"
-                                width="24"
-                                alt="comment"
-                                // onClick={handleCommentClick}
-                                className="cursor-pointer"
-                        />
+                    <Link href={bVisitParentPost && parentPostId ? `/post/${parentPostId}` : `/post/${id}`}>
+                    <Image src="/comment.svg"
+                            width="24"
+                            alt="comment"
+                            className="cursor-pointer"
+                    />
                     </Link>
                     <span className="text-gray-600 text-sm">
                         {likeCountInternal} like(s), {commentCount} comment(s)

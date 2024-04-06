@@ -47,6 +47,7 @@ const userRouter = s.router(apiContract.user, {
                     username: res.locals.user!.username,
                 },
             });
+            
             if (!userdata) {
                 return {
                     status: 200,
@@ -56,6 +57,9 @@ const userRouter = s.router(apiContract.user, {
             const listOfFollowedUserIds = userdata.followedUsers.map((d) => {
                 return d.id;
             });
+
+            listOfFollowedUserIds.push(res.locals.user!.id);
+            
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,

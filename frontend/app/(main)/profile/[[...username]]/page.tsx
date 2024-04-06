@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { use, useEffect, useRef, useState } from 'react'
 import { Image } from 'primereact/image';
 import { Avatar } from 'primereact/avatar';
 import PostBox from "@/components/home/PostBox";
@@ -11,6 +11,8 @@ import { useAuthContext } from '@/providers/auth-provider';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { apiClient } from '@/lib/apiClient';
+import { set } from 'zod';
 
 const profile = ({ params }: { params: { username: string } }) => {
   const { user, logout } = useAuthContext();
@@ -18,19 +20,30 @@ const profile = ({ params }: { params: { username: string } }) => {
 
   const [userinfo, setUserinfo] = useState<any>();
   const [bEditProfileDiagVisible, setbEditProfileDiagVisible] = useState<boolean>(false);
+  const [followList, setFollowList] = useState<any>();
+  const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
+
+  useEffect(() => {
+    const wrapper = async () => {
+        const userinfo = await getUserInfo();
+        if (!user && "error" in userinfo) { // logged out users
+            setbIsLoggedin(false);
+        } else {
+            setbIsLoggedin(true);
+        }
+    };
+
+    wrapper();
+  }, [user]);
 
   useEffect(() => {
     const wrapper = async () => {
       if (!profileUsername) {
-        if (!user) {
-          // console.log("You haven't logged in and you shouldn't be here");
-        } else {
+        if (user) {
           const userinfo_fetched = await getUserInfo();
           if ("error" in userinfo_fetched) {
             console.log("Your own profile requested not found");
           } else {
-            // console.log("from profile1");
-            // console.log(userinfo_fetched);
             setUserinfo(userinfo_fetched);
           }
         }
@@ -44,10 +57,52 @@ const profile = ({ params }: { params: { username: string } }) => {
           setUserinfo(userinfo_fetched);
         }
       }
+
+      if (user && !profileUsername) {
+        getPostsOfUser(user.username);
+      }
+
+      if (profileUsername) {
+        getPostsOfUser(profileUsername[0]);
+        getFollowList();
+      }
     };
 
     wrapper();
-  }, [user]);
+  }, [user, profileUsername]);
+
+  const [posts, setPosts] = useState<any>();
+  const [comments, setComments] = useState<any>();
+
+  const getFollowList = async () => {
+    if (user) {
+      const res = await apiClient.user.getFollows({ query: { username: user.username }});
+      console.log(res.body);
+      setFollowList(res.body);
+      // @ts-ignore
+      if (res.body.some((follow: any) => follow.username === profileUsername[0])) {
+        setbHasFollowed(true);
+      } else {
+        setbHasFollowed(false);
+      }
+    }
+  };
+
+  const getPostsOfUser = async (username: string) => {
+    // console.log("received username: " + username);
+    const posts = await apiClient.user.getPosts({ query: { username: username } });
+    // console.log(posts.body);
+
+    // Filter posts where parentPostId is not empty and store them in comments
+    // @ts-ignore
+    const comments = posts.body.filter((post: any) => post.parentPostId);
+    setComments(comments);
+
+    // Filter posts where parentPostId is empty and store them in posts
+    // @ts-ignore
+    const mainPosts = posts.body.filter((post: any) => !post.parentPostId);
+    setPosts(mainPosts);
+  };
 
   const divRef = useRef<HTMLDivElement>(null);
   const [marginTop, setMarginTop] = useState(0);
@@ -68,6 +123,14 @@ const profile = ({ params }: { params: { username: string } }) => {
   const [editDisplayName, setEditDisplayName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editBio, setEditBio] = useState('');
+
+  const [bHasFollowed, setbHasFollowed] = useState<boolean>(false);
+
+  const handleFollow = async () => {
+    const res = await apiClient.user.userFollow({ body: { username: profileUsername[0], set: !bHasFollowed}})
+    setbHasFollowed(!bHasFollowed);
+    console.log(res);
+  };
 
   return (
     <div className='flex w-full h-full flex-col overflow-y-auto overflow-x-clip'>
@@ -112,7 +175,7 @@ const profile = ({ params }: { params: { username: string } }) => {
 
               {!profileUsername && 
               (<div className='flex w-full absolute top-full z-10 justify-end mt-10 pr-10'>
-                  {/* <Button className='w-36' label='Edit Profile' onClick={() => setbEditProfileDiagVisible(true)} /> */}
+                  {/* <Button className='w-36' label='Edit Flexfolio' onClick={() => setbEditProfileDiagVisible(true)} /> */}
               </div>)}
             </div>
           </div>
@@ -144,16 +207,28 @@ const profile = ({ params }: { params: { username: string } }) => {
             <p className='text-xl whitespace-pre-wrap max-w-96'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
         </div>
 
-        {(user && !profileUsername) && 
+        {(user && !profileUsername) ? 
         (<div className='flex w-full absolute top-full z-10 justify-end mt-10 pr-10'>
             <Button className='w-36' label='Edit Profile' onClick={() => setbEditProfileDiagVisible(true)} />
-        </div>)}
+        </div>)
+        : (
+        bIsLoggedin && (
+          <div className='flex w-full absolute top-full z-10 justify-end mt-10 pr-10'>
+            <Button className='w-36'
+            label={bHasFollowed ? 'Unfollow' : 'Follow'}
+            outlined={bHasFollowed} onClick={() => handleFollow()} />
+          </div>)
+        )}
       </div>
       <div style={{ marginTop: `${marginTop}px` }}>
         <div className='flex justify-between w-full'>
           <Button className={`w-full ${selectedButton === 'Posts' ? 'border-0 !border-b-2 border-orange1' : ''}`} 
           label="Posts" text
-          onClick={() => setSelectedButton('Posts')} />
+          onClick={() => setSelectedButton('Posts')}
+          // pt={{
+          //   root: {className: "!border-0"},
+          // }} 
+          />
           <Button className={`w-full ${selectedButton === 'Replies' ? 'border-0 !border-b-2 border-orange1' : ''}`}
           label="Replies" text
           onClick={() => setSelectedButton('Replies')} />
@@ -162,8 +237,28 @@ const profile = ({ params }: { params: { username: string } }) => {
       </div>
 
       {/* <div className="bg-slate-500 h-96 w-10"></div> */}
-      {dummyPost.map((post, index) => <PostBox key={index} {...post} />)}
+      {/* {dummyPost.map((post, index) => <PostBox key={index} {...post} />)} */}
 
+      {(posts && posts.length > 0) ?
+        (selectedButton === 'Posts' ?
+          (<div className='flex items-center justify-center w-full'>
+            <div className='flex flex-col w-[60%] items-center justify-center [&>*]:mt-2'>
+              {posts.map((post: any, index: any) => <PostBox key={index} {...post} currentUserName={user?.username} />)}
+            </div>
+          </div>)
+        :
+          selectedButton === 'Replies' ?
+            (<div className='flex items-center justify-center w-full'>
+              <div className='flex flex-col w-[60%] items-center justify-center [&>*]:mt-2'>
+                {comments.map((comment: any, index: any) => <PostBox key={index} {...comment}
+                currentUserName={user?.username} bVisitParentPost={true} />)}
+              </div>
+            </div>)
+        : null
+      )
+      :
+        (<p className='text-xl my-4'>No posts yet ._.</p>)
+      }
       
     </div>
      
