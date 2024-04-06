@@ -5,8 +5,6 @@ import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
 import { Role } from "@prisma/client";
-import { TsRestRequestHandler } from "@ts-rest/express";
-import { AppRoute, AppRouter } from "@ts-rest/core";
 
 /* App-level middleware */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {

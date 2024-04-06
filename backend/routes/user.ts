@@ -322,9 +322,17 @@ const userRouter = s.router(apiContract.user, {
             }
 
             // handle changes to userConfig
-            const files = req.files as ProfileUploadFiles;
-            const avatarFile = files.avatar[0];
-            const bannerFile = files.banner[0];
+            let avatarFile: Express.Multer.File | undefined;
+            let bannerFile: Express.Multer.File | undefined;
+            if (req.files) {
+                const files = req.files as ProfileUploadFiles;
+                if (files.avatar) {
+                    avatarFile = files.avatar[0];
+                }
+                if (files.banner) {
+                    bannerFile = files.banner[0];
+                }
+            }
             if (displayName || bio || deleteAvatar || deleteBanner || avatarFile || bannerFile) {
                 let newImageUrl: string | undefined;
                 let newBannerUrl: string | undefined;
@@ -351,7 +359,7 @@ const userRouter = s.router(apiContract.user, {
                         }
                         // Upload media
                         const res2 = await compressAndUploadMedia({
-                            maxPixelSize: 300,
+                            maxPixelSize: 550,
                             container: "avatar",
                             file: avatarFile,
                             type: "image",
@@ -401,6 +409,23 @@ const userRouter = s.router(apiContract.user, {
 
             // handle changes to userCryptoInfo
             if (cryptoBookmarks || cryptoHoldings) {
+                // check uniqueness of crypto in bookmarks and holdings
+                if (cryptoBookmarks && cryptoBookmarks.length !== cryptoBookmarks.filter((v, i) => cryptoBookmarks.indexOf(v) === i).length) {
+                    return {
+                        status: 400,
+                        body: { error: "All cryptoBookmarks must be unique" },
+                    };
+                }
+                if (cryptoHoldings) {
+                    const cryptolist = cryptoHoldings.map((v) => v.cryptoId);
+                    if (cryptolist.length !== cryptolist.filter((v, i) => cryptolist.indexOf(v) === i).length) {
+                        return {
+                            status: 400,
+                            body: { error: "All cryptoId must be unique in cryptoHoldings" },
+                        };
+                    }
+                }
+
                 changeObject.userCryptoInfo = {
                     cryptoBookmarks: cryptoBookmarks,
                     cryptoHoldings: cryptoHoldings,

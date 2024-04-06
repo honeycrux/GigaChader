@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { userRoleSchema, userSessionSchema } from "#/shared/models/user";
+import { userRoleSchema, userSessionSchema } from "../models/user";
 
 const c = initContract();
 

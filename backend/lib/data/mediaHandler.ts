@@ -19,9 +19,9 @@ export const storage: Record<ExistingContainerName, (blobName: string) => string
 
 /* The url is returned as some access path of the server. Below are helper functions to attach or remove this added structure. */
 
-const storagePathToUrl = (name: string) => `/images/${name}`;
+const storagePathToUrl = (name: string) => `/image/${name}`;
 
-const urlToStoragePath = (url: string) => url.replace(/^\/images\//, "");
+const urlToStoragePath = (url: string) => url.replace(/^\/image\//, "");
 
 interface CompressUploadProps {
     container: ExistingContainerName;
@@ -38,10 +38,9 @@ export async function compressAndUploadMedia(input: CompressUploadProps) {
     if (input.type === "image") {
         // resizing and compression
         const sharpInstance = sharp(input.file.buffer);
-        filebuf = await sharpInstance
-            .resize({ width: input.maxPixelSize, height: input.maxPixelSize, fit: "contain", withoutEnlargement: true })
-            .jpeg({ mozjpeg: true })
-            .toBuffer();
+        filebuf = await sharpInstance.jpeg({ mozjpeg: true }).toBuffer();
+        // compression disabled
+        // .resize({ width: input.maxPixelSize, height: input.maxPixelSize, fit: "contain", withoutEnlargement: true })
         ext = "jpeg";
     } else {
         // video: no action for now
@@ -63,6 +62,7 @@ interface DownloadProps {
 // Download media using url
 export async function downloadMedia(input: DownloadProps) {
     const blobName = urlToStoragePath(input.url);
+    console.log(blobName);
     return await downloadBlob(blobName);
 }
 

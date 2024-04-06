@@ -27,8 +27,8 @@ export const profileUploadMiddleware = profileUploadMulter.fields([
     { name: "banner", maxCount: 1 },
 ]);
 export type ProfileUploadFiles = {
-    avatar: Express.Multer.File[];
-    banner: Express.Multer.File[];
+    avatar?: Express.Multer.File[];
+    banner?: Express.Multer.File[];
 };
 
 /* Route-level middlewares for media upload */
@@ -50,8 +50,33 @@ const mediaUploadMulter = multer({
 
 export const mediaUploadMiddleware = mediaUploadMulter.fields([{ name: "media", maxCount: 10 }]);
 export type MediaUploadFiles = {
-    media: Express.Multer.File[];
+    media?: Express.Multer.File[];
 };
+
+/* Route-level middlewares for test upload */
+
+const testUploadMulter = multer({
+    storage: storage,
+    limits: {
+        fileSize: tobyte(64),
+    },
+    fileFilter: (req, file, callback) => {
+        const mimetype = file.mimetype.split("/");
+        if (mimetype[0] === "image" || mimetype[0] === "video") {
+            callback(null, true);
+        } else {
+            callback(new multer.MulterError("LIMIT_UNEXPECTED_FILE"));
+        }
+    },
+});
+
+export const testUploadMiddleware = testUploadMulter.fields([{ name: "media", maxCount: 10 }]);
+export type TestUploadFiles = {
+    media?: Express.Multer.File[];
+};
+
+// export const testUploadMiddleware = testUploadMulter.array("media", 10);
+// export type TestUploadFiles = Express.Multer.File[];
 
 /* App-level error-handling middleware */
 

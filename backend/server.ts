@@ -21,7 +21,11 @@ const app = express();
 
 app.use(express.json());
 
-app.use(csrfProtection, createLog, uploadErrorHandler);
+if (process.env.NODE_ENV !== "development") {
+    app.use(csrfProtection);
+}
+
+app.use(createLog, uploadErrorHandler);
 
 createExpressEndpoints(apiContract, apiRouter, app, {
     globalMiddleware: [],
