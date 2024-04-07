@@ -211,7 +211,8 @@ const userRouter = s.router(apiContract.user, {
     },
 
     getPosts: {
-        handler: async ({ query: { username, from, limit }, res }) => {
+        middleware: [validateUser],
+        handler: async ({ query: { username, from, limit, filter }, res }) => {
             const userdata = await prismaClient.user.findUnique({
                 select: {
                     id: true,
@@ -238,6 +239,12 @@ const userRouter = s.router(apiContract.user, {
                 },
                 where: {
                     authorId: userdata.id,
+                    OR:
+                        filter === "post"
+                            ? [{ parentPostId: { isSet: false } }, { parentPostId: null }]
+                            : filter === "reply"
+                            ? [{ parentPostId: { not: null } }]
+                            : undefined,
                 },
             });
             if (!data) {

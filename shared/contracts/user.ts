@@ -2,7 +2,6 @@ import { initContract } from "@ts-rest/core";
 import { personalUserInfoSchema, simpleUserInfoSchema, userConfigProps, userProfileSchema } from "../models/user";
 import { postInfoSchema } from "../models/post";
 import { z } from "zod";
-import { availableParallelism } from "os";
 
 const c = initContract();
 export const userContract = c.router({
@@ -73,6 +72,7 @@ export const userContract = c.router({
             username: z.string(),
             from: z.optional(z.string()),
             limit: z.optional(z.coerce.number().int().min(1)),
+            filter: z.optional(z.union([z.literal("post"), z.literal("reply")])),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
@@ -109,8 +109,8 @@ export const userContract = c.router({
 
     userConfig: {
         method: "POST",
-        path: "/api/user/configure",
-        contentType: 'multipart/form-data',
+        path: "/api/user/config",
+        contentType: "multipart/form-data",
         body: userConfigProps,
         responses: {
             200: userProfileSchema.nullable(),

@@ -1,7 +1,7 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
-import { protectRoute } from "@/middlewares/auth";
+import { protectRoute, validateUser } from "@/middlewares/auth";
 import { MediaUploadFiles, mediaUploadMiddleware } from "@/middlewares/mediaUpload";
 import { compressAndUploadMedia } from "@/lib/data/mediaHandler";
 import { postInfoFindManyOrdered, postInfoFindOne } from "@/lib/objects/post";
@@ -11,6 +11,7 @@ const s = initServer();
 
 const postRouter = s.router(apiContract.post, {
     getPost: {
+        middleware: [validateUser],
         handler: async ({ params: { postId }, res }) => {
             const postinfo = await postInfoFindOne({ postId, requesterId: res.locals.user?.id });
             return {
@@ -66,6 +67,7 @@ const postRouter = s.router(apiContract.post, {
     },
 
     getComments: {
+        middleware: [validateUser],
         handler: async ({ query: { postId, from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
@@ -97,6 +99,7 @@ const postRouter = s.router(apiContract.post, {
     },
 
     getReposts: {
+        middleware: [validateUser],
         handler: async ({ query: { postId, from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
@@ -128,6 +131,7 @@ const postRouter = s.router(apiContract.post, {
     },
 
     getGlobalFeeds: {
+        middleware: [validateUser],
         handler: async ({ query: { from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
