@@ -39,7 +39,7 @@ const userRouter = s.router(apiContract.user, {
                 select: {
                     followedUsers: {
                         select: {
-                            id: true,
+                            targetId: true,
                         },
                     },
                 },
@@ -55,7 +55,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const listOfFollowedUserIds = userdata.followedUsers.map((d) => {
-                return d.id;
+                return d.targetId;
             });
 
             listOfFollowedUserIds.push(res.locals.user!.id);
@@ -480,6 +480,7 @@ const userRouter = s.router(apiContract.user, {
     userFollow: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { username, set } }) => {
+            console.log(username, set);
             const userdata = await prismaClient.user.findUnique({
                 select: {
                     id: true,
@@ -523,7 +524,7 @@ const userRouter = s.router(apiContract.user, {
                               },
                           }
                         : {
-                              disconnect: {
+                              delete: {
                                   initiatorId_targetId: {
                                       initiatorId: res.locals.user!.id,
                                       targetId: userdata.id,

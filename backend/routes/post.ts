@@ -311,7 +311,7 @@ const postRouter = s.router(apiContract.post, {
                               },
                           }
                         : {
-                              disconnect: {
+                              delete: {
                                   postId_userId: {
                                       postId: postId,
                                       userId: res.locals.user!.id,
@@ -364,7 +364,7 @@ const postRouter = s.router(apiContract.post, {
                               },
                           }
                         : {
-                              disconnect: {
+                              delete: {
                                   postId_userId: {
                                       postId: postId,
                                       userId: res.locals.user!.id,
