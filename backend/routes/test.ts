@@ -11,15 +11,15 @@ const testRouter = s.router(apiContract.test, {
         handler: async ({ req }) => {
             console.log("Upload Handler");
             const urls = [];
-            if (req.files) {
-                const files = req.files as TestUploadFiles;
+            const files = req.files as TestUploadFiles;
+            if (files) {
                 if (files.media) {
                     console.log(`[test/upload] received ${files.media.length} files.`);
                     for (const file of files.media) {
                         console.log(`Uploading file originally named ${file.originalname}`);
                         const response = await compressAndUploadMedia({
                             maxPixelSize: 1920,
-                            container: "avatar",
+                            container: "test",
                             file: file,
                             type: "image",
                         });

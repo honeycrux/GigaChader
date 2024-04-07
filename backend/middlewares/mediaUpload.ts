@@ -26,10 +26,12 @@ export const profileUploadMiddleware = profileUploadMulter.fields([
     { name: "avatar", maxCount: 1 },
     { name: "banner", maxCount: 1 },
 ]);
-export type ProfileUploadFiles = {
-    avatar?: Express.Multer.File[];
-    banner?: Express.Multer.File[];
-};
+export type ProfileUploadFiles =
+    | {
+          avatar?: Express.Multer.File[];
+          banner?: Express.Multer.File[];
+      }
+    | undefined;
 
 /* Route-level middlewares for media upload */
 
@@ -49,9 +51,11 @@ const mediaUploadMulter = multer({
 });
 
 export const mediaUploadMiddleware = mediaUploadMulter.fields([{ name: "media", maxCount: 10 }]);
-export type MediaUploadFiles = {
-    media?: Express.Multer.File[];
-};
+export type MediaUploadFiles =
+    | {
+          media?: Express.Multer.File[];
+      }
+    | undefined;
 
 /* Route-level middlewares for test upload */
 
@@ -71,9 +75,11 @@ const testUploadMulter = multer({
 });
 
 export const testUploadMiddleware = testUploadMulter.fields([{ name: "media", maxCount: 10 }]);
-export type TestUploadFiles = {
-    media?: Express.Multer.File[];
-};
+export type TestUploadFiles =
+    | {
+          media?: Express.Multer.File[];
+      }
+    | undefined;
 
 // export const testUploadMiddleware = testUploadMulter.array("media", 10);
 // export type TestUploadFiles = Express.Multer.File[];

@@ -1,8 +1,8 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
-import { stdCryptoInfo } from "@/lib/objects/crypto";
 import { checkExchange, fetchCrypto } from "@/lib/helpers/crypto";
+import { cryptoInfoFindMany } from "@/lib/objects/crypto";
 
 const s = initServer();
 
@@ -39,7 +39,9 @@ const cryptoRouter = s.router(apiContract.crypto, {
                 take: limit,
                 cursor: from ? { cryptoId: from } : undefined,
                 skip: from ? 1 : undefined,
-                select: stdCryptoInfo.select,
+                select: {
+                    cryptoId: true,
+                },
                 where: {
                     OR: [{ symbol: { contains: query } }, { name: { contains: query } }, { cryptoId: { contains: query } }],
                 },
@@ -50,9 +52,11 @@ const cryptoRouter = s.router(apiContract.crypto, {
                     body: null,
                 };
             }
+            const cryptolist = data.map((crypto) => crypto.cryptoId);
+            const result = await cryptoInfoFindMany({ cryptoId: cryptolist });
             return {
                 status: 200,
-                body: data,
+                body: result,
             };
         },
     },

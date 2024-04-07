@@ -39,10 +39,10 @@ export const userProfileSchema = z.object({
         bannerUrl: z.nullable(z.string()),
     }),
     userCryptoInfo: z.object({
-        cryptoBookmarks: z.array(cryptoInfoSchema),
+        cryptoBookmarks: z.array(cryptoInfoSchema.nullable()),
         cryptoHoldings: z.array(
             z.object({
-                crypto: cryptoInfoSchema,
+                crypto: cryptoInfoSchema.nullable(),
                 amount: z.number(),
             })
         ),

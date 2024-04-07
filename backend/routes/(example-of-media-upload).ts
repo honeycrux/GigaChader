@@ -5,8 +5,8 @@
 //     someField: {
 //         middleware: [profileUploadMiddleware],
 //         handler: async ({ req, res }) => {
-//             if (req.files) {
-//                 const files = req.files as ProfileUploadFiles;
+//             const files = req.files as ProfileUploadFiles;
+//             if (files) {
 //                 if ("avatar" in req.files) {
 //                     const avatarFile = files.avatar[0];
 //                     if (avatarFile) {

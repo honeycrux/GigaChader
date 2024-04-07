@@ -1,18 +1,18 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
-import { stdPostInfo } from "@/lib/objects/post";
-import { stdSimpleUserInfo } from "@/lib/objects/user";
 import { protectRoute } from "@/middlewares/auth";
 import { MediaUploadFiles, mediaUploadMiddleware } from "@/middlewares/mediaUpload";
 import { compressAndUploadMedia } from "@/lib/data/mediaHandler";
+import { postInfoFindMany, postInfoFindOne } from "@/lib/objects/post";
+import { simpleUserInfoFindMany } from "@/lib/objects/user";
 
 const s = initServer();
 
 const postRouter = s.router(apiContract.post, {
     getPost: {
         handler: async ({ params: { postId } }) => {
-            const postinfo = await stdPostInfo.sample({ postId });
+            const postinfo = await postInfoFindOne({ postId });
             return {
                 status: 200,
                 body: postinfo,
@@ -26,7 +26,9 @@ const postRouter = s.router(apiContract.post, {
                 take: limit,
                 cursor: from ? { username: from } : undefined,
                 skip: from ? 1 : undefined,
-                select: stdSimpleUserInfo.select,
+                select: {
+                    username: true,
+                },
                 orderBy: {
                     username: "asc",
                 },
@@ -42,14 +44,11 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const userlist = await Promise.all(
-                data.map((d) => {
-                    return stdSimpleUserInfo.filter(d);
-                })
-            );
+            const userlist = data.map((user) => user.username);
+            const userInfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
-                body: userlist,
+                body: userInfo,
             };
         },
     },
@@ -63,7 +62,9 @@ const postRouter = s.router(apiContract.post, {
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     parentPostId: postId,
                 },
@@ -74,14 +75,11 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postlist = await Promise.all(
-                data.map((d) => {
-                    return stdPostInfo.filter(d);
-                })
-            );
+            const postlist = data.map((post) => post.id);
+            const postinfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
-                body: postlist,
+                body: postinfo,
             };
         },
     },
@@ -95,7 +93,9 @@ const postRouter = s.router(apiContract.post, {
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     repostingPostId: postId,
                 },
@@ -106,14 +106,11 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postlist = await Promise.all(
-                data.map((d) => {
-                    return stdPostInfo.filter(d);
-                })
-            );
+            const postlist = data.map((post) => post.id);
+            const postinfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
-                body: postlist,
+                body: postinfo,
             };
         },
     },
@@ -127,7 +124,9 @@ const postRouter = s.router(apiContract.post, {
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
             });
             if (!data) {
                 return {
@@ -135,14 +134,11 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postlist = await Promise.all(
-                data.map((d) => {
-                    return stdPostInfo.filter(d);
-                })
-            );
+            const postlist = data.map((post) => post.id);
+            const postinfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
-                body: postlist,
+                body: postinfo,
             };
         },
     },
@@ -189,8 +185,8 @@ const postRouter = s.router(apiContract.post, {
                 altText: string | undefined;
                 type: "IMAGE" | "VIDEO";
             }[] = [];
-            if (req.files) {
-                const files = req.files as MediaUploadFiles;
+            const files = req.files as MediaUploadFiles;
+            if (files) {
                 if (files.media) {
                     for (const i in files.media) {
                         const file = files.media[i];
@@ -261,7 +257,9 @@ const postRouter = s.router(apiContract.post, {
                               }
                             : undefined,
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
             });
             if (!data) {
                 return {
@@ -269,7 +267,7 @@ const postRouter = s.router(apiContract.post, {
                     body: { error: "Failed to create user" },
                 };
             }
-            const postinfo = await stdPostInfo.filter(data);
+            const postinfo = await postInfoFindOne({ postId: data.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -284,7 +282,9 @@ const postRouter = s.router(apiContract.post, {
                 data: {
                     likedByUsers: set ? { connect: { id: res.locals.user!.id } } : { disconnect: { id: res.locals.user!.id } },
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     id: postId,
                 },
@@ -295,7 +295,7 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postinfo = await stdPostInfo.filter(data);
+            const postinfo = await postInfoFindOne({ postId: data.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -310,7 +310,9 @@ const postRouter = s.router(apiContract.post, {
                 data: {
                     savedByUsers: set ? { connect: { id: res.locals.user!.id } } : { disconnect: { id: res.locals.user!.id } },
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     id: postId,
                 },
@@ -321,7 +323,7 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postinfo = await stdPostInfo.filter(data);
+            const postinfo = await postInfoFindOne({ postId: data.id });
             return {
                 status: 200,
                 body: postinfo,

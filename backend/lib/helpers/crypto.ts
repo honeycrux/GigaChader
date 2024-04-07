@@ -1,8 +1,8 @@
 import { CryptoInfo } from "#/shared/models/crypto";
 import { Prisma } from "@prisma/client";
 import { prismaClient } from "../data/db";
-import { stdCryptoInfo } from "../objects/crypto";
 import axios from "axios";
+import { cryptoInfoFindOne } from "../objects/crypto";
 
 type CoincapAsset = {
     id: string;
@@ -100,7 +100,7 @@ export async function checkExchange(): Promise<boolean> {
 
 export async function fetchCrypto(cryptoId: string): Promise<CryptoInfo | null> {
     const currentTime = new Date();
-    const data = await stdCryptoInfo.sample({ cryptoId });
+    const data = await cryptoInfoFindOne({ cryptoId });
     if (!data) {
         return null;
     }
@@ -112,13 +112,17 @@ export async function fetchCrypto(cryptoId: string): Promise<CryptoInfo | null> 
     if (!freshdata) {
         return null;
     }
-    const result = await prismaClient.crypto.upsert({
-        select: stdCryptoInfo.select,
+    const crypto = await prismaClient.crypto.upsert({
+        select: {
+            cryptoId: true,
+        },
         where: {
             cryptoId: freshdata.cryptoId,
         },
         update: freshdata,
         create: freshdata,
     });
+    const result = await cryptoInfoFindOne({ cryptoId });
+
     return result;
 }

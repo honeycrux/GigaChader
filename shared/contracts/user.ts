@@ -111,7 +111,7 @@ export const userContract = c.router({
         path: "/api/user/configure",
         body: userConfigProps,
         responses: {
-            200: userProfileSchema,
+            200: userProfileSchema.nullable(),
             400: z.object({
                 error: z.string(),
             }),

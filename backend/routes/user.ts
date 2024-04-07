@@ -1,12 +1,12 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { protectRoute } from "@/middlewares/auth";
-import { stdPersonalUserInfo, stdSimpleUserInfo, stdUserProfile } from "@/lib/objects/user";
 import { prismaClient } from "@/lib/data/db";
-import { stdPostInfo } from "@/lib/objects/post";
 import { ProfileUploadFiles, profileUploadMiddleware } from "@/middlewares/mediaUpload";
 import { Prisma } from "@prisma/client";
 import { compressAndUploadMedia, deleteMedia } from "@/lib/data/mediaHandler";
+import { personalUserInfoFindOne, simpleUserInfoFindMany, userProfileFindOne } from "@/lib/objects/user";
+import { postInfoFindMany } from "@/lib/objects/post";
 
 const s = initServer();
 
@@ -14,7 +14,7 @@ const userRouter = s.router(apiContract.user, {
     getInfo: {
         middleware: [protectRoute.user],
         handler: async ({ res }) => {
-            const userinfo = await stdPersonalUserInfo.sample({ username: res.locals.user!.username });
+            const userinfo = await personalUserInfoFindOne({ username: res.locals.user!.username });
             return {
                 status: 200,
                 body: userinfo,
@@ -24,7 +24,7 @@ const userRouter = s.router(apiContract.user, {
 
     getProfile: {
         handler: async ({ params: { username } }) => {
-            const userinfo = await stdUserProfile.sample({ username });
+            const userinfo = await userProfileFindOne({ username });
             return {
                 status: 200,
                 body: userinfo,
@@ -67,7 +67,9 @@ const userRouter = s.router(apiContract.user, {
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     authorId: {
                         in: listOfFollowedUserIds,
@@ -80,14 +82,11 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const postlist = await Promise.all(
-                data.map((d) => {
-                    return stdPostInfo.filter(d);
-                })
-            );
+            const postlist = data.map((post) => post.id);
+            const postInfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
-                body: postlist,
+                body: postInfo,
             };
         },
     },
@@ -115,7 +114,9 @@ const userRouter = s.router(apiContract.user, {
                 orderBy: {
                     username: "asc",
                 },
-                select: stdSimpleUserInfo.select,
+                select: {
+                    username: true,
+                },
                 where: {
                     followers: {
                         some: {
@@ -130,14 +131,11 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const userlist = await Promise.all(
-                data.map((d) => {
-                    return stdSimpleUserInfo.filter(d);
-                })
-            );
+            const userlist = data.map((user) => user.username);
+            const userinfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
-                body: userlist,
+                body: userinfo,
             };
         },
     },
@@ -165,7 +163,9 @@ const userRouter = s.router(apiContract.user, {
                 orderBy: {
                     username: "asc",
                 },
-                select: stdSimpleUserInfo.select,
+                select: {
+                    username: true,
+                },
                 where: {
                     followedUsers: {
                         some: {
@@ -180,14 +180,11 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const userlist = await Promise.all(
-                data.map((d) => {
-                    return stdSimpleUserInfo.filter(d);
-                })
-            );
+            const userlist = data.map((user) => user.username);
+            const userinfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
-                body: userlist,
+                body: userinfo,
             };
         },
     },
@@ -215,7 +212,9 @@ const userRouter = s.router(apiContract.user, {
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     authorId: userdata.id,
                 },
@@ -226,14 +225,11 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const postlist = await Promise.all(
-                data.map((d) => {
-                    return stdPostInfo.filter(d);
-                })
-            );
+            const postlist = data.map((post) => post.id);
+            const postinfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
-                body: postlist,
+                body: postinfo,
             };
         },
     },
@@ -248,7 +244,9 @@ const userRouter = s.router(apiContract.user, {
                 orderBy: {
                     createdAt: "desc",
                 },
-                select: stdPostInfo.select,
+                select: {
+                    id: true,
+                },
                 where: {
                     savedByUserIds: {
                         has: res.locals.user!.id,
@@ -261,14 +259,11 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const postlist = await Promise.all(
-                data.map((d) => {
-                    return stdPostInfo.filter(d);
-                })
-            );
+            const postlist = data.map((post) => post.id);
+            const postinfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
-                body: postlist,
+                body: postinfo,
             };
         },
     },
@@ -279,7 +274,9 @@ const userRouter = s.router(apiContract.user, {
                 take: limit,
                 cursor: from ? { id: from } : undefined,
                 skip: from ? 1 : undefined,
-                select: stdSimpleUserInfo.select,
+                select: {
+                    username: true,
+                },
                 where: {
                     OR: [{ username: { contains: query } }],
                 },
@@ -290,14 +287,11 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const userlist = await Promise.all(
-                data.map((d) => {
-                    return stdSimpleUserInfo.filter(d);
-                })
-            );
+            const userlist = data.map((user) => user.username);
+            const userinfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
-                body: userlist,
+                body: userinfo,
             };
         },
     },
@@ -328,8 +322,8 @@ const userRouter = s.router(apiContract.user, {
             // handle changes to userConfig
             let avatarFile: Express.Multer.File | undefined;
             let bannerFile: Express.Multer.File | undefined;
-            if (req.files) {
-                const files = req.files as ProfileUploadFiles;
+            const files = req.files as ProfileUploadFiles;
+            if (files) {
                 if (files.avatar) {
                     avatarFile = files.avatar[0];
                 }
@@ -440,7 +434,9 @@ const userRouter = s.router(apiContract.user, {
             // commit changes
             const data = await prismaClient.user.update({
                 data: changeObject,
-                select: stdUserProfile.select,
+                select: {
+                    username: true,
+                },
                 where: {
                     id: res.locals.user!.id,
                 },
@@ -451,7 +447,7 @@ const userRouter = s.router(apiContract.user, {
                     body: { error: "Failed to push changes to user config" },
                 };
             }
-            const userinfo = await stdUserProfile.filter(data);
+            const userinfo = await userProfileFindOne({ username: data.username });
             return {
                 status: 200,
                 body: userinfo,

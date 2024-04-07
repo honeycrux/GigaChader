@@ -9,12 +9,13 @@ const generateFileName = (bytes: number = 20) => crypto.randomBytes(bytes).toStr
 
 /* Define existing containers - these should be containers existing on the storage */
 
-export type ExistingContainerName = "avatar" | "media";
+export type ExistingContainerName = "avatar" | "media" | "test";
 
 // this should be used when constructing storage programmatically
 export const storage: Record<ExistingContainerName, (blobName: string) => string> = {
     avatar: (blobName: string) => `avatar/${blobName}`,
     media: (blobName: string) => `media/${blobName}`,
+    test: (blobName: string) => `test/${blobName}`,
 };
 
 /* The url is returned as some access path of the server. Below are helper functions to attach or remove this added structure. */
