@@ -3,7 +3,7 @@
 import LogoSideBar from '@/components/authentication/LogoSideBar'
 import SignupBox from '@/components/authentication/SignupBox'
 
-const signup = () => {    
+const signup = () => {
     return (
         <>
         <div className="flex">

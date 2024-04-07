@@ -76,7 +76,8 @@ const profile = ({ params }: { params: { username: string } }) => {
 
   const getFollowList = async () => {
     if (user) {
-      const res = await apiClient.user.getFollows({ query: { username: user.username }});
+      // const res = await apiClient.user.getFollows({ query: { username: user.username }});
+      const res = await apiClient.user.getFollowedUsers({ query: { username: user.username }});
       console.log(res.body);
       setFollowList(res.body);
       // @ts-ignore

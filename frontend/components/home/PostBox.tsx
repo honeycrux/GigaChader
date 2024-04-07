@@ -115,7 +115,8 @@ const PostBox = (
                             onClick={handleHeartClick}
                             className="cursor-pointer"
                     />)}
-                    <Link href={bVisitParentPost && parentPostId ? `/post/${parentPostId}` : `/post/${id}`}>
+                    {/* <Link href={bVisitParentPost && parentPostId ? `/post/${parentPostId}` : `/post/${id}`}> */}
+                    <Link href={`/post/${id}`}>
                     <Image src="/comment.svg"
                             width="24"
                             alt="comment"
@@ -129,6 +130,7 @@ const PostBox = (
             </div>
         </div>
         <p className="text-gray-600">{formatDate(createdAt)}</p>
+        { parentPostId && <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">Go to parent post</Link> }
         {
             bShowCommentBox &&
             <div className="flex flex-col w-full">
