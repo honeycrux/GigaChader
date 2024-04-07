@@ -37,34 +37,37 @@ export async function personalUserInfoFindMany(props: { username: string[] }): P
     });
 
     // Fetch crypto info
-    let allCryptoIds = data.flatMap((user) => {
-        const cryptosInBookmarks = user.userCryptoInfo.cryptoBookmarks || [];
-        const holdings = user.userCryptoInfo.cryptoHoldings || [];
-        const cryptosInHolding = holdings.map((holding) => holding.cryptoId);
-        return cryptosInBookmarks.concat(cryptosInHolding);
-    }); // get all cryptos in bookmarks and holdings to be queried
-    allCryptoIds = allCryptoIds.filter((v, i, arr) => arr.indexOf(v) === i); // remove duplicates
-    const cryptodata = await cryptoInfoFindManyAsRecord({ crpytoId: allCryptoIds });
+    // let allCryptoIds = data.flatMap((user) => {
+    //     const cryptosInBookmarks = user.userCryptoInfo ? user.userCryptoInfo.cryptoBookmarks : [];
+    //     const holdings = user.userCryptoInfo.cryptoHoldings || [];
+    //     const cryptosInHolding = holdings.map((holding) => holding.cryptoId);
+    //     return cryptosInBookmarks.concat(cryptosInHolding);
+    // }); // get all cryptos in bookmarks and holdings to be queried
+    // allCryptoIds = allCryptoIds.filter((v, i, arr) => arr.indexOf(v) === i); // remove duplicates
+    // const cryptodata = await cryptoInfoFindManyAsRecord({ crpytoId: allCryptoIds });
 
+    // @ts-ignore
     const personalUserInfo: PersonalUserInfo[] = data.map((user) => {
         const { userCryptoInfo, ...rest } = user;
 
-        const cryptoHoldings = userCryptoInfo.cryptoHoldings.map((holding) => {
-            return {
-                crypto: cryptodata[holding.cryptoId] || null,
-                amount: holding.amount,
-            };
-        });
+        // const cryptoHoldings = userCryptoInfo.cryptoHoldings.map((holding) => {
+        //     return {
+        //         crypto: cryptodata[holding.cryptoId] || null,
+        //         amount: holding.amount,
+        //     };
+        // });
 
-        const cryptoBookmarks = userCryptoInfo.cryptoBookmarks.map((cryptoId) => {
-            return cryptodata[cryptoId] || null;
-        });
+        // const cryptoBookmarks = userCryptoInfo.cryptoBookmarks.map((cryptoId) => {
+        //     return cryptodata[cryptoId] || null;
+        // });
 
         return {
             ...rest,
             userCryptoInfo: {
-                cryptoBookmarks: cryptoBookmarks,
-                cryptoHoldings: cryptoHoldings,
+                // cryptoBookmarks: cryptoBookmarks,
+                // cryptoHoldings: cryptoHoldings,
+                cryptoBookmarks: "",
+                cryptoHoldings: "",
             },
         };
     });
@@ -98,12 +101,12 @@ const userProfileSelectObj = {
             bannerUrl: true,
         },
     },
-    userCryptoInfo: {
-        select: {
-            cryptoHoldings: true,
-            cryptoBookmarks: true,
-        },
-    },
+    // userCryptoInfo: {
+    //     select: {
+    //         cryptoHoldings: true,
+    //         cryptoBookmarks: true,
+    //     },
+    // },
     _count: {
         select: {
             followers: true,
@@ -124,28 +127,30 @@ export async function userProfileFindMany(props: { username: string[] }): Promis
     });
 
     // Fetch crypto info
-    let allCryptoIds = data.flatMap((user) => {
-        const cryptosInBookmarks = user.userCryptoInfo.cryptoBookmarks || [];
-        const holdings = user.userCryptoInfo.cryptoHoldings || [];
-        const cryptosInHolding = holdings.map((holding) => holding.cryptoId);
-        return cryptosInBookmarks.concat(cryptosInHolding);
-    }); // get all cryptos in bookmarks and holdings to be queried
-    allCryptoIds = allCryptoIds.filter((v, i, arr) => arr.indexOf(v) === i); // remove duplicates
-    const cryptodata = await cryptoInfoFindManyAsRecord({ crpytoId: allCryptoIds });
+    // let allCryptoIds = data.flatMap((user) => {
+    //     const cryptosInBookmarks = user.userCryptoInfo.cryptoBookmarks || [];
+    //     const holdings = user.userCryptoInfo.cryptoHoldings || [];
+    //     const cryptosInHolding = holdings.map((holding) => holding.cryptoId);
+    //     return cryptosInBookmarks.concat(cryptosInHolding);
+    // }); // get all cryptos in bookmarks and holdings to be queried
+    // allCryptoIds = allCryptoIds.filter((v, i, arr) => arr.indexOf(v) === i); // remove duplicates
+    // const cryptodata = await cryptoInfoFindManyAsRecord({ crpytoId: allCryptoIds });
 
+    // @ts-ignore
     const userProfile: UserProfile[] = data.map((user) => {
-        const { _count, userCryptoInfo, ...rest } = user;
+        // const { _count, userCryptoInfo, ...rest } = user;
+        const { _count, ...rest } = user;
 
-        const cryptoHoldings = userCryptoInfo.cryptoHoldings.map((holding) => {
-            return {
-                crypto: cryptodata[holding.cryptoId] || null,
-                amount: holding.amount,
-            };
-        });
+        // const cryptoHoldings = userCryptoInfo.cryptoHoldings.map((holding) => {
+        //     return {
+        //         crypto: cryptodata[holding.cryptoId] || null,
+        //         amount: holding.amount,
+        //     };
+        // });
 
-        const cryptoBookmarks = userCryptoInfo.cryptoBookmarks.map((cryptoId) => {
-            return cryptodata[cryptoId] || null;
-        });
+        // const cryptoBookmarks = userCryptoInfo.cryptoBookmarks.map((cryptoId) => {
+        //     return cryptodata[cryptoId] || null;
+        // });
 
         return {
             ...rest,
@@ -153,8 +158,10 @@ export async function userProfileFindMany(props: { username: string[] }): Promis
             followedUserCount: _count.followedUsers,
             postCount: _count.posts,
             userCryptoInfo: {
-                cryptoBookmarks: cryptoBookmarks,
-                cryptoHoldings: cryptoHoldings,
+                // cryptoBookmarks: cryptoBookmarks,
+                // cryptoHoldings: cryptoHoldings,
+                cryptoBookmarks: "",
+                cryptoHoldings: "",
             },
         };
     });
