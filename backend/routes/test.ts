@@ -27,6 +27,8 @@ const testRouter = s.router(apiContract.test, {
                         urls.push(response.url);
                     }
                 }
+            } else {
+                console.error("No files received");
             }
             return {
                 status: 200,

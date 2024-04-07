@@ -92,4 +92,5 @@ export const userConfigProps = z.object({
             })
         )
     ),
+    avatar: z.optional(z.any()),
 });

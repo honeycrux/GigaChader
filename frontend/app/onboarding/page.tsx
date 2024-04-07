@@ -12,15 +12,7 @@ import { apiClient, axiosClient } from "@/lib/apiClient";
 function Onboarding() {
   const toast = useRef<Toast>(null);
 
-  // @ts-ignore
-  const handleProfilePicUpload = async ({files}) => {
-    if (toast.current) {
-      toast.current.show({ severity: "info", summary: "Success", detail: "Fake file upload" });
-    }
-    console.log(files);
-    // const res = await apiClient.user.simpleUpload({ body: { file: files[0] } });
-    // console.log(res);
-  };
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   const fakeContinue = () => {
     if (toast.current) {
@@ -32,6 +24,15 @@ function Onboarding() {
   const [userName, setUserName] = useState("@chadmaster");
   const [bio, setBio] = useState("All in or nothing.");
 
+  const handleUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("media", file);
+    // const res = await axiosClient.post("/api/test/upload", formData);
+    const res = await apiClient.test.upload({body: {media: file}});
+    // const res = await apiClient.user.userConfig({body: {avatar: file}});
+    console.log(res);
+  };
+
   return (
     <>
       <div className="flex flex-col items-center justify-center my-10">
@@ -42,8 +43,16 @@ function Onboarding() {
           <div className="flex flex-col p-12 w-[35rem] h-auto custom-shadow-border rounded-[50px]">
             <div className="flex items-center">
               <Image className="mr-5" src={placeholder_profilePic} width={100} alt="placeholder profilePic" />
-              <FileUpload mode="basic" name="profilePic" accept="image/*" chooseLabel="Upload Profile Picture"
-              customUpload auto uploadHandler={handleProfilePicUpload} />
+              {/* <FileUpload mode="basic" name="profilePic" accept="image/*" chooseLabel="Upload Profile Picture"
+              customUpload auto uploadHandler={handleProfilePicUpload} /> */}
+              <input
+                multiple={false}
+                type="file"
+                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                className="w-fit"
+              />
+              <Button label="Upload"
+              onClick={() => {handleUpload(uploadFile as File);}} />
             </div>
             <div className="[&>*]:my-2">
               <p className="!mt-4 text-xl">Username: &nbsp;

@@ -26,8 +26,8 @@ const HeaderNavbar = () => {
           setDisplayName("guest");
         } else {
           setDisplayName(userinfo.userConfig.displayName);
-          // console.log("from HeaderNavbar");
-          // console.log(userinfo);
+          console.log("from HeaderNavbar");
+          console.log(userinfo);
         }
       }
     };

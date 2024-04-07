@@ -116,11 +116,11 @@ const home = () => {
                 </div>
 
                 {globalFeeds && (
-                    [...globalFeeds].reverse().map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                    globalFeeds.map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
                 )}
 
                 {(followedPosts && followedPosts.length > 0) && (
-                    [...followedPosts].reverse().map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                    followedPosts.map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
                 )}
 
                 {((!globalFeeds && !followedPosts) || ((globalFeeds?.length === 0 || followedPosts?.length === 0))) && (
