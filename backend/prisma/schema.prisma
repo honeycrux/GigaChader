@@ -41,23 +41,18 @@ model User {
   userConfig             UserConfig
   userCryptoInfo         UserCryptoInfo
 
-  followerIds     String[] @db.ObjectId
-  followedUserIds String[] @db.ObjectId
-  likedPostIds    String[] @db.ObjectId
-  savedPostIds    String[] @db.ObjectId
-
-  followers              User[]               @relation(name: "UserFollowers", fields: [followerIds], references: [id])
-  followedUsers          User[]               @relation(name: "UserFollowers", fields: [followedUserIds], references: [id])
+  followers              UserFollow[]         @relation(name: "UserFollowTarget")
+  followedUsers          UserFollow[]         @relation(name: "UserFollow")
   sessions               Session[]            @relation(name: "UserSession")
   posts                  Post[]               @relation(name: "UserPost")
-  likedPosts             Post[]               @relation(name: "PostLikes", fields: [likedPostIds], references: [id])
-  savedPosts             Post[]               @relation(name: "PostSaves", fields: [savedPostIds], references: [id])
   digitalTransactions    DigitalTransaction[] @relation(name: "UserDigitalTransaction")
   sentDirectMessages     DirectMessage[]      @relation(name: "DirectMessageSender")
   receivedDirectMessages DirectMessage[]      @relation(name: "DirectMessageReceiver")
   moderationRecords      ModerationRecord[]   @relation(name: "UserModerationRecord")
   moderationHits         ModerationRecord[]   @relation(name: "UserModerationHit")
   pollVotes              PollVote[]           @relation(name: "UserPollVote")
+  postLikes              PostLike[]           @relation(name: "UserPostLike")
+  postSaves              PostSave[]           @relation(name: "UserPostSave")
 }
 
 enum Role {
@@ -97,6 +92,19 @@ model Session {
   user User @relation(name: "UserSession", references: [id], fields: [userId], onDelete: Cascade)
 }
 
+model UserFollow {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+
+  initiatorId String @db.ObjectId
+  targetId    String @db.ObjectId
+
+  initiator User @relation("UserFollow", references: [id], fields: [initiatorId], onDelete: Cascade)
+  target    User @relation("UserFollowTarget", references: [id], fields: [targetId], onDelete: Cascade)
+
+  @@unique([initiatorId, targetId])
+}
+
 model DigitalTransaction {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   item      String
@@ -131,12 +139,10 @@ model Post {
   pollOptions PollOption[]
   userMedia   UserMedia[]
 
-  authorId          String   @db.ObjectId
-  repostingPostId   String?  @db.ObjectId
-  parentPostId      String?  @db.ObjectId
-  parentCommunityId String?  @db.ObjectId
-  likedByUserIds    String[] @db.ObjectId
-  savedByUserIds    String[] @db.ObjectId
+  authorId          String  @db.ObjectId
+  repostingPostId   String? @db.ObjectId
+  parentPostId      String? @db.ObjectId
+  parentCommunityId String? @db.ObjectId
 
   postHashtags    PostHashtag[]      @relation(name: "PostHashtag")
   author          User               @relation(name: "UserPost", fields: [authorId], references: [id], onDelete: NoAction)
@@ -144,11 +150,11 @@ model Post {
   repostedOnPosts Post[]             @relation(name: "Repost")
   parentPost      Post?              @relation(name: "PostTree", references: [id], fields: [parentPostId], onDelete: NoAction, onUpdate: NoAction)
   childPosts      Post[]             @relation(name: "PostTree")
-  likedByUsers    User[]             @relation(name: "PostLikes", fields: [likedByUserIds], references: [id])
-  savedByUsers    User[]             @relation(name: "PostSaves", fields: [savedByUserIds], references: [id])
   parentCommunity Community?         @relation(name: "CommunityPost", references: [id], fields: [parentCommunityId], onDelete: NoAction)
   moderationHits  ModerationRecord[] @relation(name: "PostModerationHit")
   pollVotes       PollVote[]         @relation(name: "PostPollVote")
+  postLikes       PostLike[]         @relation(name: "PostPostLike")
+  postSaves       PostSave[]         @relation(name: "PostPostSave")
 }
 
 type PollOption {
@@ -166,6 +172,32 @@ enum UserMediaType {
   VIDEO
 }
 
+model PostLike {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+
+  postId String @db.ObjectId
+  userId String @db.ObjectId
+
+  post Post @relation(name: "PostPostLike", references: [id], fields: [postId], onDelete: Cascade)
+  user User @relation(name: "UserPostLike", references: [id], fields: [userId], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model PostSave {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+
+  postId String @db.ObjectId
+  userId String @db.ObjectId
+
+  post Post @relation(name: "PostPostSave", references: [id], fields: [postId], onDelete: Cascade)
+  user User @relation(name: "UserPostSave", references: [id], fields: [userId], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
 model PollVote {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
   optionNumber Int
@@ -174,7 +206,7 @@ model PollVote {
   voterId      String @db.ObjectId
 
   parentPost Post @relation(name: "PostPollVote", references: [id], fields: [parentPostId], onDelete: Cascade)
-  voter      User @relation(name: "UserPollVote", references: [id], fields: [voterId], onDelete: NoAction)
+  voter      User @relation(name: "UserPollVote", references: [id], fields: [voterId], onDelete: Cascade)
 
   @@unique([parentPostId, voterId])
 }

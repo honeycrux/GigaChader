@@ -20,10 +20,10 @@ const postInfoSelectObj = {
     parentPostId: true,
     _count: {
         select: {
-            likedByUsers: true,
+            postLikes: true,
+            postSaves: true,
             repostedOnPosts: true,
             childPosts: true,
-            savedByUsers: true,
         },
     },
 } satisfies Prisma.PostSelect;
@@ -46,10 +46,10 @@ export async function postInfoFindMany(props: { postId: string[] }): Promise<Pos
         return {
             ...rest,
             author: authordata[author.username],
-            likeCount: _count.likedByUsers,
+            likeCount: _count.postLikes,
+            saveCount: _count.postSaves,
             repostCount: _count.repostedOnPosts,
             commentCount: _count.childPosts,
-            saveCount: _count.savedByUsers,
         };
     });
 

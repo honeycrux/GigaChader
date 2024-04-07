@@ -47,7 +47,7 @@ const userRouter = s.router(apiContract.user, {
                     username: res.locals.user!.username,
                 },
             });
-            
+
             if (!userdata) {
                 return {
                     status: 200,
@@ -59,7 +59,7 @@ const userRouter = s.router(apiContract.user, {
             });
 
             listOfFollowedUserIds.push(res.locals.user!.id);
-            
+
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,
@@ -101,28 +101,38 @@ const userRouter = s.router(apiContract.user, {
                     username: username,
                 },
             });
+            const fromUser = from
+                ? await prismaClient.user.findUnique({
+                      select: {
+                          id: true,
+                      },
+                      where: {
+                          username: from,
+                      },
+                  })
+                : null;
             if (!userdata) {
                 return {
                     status: 200,
                     body: null,
                 };
             }
-            const data = await prismaClient.user.findMany({
+            const data = await prismaClient.userFollow.findMany({
                 take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
+                cursor: fromUser ? { initiatorId_targetId: { initiatorId: fromUser.id, targetId: userdata.id } } : undefined,
+                skip: fromUser ? 1 : undefined,
                 orderBy: {
-                    username: "asc",
+                    createdAt: "desc",
                 },
                 select: {
-                    username: true,
-                },
-                where: {
-                    followers: {
-                        some: {
-                            id: userdata.id,
+                    initiator: {
+                        select: {
+                            username: true,
                         },
                     },
+                },
+                where: {
+                    targetId: userdata.id,
                 },
             });
             if (!data) {
@@ -131,7 +141,7 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const userlist = data.map((user) => user.username);
+            const userlist = data.map((userFollow) => userFollow.initiator.username);
             const userinfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
@@ -150,28 +160,38 @@ const userRouter = s.router(apiContract.user, {
                     username: username,
                 },
             });
+            const fromUser = from
+                ? await prismaClient.user.findUnique({
+                      select: {
+                          id: true,
+                      },
+                      where: {
+                          username: from,
+                      },
+                  })
+                : null;
             if (!userdata) {
                 return {
                     status: 200,
                     body: null,
                 };
             }
-            const data = await prismaClient.user.findMany({
+            const data = await prismaClient.userFollow.findMany({
                 take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
+                cursor: fromUser ? { initiatorId_targetId: { initiatorId: userdata.id, targetId: fromUser.id } } : undefined,
+                skip: fromUser ? 1 : undefined,
                 orderBy: {
-                    username: "asc",
+                    createdAt: "desc",
                 },
                 select: {
-                    username: true,
-                },
-                where: {
-                    followedUsers: {
-                        some: {
-                            id: userdata.id,
+                    target: {
+                        select: {
+                            username: true,
                         },
                     },
+                },
+                where: {
+                    initiatorId: userdata.id,
                 },
             });
             if (!data) {
@@ -180,7 +200,7 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const userlist = data.map((user) => user.username);
+            const userlist = data.map((userFollow) => userFollow.target.username);
             const userinfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
@@ -237,20 +257,22 @@ const userRouter = s.router(apiContract.user, {
     getSavedPosts: {
         middleware: [protectRoute.user],
         handler: async ({ res, query: { from, limit } }) => {
-            const data = await prismaClient.post.findMany({
+            const data = await prismaClient.postSave.findMany({
                 take: limit,
-                cursor: from ? { id: from } : undefined,
+                cursor: from ? { postId_userId: { postId: from, userId: res.locals.user!.id } } : undefined,
                 skip: from ? 1 : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
                 select: {
-                    id: true,
+                    post: {
+                        select: {
+                            id: true,
+                        },
+                    },
                 },
                 where: {
-                    savedByUserIds: {
-                        has: res.locals.user!.id,
-                    },
+                    userId: res.locals.user!.id,
                 },
             });
             if (!data) {
@@ -259,7 +281,7 @@ const userRouter = s.router(apiContract.user, {
                     body: null,
                 };
             }
-            const postlist = data.map((post) => post.id);
+            const postlist = data.map((postSave) => postSave.post.id);
             const postinfo = await postInfoFindMany({ postId: postlist });
             return {
                 status: 200,
@@ -470,13 +492,44 @@ const userRouter = s.router(apiContract.user, {
                 return {
                     status: 400,
                     body: {
-                        error: `User ${username} not found.`,
+                        error: `User ${username} not found`,
+                    },
+                };
+            }
+            if (res.locals.user!.username === username) {
+                return {
+                    status: 400,
+                    body: {
+                        error: `User ${username} cannot follow themselves`,
                     },
                 };
             }
             const data = await prismaClient.user.update({
                 data: {
-                    followedUsers: set ? { connect: [{ username }] } : { disconnect: [{ username }] },
+                    followedUsers: set
+                        ? {
+                              connectOrCreate: {
+                                  where: {
+                                      initiatorId_targetId: {
+                                          initiatorId: res.locals.user!.id,
+                                          targetId: userdata.id,
+                                      },
+                                  },
+                                  create: {
+                                      target: {
+                                          connect: { username: username },
+                                      },
+                                  },
+                              },
+                          }
+                        : {
+                              disconnect: {
+                                  initiatorId_targetId: {
+                                      initiatorId: res.locals.user!.id,
+                                      targetId: userdata.id,
+                                  },
+                              },
+                          },
                 },
                 select: {
                     _count: {

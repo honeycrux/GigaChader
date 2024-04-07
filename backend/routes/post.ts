@@ -22,20 +22,32 @@ const postRouter = s.router(apiContract.post, {
 
     getLikes: {
         handler: async ({ query: { postId, from, limit } }) => {
-            const data = await prismaClient.user.findMany({
+            const fromUser = from
+                ? await prismaClient.user.findUnique({
+                      select: {
+                          id: true,
+                      },
+                      where: {
+                          username: from,
+                      },
+                  })
+                : null;
+            const data = await prismaClient.postLike.findMany({
                 take: limit,
-                cursor: from ? { username: from } : undefined,
-                skip: from ? 1 : undefined,
-                select: {
-                    username: true,
-                },
+                cursor: fromUser ? { postId_userId: { postId: postId, userId: fromUser.id } } : undefined,
+                skip: fromUser ? 1 : undefined,
                 orderBy: {
-                    username: "asc",
+                    createdAt: "desc",
+                },
+                select: {
+                    user: {
+                        select: {
+                            username: true,
+                        },
+                    },
                 },
                 where: {
-                    likedPostIds: {
-                        has: postId,
-                    },
+                    postId: postId,
                 },
             });
             if (!data) {
@@ -44,7 +56,7 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const userlist = data.map((user) => user.username);
+            const userlist = data.map((postlike) => postlike.user.username);
             const userInfo = await simpleUserInfoFindMany({ username: userlist });
             return {
                 status: 200,
@@ -280,7 +292,32 @@ const postRouter = s.router(apiContract.post, {
         handler: async ({ res, body: { postId, set } }) => {
             const data = await prismaClient.post.update({
                 data: {
-                    likedByUsers: set ? { connect: { id: res.locals.user!.id } } : { disconnect: { id: res.locals.user!.id } },
+                    postLikes: set
+                        ? {
+                              connectOrCreate: {
+                                  where: {
+                                      postId_userId: {
+                                          postId: postId,
+                                          userId: res.locals.user!.id,
+                                      },
+                                  },
+                                  create: {
+                                      user: {
+                                          connect: {
+                                              id: res.locals.user!.id,
+                                          },
+                                      },
+                                  },
+                              },
+                          }
+                        : {
+                              disconnect: {
+                                  postId_userId: {
+                                      postId: postId,
+                                      userId: res.locals.user!.id,
+                                  },
+                              },
+                          },
                 },
                 select: {
                     id: true,
@@ -308,7 +345,32 @@ const postRouter = s.router(apiContract.post, {
         handler: async ({ res, body: { postId, set } }) => {
             const data = await prismaClient.post.update({
                 data: {
-                    savedByUsers: set ? { connect: { id: res.locals.user!.id } } : { disconnect: { id: res.locals.user!.id } },
+                    postSaves: set
+                        ? {
+                              connectOrCreate: {
+                                  where: {
+                                      postId_userId: {
+                                          postId: postId,
+                                          userId: res.locals.user!.id,
+                                      },
+                                  },
+                                  create: {
+                                      user: {
+                                          connect: {
+                                              id: res.locals.user!.id,
+                                          },
+                                      },
+                                  },
+                              },
+                          }
+                        : {
+                              disconnect: {
+                                  postId_userId: {
+                                      postId: postId,
+                                      userId: res.locals.user!.id,
+                                  },
+                              },
+                          },
                 },
                 select: {
                     id: true,
