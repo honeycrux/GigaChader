@@ -9,7 +9,7 @@ const LeftSideBar = () => {
     const router = useRouter();
 
     useEffect(() => {
-        if (pathname.includes('userMangement')) {
+        if (pathname.includes('userManagement')) {
             setSelectedButton('User management');
         } else if (pathname.includes('postManagement')) {
             setSelectedButton('Post management');
@@ -23,7 +23,7 @@ const LeftSideBar = () => {
 
                 <button
                     className={`flex items-center my-2 w-full py-2 h-16 pl-5 rounded-lg ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`}
-                    onClick={() => {setSelectedButton('User management'); router.push('/admin/userMangement')}}
+                    onClick={() => {setSelectedButton('User management'); router.push('/admin/userManagement')}}
                 >
                     <i className="pi pi-user-edit text-2xl"></i>
                     <span className="ml-3 text-2xl">User management</span>
