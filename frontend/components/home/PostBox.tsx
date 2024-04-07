@@ -129,6 +129,7 @@ const PostBox = (
             </div>
         </div>
         <p className="text-gray-600">{formatDate(createdAt)}</p>
+        { parentPostId && <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">Go to parent post</Link> }
         {
             bShowCommentBox &&
             <div className="flex flex-col w-full">
