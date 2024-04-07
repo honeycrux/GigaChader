@@ -19,7 +19,7 @@ export const cryptoContract = c.router({
         query: z.object({
             query: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(cryptoInfoSchema).nullable(),

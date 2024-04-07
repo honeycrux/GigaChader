@@ -20,12 +20,12 @@ export const postContract = c.router({
         query: z.object({
             postId: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(simpleUserInfoSchema).nullable(),
         },
-        summary: "Get likes of a user",
+        summary: "Get likes on a post",
     },
 
     getComments: {
@@ -34,12 +34,12 @@ export const postContract = c.router({
         query: z.object({
             postId: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
         },
-        summary: "Get comments of a user",
+        summary: "Get comments on a post",
     },
 
     getReposts: {
@@ -48,12 +48,12 @@ export const postContract = c.router({
         query: z.object({
             postId: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
         },
-        summary: "Get reposts of a user",
+        summary: "Get reposts on a post",
     },
 
     getGlobalFeeds: {
@@ -61,7 +61,7 @@ export const postContract = c.router({
         path: "/api/post/global-feeds",
         query: z.object({
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),

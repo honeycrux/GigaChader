@@ -29,7 +29,7 @@ export const userContract = c.router({
         path: "/api/user/feeds",
         query: z.object({
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
@@ -43,7 +43,7 @@ export const userContract = c.router({
         query: z.object({
             username: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(simpleUserInfoSchema).nullable(),
@@ -57,7 +57,7 @@ export const userContract = c.router({
         query: z.object({
             username: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(simpleUserInfoSchema).nullable(),
@@ -71,7 +71,7 @@ export const userContract = c.router({
         query: z.object({
             username: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
@@ -84,7 +84,7 @@ export const userContract = c.router({
         path: "/api/user/saved-posts",
         query: z.object({
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(postInfoSchema).nullable(),
@@ -98,7 +98,7 @@ export const userContract = c.router({
         query: z.object({
             query: z.string(),
             from: z.optional(z.string()),
-            limit: z.optional(z.number().int().min(1)),
+            limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
             200: z.array(simpleUserInfoSchema).nullable(),

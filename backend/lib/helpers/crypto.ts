@@ -89,16 +89,27 @@ export async function checkExchange(): Promise<boolean> {
     await prismaClient.crypto.createMany({
         data: assetsdata,
     });
-    await prismaClient.systemMetadata.create({
-        data: {
+    await prismaClient.systemMetadata.upsert({
+        update: {
+            value: { lastUpdated: Date.now() },
+        },
+        create: {
             key: "crypto/coincap-fetch-everything",
             value: { lastUpdated: Date.now() },
+        },
+        where: {
+            key: "crypto/coincap-fetch-everything",
         },
     });
     return true;
 }
 
 export async function fetchCrypto(cryptoId: string): Promise<CryptoInfo | null> {
+    const check = await checkExchange();
+    if (!check) {
+        return null;
+    }
+
     const currentTime = new Date();
     const data = await cryptoInfoFindOne({ cryptoId });
     if (!data) {

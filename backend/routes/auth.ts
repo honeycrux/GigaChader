@@ -95,7 +95,10 @@ const authRouter = s.router(apiContract.auth, {
                         userConfig: {
                             displayName: displayName,
                         },
-                        userCryptoInfo: {},
+                        userCryptoInfo: {
+                            cryptoBookmarks: [],
+                            cryptoHoldings: [],
+                        },
                     },
                 });
 
