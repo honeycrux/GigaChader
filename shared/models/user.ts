@@ -50,6 +50,7 @@ export const userProfileSchema = z.object({
     followerCount: z.number(),
     followedUserCount: z.number(),
     postCount: z.number(),
+    followedByRequester: z.boolean().nullable(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;

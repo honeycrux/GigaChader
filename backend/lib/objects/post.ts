@@ -28,7 +28,7 @@ const postInfoSelectObj = {
     },
 } satisfies Prisma.PostSelect;
 
-export async function postInfoFindMany(props: { postId: string[] }): Promise<PostInfo[]> {
+export async function postInfoFindMany(props: { postId: string[]; requesterId: string | undefined }): Promise<PostInfo[]> {
     const data = await prismaClient.post.findMany({
         select: postInfoSelectObj,
         where: {
@@ -41,7 +41,57 @@ export async function postInfoFindMany(props: { postId: string[] }): Promise<Pos
     const authorlist = data.map((post) => post.author.username);
     const authordata = await simpleUserInfoFindManyAsRecord({ username: authorlist });
 
-    const postInfo = data.map((post) => {
+    // Populate map for posts liked or saved by requester
+    const likemap: Record<string, boolean> = {};
+    const savemap: Record<string, boolean> = {};
+    if (props.requesterId) {
+        const likedata = await prismaClient.postLike.findMany({
+            where: {
+                post: {
+                    id: {
+                        in: props.postId,
+                    },
+                },
+                user: {
+                    id: props.requesterId,
+                },
+            },
+            select: {
+                post: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        const savedata = await prismaClient.postSave.findMany({
+            where: {
+                post: {
+                    id: {
+                        in: props.postId,
+                    },
+                },
+                user: {
+                    id: props.requesterId,
+                },
+            },
+            select: {
+                post: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+        for (const d of likedata) {
+            likemap[d.post.id] = true;
+        }
+        for (const d of savedata) {
+            savemap[d.post.id] = true;
+        }
+    }
+
+    const postInfo: PostInfo[] = data.map((post) => {
         const { _count, author, ...rest } = post;
         return {
             ...rest,
@@ -50,14 +100,16 @@ export async function postInfoFindMany(props: { postId: string[] }): Promise<Pos
             saveCount: _count.postSaves,
             repostCount: _count.repostedOnPosts,
             commentCount: _count.childPosts,
+            likedByRequester: props.requesterId ? !!likemap[post.id] : null,
+            savedByRequester: props.requesterId ? !!savemap[post.id] : null,
         };
     });
 
     return postInfo;
 }
 
-export async function postInfoFindManyAsRecord(props: { postId: string[] }): Promise<Record<string, PostInfo>> {
-    const data = await postInfoFindMany({ postId: props.postId });
+export async function postInfoFindManyAsRecord(props: { postId: string[]; requesterId: string | undefined }): Promise<Record<string, PostInfo>> {
+    const data = await postInfoFindMany({ postId: props.postId, requesterId: props.requesterId });
     const result: Record<string, PostInfo> = {};
     for (const d of data) {
         result[d.id] = d;
@@ -65,8 +117,14 @@ export async function postInfoFindManyAsRecord(props: { postId: string[] }): Pro
     return result;
 }
 
-export async function postInfoFindOne(props: { postId: string }): Promise<PostInfo | null> {
-    const data = await postInfoFindMany({ postId: [props.postId] });
+export async function postInfoFindManyOrdered(props: { postId: string[]; requesterId: string | undefined }): Promise<PostInfo[]> {
+    const data = await postInfoFindManyAsRecord({ postId: props.postId, requesterId: props.requesterId });
+    const result = props.postId.filter((id) => !!data[id]).map((id) => data[id]);
+    return result;
+}
+
+export async function postInfoFindOne(props: { postId: string; requesterId: string | undefined }): Promise<PostInfo | null> {
+    const data = await postInfoFindMany({ postId: [props.postId], requesterId: props.requesterId });
     if (!data[0]) {
         return null;
     }
@@ -112,6 +170,12 @@ export async function simplePostInfoFindManyAsRecord(props: { postId: string[] }
     for (const d of data) {
         result[d.id] = d;
     }
+    return result;
+}
+
+export async function simplePostInfoFindManyOrdered(props: { postId: string[] }): Promise<SimplePostInfo[]> {
+    const data = await simplePostInfoFindManyAsRecord({ postId: props.postId });
+    const result = props.postId.filter((id) => !!data[id]).map((id) => data[id]);
     return result;
 }
 

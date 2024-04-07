@@ -44,7 +44,7 @@ export async function personalUserInfoFindMany(props: { username: string[] }): P
         return cryptosInBookmarks.concat(cryptosInHolding);
     }); // get all cryptos in bookmarks and holdings to be queried
     allCryptoIds = allCryptoIds.filter((v, i, arr) => arr.indexOf(v) === i); // remove duplicates
-    const cryptodata = await cryptoInfoFindManyAsRecord({ crpytoId: allCryptoIds });
+    const cryptodata = await cryptoInfoFindManyAsRecord({ cryptoId: allCryptoIds });
 
     const personalUserInfo: PersonalUserInfo[] = data.map((user) => {
         const { userCryptoInfo, ...rest } = user;
@@ -81,6 +81,12 @@ export async function personalUserInfoFindManyAsRecord(props: { username: string
     return result;
 }
 
+export async function personalUserInfoFindManyOrdered(props: { username: string[] }): Promise<PersonalUserInfo[]> {
+    const data = await personalUserInfoFindManyAsRecord({ username: props.username });
+    const result = props.username.filter((id) => !!data[id]).map((id) => data[id]);
+    return result;
+}
+
 export async function personalUserInfoFindOne(props: { username: string }): Promise<PersonalUserInfo | null> {
     const data = await personalUserInfoFindMany({ username: [props.username] });
     if (!data[0]) {
@@ -113,7 +119,7 @@ const userProfileSelectObj = {
     },
 } satisfies Prisma.UserSelect;
 
-export async function userProfileFindMany(props: { username: string[] }): Promise<UserProfile[]> {
+export async function userProfileFindMany(props: { username: string[]; requesterId: string | undefined }): Promise<UserProfile[]> {
     const data = await prismaClient.user.findMany({
         select: userProfileSelectObj,
         where: {
@@ -131,7 +137,34 @@ export async function userProfileFindMany(props: { username: string[] }): Promis
         return cryptosInBookmarks.concat(cryptosInHolding);
     }); // get all cryptos in bookmarks and holdings to be queried
     allCryptoIds = allCryptoIds.filter((v, i, arr) => arr.indexOf(v) === i); // remove duplicates
-    const cryptodata = await cryptoInfoFindManyAsRecord({ crpytoId: allCryptoIds });
+    const cryptodata = await cryptoInfoFindManyAsRecord({ cryptoId: allCryptoIds });
+
+    // Populate map for usernames followed by requester
+    const followmap: Record<string, boolean> = {};
+    if (props.requesterId) {
+        const followdata = await prismaClient.userFollow.findMany({
+            where: {
+                initiator: {
+                    id: props.requesterId,
+                },
+                target: {
+                    username: {
+                        in: props.username,
+                    },
+                },
+            },
+            select: {
+                target: {
+                    select: {
+                        username: true,
+                    },
+                },
+            },
+        });
+        for (const d of followdata) {
+            followmap[d.target.username] = true;
+        }
+    }
 
     const userProfile: UserProfile[] = data.map((user) => {
         const { _count, userCryptoInfo, ...rest } = user;
@@ -156,14 +189,15 @@ export async function userProfileFindMany(props: { username: string[] }): Promis
                 cryptoBookmarks: cryptoBookmarks,
                 cryptoHoldings: cryptoHoldings,
             },
+            followedByRequester: props.requesterId ? !!followmap[user.username] : null,
         };
     });
 
     return userProfile;
 }
 
-export async function userProfileFindManyAsRecord(props: { username: string[] }): Promise<Record<string, UserProfile>> {
-    const data = await userProfileFindMany({ username: props.username });
+export async function userProfileFindManyAsRecord(props: { username: string[]; requesterId: string | undefined }): Promise<Record<string, UserProfile>> {
+    const data = await userProfileFindMany({ username: props.username, requesterId: props.requesterId });
     const result: Record<string, UserProfile> = {};
     for (const d of data) {
         result[d.username] = d;
@@ -171,8 +205,14 @@ export async function userProfileFindManyAsRecord(props: { username: string[] })
     return result;
 }
 
-export async function userProfileFindOne(props: { username: string }): Promise<UserProfile | null> {
-    const data = await userProfileFindMany({ username: [props.username] });
+export async function userProfileFindManyOrdered(props: { username: string[]; requesterId: string | undefined }): Promise<UserProfile[]> {
+    const data = await userProfileFindManyAsRecord({ username: props.username, requesterId: props.requesterId });
+    const result = props.username.filter((id) => !!data[id]).map((id) => data[id]);
+    return result;
+}
+
+export async function userProfileFindOne(props: { username: string; requesterId: string | undefined }): Promise<UserProfile | null> {
+    const data = await userProfileFindMany({ username: [props.username], requesterId: props.requesterId });
     if (!data[0]) {
         return null;
     }
@@ -215,6 +255,12 @@ export async function simpleUserInfoFindManyAsRecord(props: { username: string[]
     for (const d of data) {
         result[d.username] = d;
     }
+    return result;
+}
+
+export async function simpleUserInfoFindManyOrdered(props: { username: string[] }): Promise<SimpleUserInfo[]> {
+    const data = await simpleUserInfoFindManyAsRecord({ username: props.username });
+    const result = props.username.filter((id) => !!data[id]).map((id) => data[id]);
     return result;
 }
 

@@ -1,12 +1,12 @@
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
-import { protectRoute } from "@/middlewares/auth";
+import { protectRoute, validateUser } from "@/middlewares/auth";
 import { prismaClient } from "@/lib/data/db";
 import { ProfileUploadFiles, profileUploadMiddleware } from "@/middlewares/mediaUpload";
 import { Prisma } from "@prisma/client";
 import { compressAndUploadMedia, deleteMedia } from "@/lib/data/mediaHandler";
-import { personalUserInfoFindOne, simpleUserInfoFindMany, userProfileFindOne } from "@/lib/objects/user";
-import { postInfoFindMany } from "@/lib/objects/post";
+import { personalUserInfoFindOne, simpleUserInfoFindManyOrdered, userProfileFindOne } from "@/lib/objects/user";
+import { postInfoFindManyOrdered } from "@/lib/objects/post";
 
 const s = initServer();
 
@@ -23,8 +23,9 @@ const userRouter = s.router(apiContract.user, {
     },
 
     getProfile: {
-        handler: async ({ params: { username } }) => {
-            const userinfo = await userProfileFindOne({ username });
+        middleware: [validateUser],
+        handler: async ({ params: { username }, res }) => {
+            const userinfo = await userProfileFindOne({ username, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: userinfo,
@@ -83,7 +84,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const postlist = data.map((post) => post.id);
-            const postInfo = await postInfoFindMany({ postId: postlist });
+            const postInfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postInfo,
@@ -142,7 +143,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const userlist = data.map((userFollow) => userFollow.initiator.username);
-            const userinfo = await simpleUserInfoFindMany({ username: userlist });
+            const userinfo = await simpleUserInfoFindManyOrdered({ username: userlist });
             return {
                 status: 200,
                 body: userinfo,
@@ -201,7 +202,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const userlist = data.map((userFollow) => userFollow.target.username);
-            const userinfo = await simpleUserInfoFindMany({ username: userlist });
+            const userinfo = await simpleUserInfoFindManyOrdered({ username: userlist });
             return {
                 status: 200,
                 body: userinfo,
@@ -210,7 +211,7 @@ const userRouter = s.router(apiContract.user, {
     },
 
     getPosts: {
-        handler: async ({ query: { username, from, limit } }) => {
+        handler: async ({ query: { username, from, limit }, res }) => {
             const userdata = await prismaClient.user.findUnique({
                 select: {
                     id: true,
@@ -246,7 +247,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const postlist = data.map((post) => post.id);
-            const postinfo = await postInfoFindMany({ postId: postlist });
+            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -282,7 +283,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const postlist = data.map((postSave) => postSave.post.id);
-            const postinfo = await postInfoFindMany({ postId: postlist });
+            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -310,7 +311,7 @@ const userRouter = s.router(apiContract.user, {
                 };
             }
             const userlist = data.map((user) => user.username);
-            const userinfo = await simpleUserInfoFindMany({ username: userlist });
+            const userinfo = await simpleUserInfoFindManyOrdered({ username: userlist });
             return {
                 status: 200,
                 body: userinfo,
@@ -469,7 +470,7 @@ const userRouter = s.router(apiContract.user, {
                     body: { error: "Failed to push changes to user config" },
                 };
             }
-            const userinfo = await userProfileFindOne({ username: data.username });
+            const userinfo = await userProfileFindOne({ username: data.username, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: userinfo,
@@ -480,7 +481,6 @@ const userRouter = s.router(apiContract.user, {
     userFollow: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { username, set } }) => {
-            console.log(username, set);
             const userdata = await prismaClient.user.findUnique({
                 select: {
                     id: true,

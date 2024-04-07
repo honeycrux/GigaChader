@@ -25,12 +25,18 @@ export async function cryptoInfoFindMany(props: { cryptoId: string[] }): Promise
     return data;
 }
 
-export async function cryptoInfoFindManyAsRecord(props: { crpytoId: string[] }): Promise<Record<string, CryptoInfo>> {
-    const data = await cryptoInfoFindMany({ cryptoId: props.crpytoId });
+export async function cryptoInfoFindManyAsRecord(props: { cryptoId: string[] }): Promise<Record<string, CryptoInfo>> {
+    const data = await cryptoInfoFindMany({ cryptoId: props.cryptoId });
     const result: Record<string, CryptoInfo> = {};
     for (const d of data) {
         result[d.cryptoId] = d;
     }
+    return result;
+}
+
+export async function cryptoInfoFindManyOrdered(props: { cryptoId: string[] }): Promise<CryptoInfo[]> {
+    const data = await cryptoInfoFindManyAsRecord({ cryptoId: props.cryptoId });
+    const result = props.cryptoId.filter((id) => !!data[id]).map((id) => data[id]);
     return result;
 }
 

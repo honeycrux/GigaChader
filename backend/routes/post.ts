@@ -4,15 +4,15 @@ import { prismaClient } from "@/lib/data/db";
 import { protectRoute } from "@/middlewares/auth";
 import { MediaUploadFiles, mediaUploadMiddleware } from "@/middlewares/mediaUpload";
 import { compressAndUploadMedia } from "@/lib/data/mediaHandler";
-import { postInfoFindMany, postInfoFindOne } from "@/lib/objects/post";
-import { simpleUserInfoFindMany } from "@/lib/objects/user";
+import { postInfoFindManyOrdered, postInfoFindOne } from "@/lib/objects/post";
+import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 
 const s = initServer();
 
 const postRouter = s.router(apiContract.post, {
     getPost: {
-        handler: async ({ params: { postId } }) => {
-            const postinfo = await postInfoFindOne({ postId });
+        handler: async ({ params: { postId }, res }) => {
+            const postinfo = await postInfoFindOne({ postId, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -57,7 +57,7 @@ const postRouter = s.router(apiContract.post, {
                 };
             }
             const userlist = data.map((postlike) => postlike.user.username);
-            const userInfo = await simpleUserInfoFindMany({ username: userlist });
+            const userInfo = await simpleUserInfoFindManyOrdered({ username: userlist });
             return {
                 status: 200,
                 body: userInfo,
@@ -66,7 +66,7 @@ const postRouter = s.router(apiContract.post, {
     },
 
     getComments: {
-        handler: async ({ query: { postId, from, limit } }) => {
+        handler: async ({ query: { postId, from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,
@@ -88,7 +88,7 @@ const postRouter = s.router(apiContract.post, {
                 };
             }
             const postlist = data.map((post) => post.id);
-            const postinfo = await postInfoFindMany({ postId: postlist });
+            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -97,7 +97,7 @@ const postRouter = s.router(apiContract.post, {
     },
 
     getReposts: {
-        handler: async ({ query: { postId, from, limit } }) => {
+        handler: async ({ query: { postId, from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,
@@ -119,7 +119,7 @@ const postRouter = s.router(apiContract.post, {
                 };
             }
             const postlist = data.map((post) => post.id);
-            const postinfo = await postInfoFindMany({ postId: postlist });
+            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -128,7 +128,7 @@ const postRouter = s.router(apiContract.post, {
     },
 
     getGlobalFeeds: {
-        handler: async ({ query: { from, limit } }) => {
+        handler: async ({ query: { from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,
@@ -147,7 +147,7 @@ const postRouter = s.router(apiContract.post, {
                 };
             }
             const postlist = data.map((post) => post.id);
-            const postinfo = await postInfoFindMany({ postId: postlist });
+            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -279,7 +279,7 @@ const postRouter = s.router(apiContract.post, {
                     body: { error: "Failed to create user" },
                 };
             }
-            const postinfo = await postInfoFindOne({ postId: data.id });
+            const postinfo = await postInfoFindOne({ postId: data.id, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -332,7 +332,7 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postinfo = await postInfoFindOne({ postId: data.id });
+            const postinfo = await postInfoFindOne({ postId: data.id, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,
@@ -385,7 +385,7 @@ const postRouter = s.router(apiContract.post, {
                     body: null,
                 };
             }
-            const postinfo = await postInfoFindOne({ postId: data.id });
+            const postinfo = await postInfoFindOne({ postId: data.id, requesterId: res.locals.user?.id });
             return {
                 status: 200,
                 body: postinfo,

@@ -2,7 +2,7 @@ import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { checkExchange, fetchCrypto } from "@/lib/helpers/crypto";
-import { cryptoInfoFindMany } from "@/lib/objects/crypto";
+import { cryptoInfoFindManyOrdered } from "@/lib/objects/crypto";
 
 const s = initServer();
 
@@ -53,7 +53,7 @@ const cryptoRouter = s.router(apiContract.crypto, {
                 };
             }
             const cryptolist = data.map((crypto) => crypto.cryptoId);
-            const result = await cryptoInfoFindMany({ cryptoId: cryptolist });
+            const result = await cryptoInfoFindManyOrdered({ cryptoId: cryptolist });
             return {
                 status: 200,
                 body: result,

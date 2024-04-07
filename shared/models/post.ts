@@ -20,6 +20,8 @@ export const postInfoSchema = z.object({
     repostCount: z.number(),
     commentCount: z.number(),
     saveCount: z.number(),
+    likedByRequester: z.boolean().nullable(),
+    savedByRequester: z.boolean().nullable(),
 });
 
 export type PostInfo = z.infer<typeof postInfoSchema>;

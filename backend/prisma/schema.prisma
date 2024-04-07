@@ -40,6 +40,7 @@ model User {
   digitalBalance         Float          @default(0)
   userConfig             UserConfig
   userCryptoInfo         UserCryptoInfo
+  suspended              Boolean        @default(false)
 
   followers              UserFollow[]         @relation(name: "UserFollowTarget")
   followedUsers          UserFollow[]         @relation(name: "UserFollow")
@@ -138,6 +139,7 @@ model Post {
   createdAt   DateTime     @default(now())
   pollOptions PollOption[]
   userMedia   UserMedia[]
+  suspended   Boolean      @default(false)
 
   authorId          String  @db.ObjectId
   repostingPostId   String? @db.ObjectId
@@ -232,6 +234,7 @@ model Community {
   isExclusive   Boolean
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  suspended     Boolean  @default(false)
 
   posts          Post[]             @relation(name: "CommunityPost")
   moderationHits ModerationRecord[] @relation(name: "CommunityModerationHit")
