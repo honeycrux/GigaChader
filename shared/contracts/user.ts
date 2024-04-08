@@ -124,7 +124,6 @@ export const userContract = c.router({
     userFollow: {
         method: "POST",
         path: "/api/user/follow",
-        contentType: 'multipart/form-data',
         body: z.object({
             username: z.string(),
             set: z.boolean(),

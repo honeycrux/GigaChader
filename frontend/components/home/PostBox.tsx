@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 import { Dialog } from 'primereact/dialog';
+import { on } from "events";
 interface Props {
     id: string;
     currentUserName: string;  // for checking if the current user can delete a post
@@ -28,6 +29,7 @@ interface Props {
     bVisitParentPost?: boolean;
     bButtonvisible?: boolean;
     bshowBorder?: boolean;
+    onRepostSubmit?: any;
 }
 
 const PostBox = (
@@ -44,7 +46,8 @@ const PostBox = (
         likeCount,
         bVisitParentPost,
         bButtonvisible = true,
-        bshowBorder = false
+        bshowBorder = false,
+        onRepostSubmit,
     }: Props) => {
     const toast = useRef<Toast>(null);
     const [heartPath, setHeartPath] = useState("/heart.svg");
@@ -143,6 +146,12 @@ const PostBox = (
             },
         });
         console.log(res);
+
+        // Call the callback function passed from the parent component
+        if (onRepostSubmit) {
+            onRepostSubmit();
+        }
+
         setVisible(false);
     }
     const dialogFooter = (
@@ -188,13 +197,13 @@ const PostBox = (
                                 className="cursor-pointer"
                             />
                         </Link>
-                        <Image src="/retweet-round.svg"
+                        {currentUserName && (<Image src="/retweet-round.svg"
                             width="24"
                             alt="repost"
                             onClick={handleRepostClick}
                             className="cursor-pointer"
 
-                        />
+                        />)}
                         <span className="text-gray-600 text-sm">
                             {likeCountInternal} like(s), {commentCount} comment(s)
                         </span>

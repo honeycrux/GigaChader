@@ -6,7 +6,7 @@ import SignupBox from '@/components/authentication/SignupBox'
 const signup = () => {
     return (
         <>
-        <div className="flex">
+        <div className="flex overflow-y-auto">
                 {/* left container */}
                 <LogoSideBar />
                 {/* right container */}

@@ -120,7 +120,9 @@ const home = () => {
                 )}
 
                 {(followedPosts && followedPosts.length > 0) && (
-                    followedPosts.map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                    followedPosts.map((post: any, index: Key | null | undefined) => 
+                    <PostBox key={index} {...post} 
+                    currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)
                 )}
 
                 {((!globalFeeds && !followedPosts) || ((globalFeeds?.length === 0 || followedPosts?.length === 0))) && (

@@ -4,6 +4,8 @@ import { signup } from "@/lib/actions/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { Password } from "primereact/password";
+import { classNames } from "primereact/utils";
 import { useState } from "react";
 
 const SignupBox = () => {
@@ -12,6 +14,7 @@ const SignupBox = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [bIsSignupLoading, setbIsSignupLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   // useEffect(() => {
   //   console.log("email: " + email);
   //   console.log("password: " + password);
@@ -21,6 +24,11 @@ const SignupBox = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
     // TODO: replace with zod later
     if (!userName || !displayName || !email || !password) {
@@ -56,7 +64,7 @@ const SignupBox = () => {
   return (
     <>
       <div className="flex w-2/3 items-center justify-center">
-        <div className="flex flex-col p-12 w-[34rem] h-[40rem] custom-shadow-border rounded-[50px]">
+        <div className="flex flex-col p-12 w-[34rem] h-fit custom-shadow-border rounded-[50px]">
           <p className="text-3xl">Sign up</p>
           <hr className="h-px my-5 bg-gray-400" />
           <form onSubmit={handleSubmit} className="flex flex-col h-full [&>*]:my-1">
@@ -68,8 +76,18 @@ const SignupBox = () => {
             <InputText className="custom-shadow-border-light" value={email} onChange={(e) => setEmail(e.target.value)} />
             {/* <br className='my-2' /> */}
             <p className="text-2xl !mb-0">Password</p>
-            <p className="!m-0">Use longer than 6 characters</p>
-            <InputText className="custom-shadow-border-light" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <p className="!m-0">Use &gt;= 6 characters</p>
+            <Password className="custom-shadow-border-light w-full" toggleMask value={password} onChange={(e) => setPassword(e.target.value)} 
+              pt={{
+                input: {className: "w-full"}
+              }}
+            />
+            <p className="text-2xl !mb-0">Confirm Password</p>
+            <Password className="custom-shadow-border-light w-full" toggleMask feedback={false} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
+              pt={{
+                input: {className: "w-full"}
+              }}
+            />
             {error ? <div className="text-red-600">{error}</div> : <br className="!my-5" />}
             <div className="flex w-full justify-center">
               <Button className="px-20" label="Sign up" loading={bIsSignupLoading} />

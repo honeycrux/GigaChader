@@ -128,6 +128,7 @@ const profile = ({ params }: { params: { username: string } }) => {
   const [bHasFollowed, setbHasFollowed] = useState<boolean>(false);
 
   const handleFollow = async () => {
+    console.log("username: " + profileUsername[0] + " set: " + !bHasFollowed);
     const res = await apiClient.user.userFollow({ body: { username: profileUsername[0], set: !bHasFollowed}})
     setbHasFollowed(!bHasFollowed);
     console.log(res);

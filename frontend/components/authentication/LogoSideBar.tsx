@@ -4,7 +4,7 @@ import gigachader from "@/public/gigachader.png"
 const LogoSideBar = () => {
   return (
     <>
-    <div className='flex bg-orange2 w-1/3 h-screen items-center overflow-hidden'>
+    <div className='flex bg-orange2 w-1/3 h-auto min-h-screen items-center overflow-hidden'>
         <Image src={gigachader}
                 width={700}
                 alt="logo"
