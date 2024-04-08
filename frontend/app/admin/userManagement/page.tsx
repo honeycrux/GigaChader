@@ -6,7 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 
 
-const userMangement = () => {
+const userManagement = () => {
 
     const [showSuspendDialog, setShowSuspendDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -15,7 +15,7 @@ const userMangement = () => {
             <div>
                 <Button label="Yes" className="p-button-danger" onClick={() => handleSuspendUser()} />
                 <Button label="No" className="p-button" onClick={() => setShowSuspendDialog(false)} />
-                
+
             </div>
         );
     };
@@ -30,23 +30,23 @@ const userMangement = () => {
         setShowSuspendDialog(false);
     };
 
-    const [selectedUser, setSelectedUser] = useState({id: '', username: '', displayName: ''}); 
-    const handleEditClick = (user:any) => { // Add this function
+    const [selectedUser, setSelectedUser] = useState({id: '', username: '', displayName: '' });
+    const handleEditClick = (user: any) => { // Add this function
         setSelectedUser(user);
         setShowEditDialog(true);
     };
-// Add this Dialog component for editing
-const renderEditDialog = () => {
-    if (!selectedUser) return null;
-    return (
-        <Dialog visible={showEditDialog} style={{ width: '450px' }} header="Edit User"
-            modal footer={renderFooter()} onHide={() => setShowEditDialog(false)}>
-            <p>UserID: {selectedUser.id}</p>
-            <p>Username: {selectedUser.username}</p>
-            <p>Display Name: {selectedUser.displayName}</p>
-        </Dialog>
-    );
-};
+    // Add this Dialog component for editing
+    const renderEditDialog = () => {
+        if (!selectedUser) return null;
+        return (
+            <Dialog visible={showEditDialog} style={{ width: '450px' }} header="Edit User"
+                modal footer={renderFooter()} onHide={() => setShowEditDialog(false)}>
+                <p>UserID: {selectedUser.id}</p>
+                <p>Username: {selectedUser.username}</p>
+                <p>Display Name: {selectedUser.displayName}</p>
+            </Dialog>
+        );
+    };
     return (
         <>
             {/* main content start */}
@@ -77,11 +77,11 @@ const renderEditDialog = () => {
                                 <td className="px-8 py-4">user1</td>
                                 <td className="px-8 py-4">dsname</td>
                                 <td className="px-8 py-4 flex space-x-4">
-                                <button className="bg-orange1  text-white py-2 px-10 rounded-lg"
-                onClick={() => handleEditClick({id: '1234', username: 'user1', displayName: 'dsname'})}>
-                Edit
-            </button>
-            {renderEditDialog()}
+                                    <button className="bg-orange1  text-white py-2 px-10 rounded-lg"
+                                        onClick={() => handleEditClick({ id: '1234', username: 'user1', displayName: 'dsname' })}>
+                                        Edit
+                                    </button>
+                                    {renderEditDialog()}
                                     <button className="bg-red-500 text-white py-2 px-7 rounded-lg"
                                         onClick={handleSuspendClick}>
                                         Suspend
@@ -104,4 +104,4 @@ const renderEditDialog = () => {
 
 }
 
-export default userMangement
+export default userManagement
