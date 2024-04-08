@@ -1,34 +1,53 @@
 "use client";
 
-
-import { Image } from "primereact/image";
 import { InputText } from 'primereact/inputtext';
 import { useState } from "react";
-import { Dropdown } from 'primereact/dropdown';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
 
-interface ActionOption {
-    name: string;
-    code: string;
-}
 
 const userMangement = () => {
 
-    
-    const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
-    const actions: ActionOption[] = [
-        { name: 'Edit', code: 'ED' },
-        { name: 'Remove', code: 'RM' }
-    ];
-
-    const actionTemplate = (option: ActionOption) => {
+    const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const renderFooter = () => {
         return (
-            <div className={`p-d-flex p-ai-center ${option.code === 'RM' ? 'text-red-500' : ''}`}>
-                <span className="p-ml-2">{option.name}</span>
+            <div>
+                <Button label="Yes" className="p-button-danger" onClick={() => handleSuspendUser()} />
+                <Button label="No" className="p-button" onClick={() => setShowSuspendDialog(false)} />
+                
             </div>
         );
     };
 
-        return (
+    const handleSuspendClick = () => {
+        setShowSuspendDialog(true);
+    };
+
+    const handleSuspendUser = () => {
+        // Add logic here to Suspend the user
+        console.log('User Suspended');
+        setShowSuspendDialog(false);
+    };
+
+    const [selectedUser, setSelectedUser] = useState({id: '', username: '', displayName: ''}); 
+    const handleEditClick = (user:any) => { // Add this function
+        setSelectedUser(user);
+        setShowEditDialog(true);
+    };
+// Add this Dialog component for editing
+const renderEditDialog = () => {
+    if (!selectedUser) return null;
+    return (
+        <Dialog visible={showEditDialog} style={{ width: '450px' }} header="Edit User"
+            modal footer={renderFooter()} onHide={() => setShowEditDialog(false)}>
+            <p>UserID: {selectedUser.id}</p>
+            <p>Username: {selectedUser.username}</p>
+            <p>Display Name: {selectedUser.displayName}</p>
+        </Dialog>
+    );
+};
+    return (
         <>
             {/* main content start */}
             <main className='flex w-[95%] justify-center'>
@@ -54,18 +73,25 @@ const userMangement = () => {
                         </thead>
                         <tbody className="text-sm font-normal text-gray-700">
                             <tr className="hover:bg-gray-100 border-b border-gray-300 py-10">
-                                <td className="px-8 py-4">User ID-------------</td>
-                                <td className="px-8 py-4">Username</td>
-                                <td className="px-8 py-4">Display Name</td>
+                                <td className="px-8 py-4">1234</td>
+                                <td className="px-8 py-4">user1</td>
+                                <td className="px-8 py-4">dsname</td>
                                 <td className="px-8 py-4 flex space-x-4">
-                                <button className="bg-orange1  text-white py-2 px-10 rounded-lg">
+                                <button className="bg-orange1  text-white py-2 px-10 rounded-lg"
+                onClick={() => handleEditClick({id: '1234', username: 'user1', displayName: 'dsname'})}>
                 Edit
             </button>
-            
-                                    <button className="bg-red-500 text-white py-2 px-7 rounded-lg">
-                                        Remove
+            {renderEditDialog()}
+                                    <button className="bg-red-500 text-white py-2 px-7 rounded-lg"
+                                        onClick={handleSuspendClick}>
+                                        Suspend
                                     </button>
-                                                                    </td>
+                                    {/* Add this Dialog component */}
+                                    <Dialog visible={showSuspendDialog} style={{ width: '450px' }} header="Confirmation"
+                                        modal footer={renderFooter()} onHide={() => setShowSuspendDialog(false)}>
+                                        Do you want to suspend this user?
+                                    </Dialog>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

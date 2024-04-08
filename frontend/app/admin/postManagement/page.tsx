@@ -1,11 +1,10 @@
 "use client";
 
-
-import { Image } from "primereact/image";
 import { InputText } from 'primereact/inputtext';
 import { useState } from "react";
 import { Dropdown } from 'primereact/dropdown';
-
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
 interface ActionOption {
     name: string;
     code: string;
@@ -13,22 +12,38 @@ interface ActionOption {
 
 const postMangement = () => {
 
-
     const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
     const actions: ActionOption[] = [
         { name: 'Edit', code: 'ED' },
-        { name: 'Remove', code: 'RM' }
+        { name: 'Suspend', code: 'SP' }
     ];
 
     const actionTemplate = (option: ActionOption) => {
         return (
-            <div className={`p-d-flex p-ai-center ${option.code === 'RM' ? 'text-red-500' : ''}`}>
+            <div className={`p-d-flex p-ai-center ${option.code === 'SP' ? 'text-red-500' : ''}`}>
                 <span className="p-ml-2">{option.name}</span>
             </div>
         );
     };
 
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const onActionChange = (e: any) => {
+        setSelectedAction(e.value);
+        if (e.value.code === 'SP') {
+            setShowConfirmDialog(true);
+        }
+    };
+
+    const renderFooter = () => {
         return (
+            <div>
+                <Button label="Yes" icon="pi pi-check" onClick={() => {/* handle removal logic here */ }} autoFocus />
+                <Button label="No" icon="pi pi-times" onClick={() => {setShowConfirmDialog(false); setSelectedAction(null);}} className="p-button" />
+                
+            </div>
+        );
+    };
+    return (
         <>
             {/* main content start */}
             <main className='flex w-[95%] justify-center'>
@@ -58,8 +73,20 @@ const postMangement = () => {
                                 <td className="px-8 py-4">Post content</td>
                                 <td className="px-8 py-4">
 
-                                    <Dropdown className="border border-gray-300 py-0 rounded-lg" value={selectedAction} options={actions} onChange={(e) => setSelectedAction(e.value)}
-                                        itemTemplate={actionTemplate} placeholder="Choose an action"/>
+                                    <Dropdown className="border border-gray-300 py-0 rounded-lg"
+                                        value={selectedAction} options={actions}
+                                        onChange={onActionChange}
+                                        itemTemplate={actionTemplate}
+                                        optionLabel="name"
+                                        placeholder="Choose an action" />
+
+                                    <Dialog header="Confirmation"
+                                        visible={showConfirmDialog}
+                                        style={{ width: '50vw' }}
+                                        footer={renderFooter()}
+                                        onHide={() => setShowConfirmDialog(false)}>
+                                        Do you want to suspend this post?
+                                    </Dialog>
 
                                 </td>
                             </tr>
