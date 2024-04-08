@@ -28,7 +28,7 @@ const userMangement = () => {
         );
     };
 
-    return (
+        return (
         <>
             {/* main content start */}
             <main className='flex w-[95%] justify-center'>
@@ -58,14 +58,14 @@ const userMangement = () => {
                                 <td className="px-8 py-4">Username</td>
                                 <td className="px-8 py-4">Display Name</td>
                                 <td className="px-8 py-4 flex space-x-4">
-                                    <button className="bg-orange1  text-white py-2 px-10 rounded-lg">
-                                        Edit
-                                    </button>
-
+                                <button className="bg-orange1  text-white py-2 px-10 rounded-lg">
+                Edit
+            </button>
+            
                                     <button className="bg-red-500 text-white py-2 px-7 rounded-lg">
                                         Remove
                                     </button>
-                                </td>
+                                                                    </td>
                             </tr>
                         </tbody>
                     </table>
