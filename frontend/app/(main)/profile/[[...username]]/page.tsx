@@ -92,7 +92,7 @@ const profile = ({ params }: { params: { username: string } }) => {
   const getPostsOfUser = async (username: string) => {
     // console.log("received username: " + username);
     const posts = await apiClient.user.getPosts({ query: { username: username } });
-    // console.log(posts.body);
+    console.log(posts.body);
 
     // Filter posts where parentPostId is not empty and store them in comments
     // @ts-ignore

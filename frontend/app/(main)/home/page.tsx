@@ -31,7 +31,7 @@ const home = () => {
 
     const getFollowedPosts = async () => {
         const followedPosts = (await apiClient.user.getFeeds()).body;
-        console.log(followedPosts);
+        // console.log(followedPosts);
         setFollowedPosts(followedPosts);
     };
 
@@ -60,7 +60,7 @@ const home = () => {
     // }, [bIsLoggedin]);
 
     useEffect(() => {
-        console.log(globalFeeds);
+        // console.log(globalFeeds);
     }, [globalFeeds]);
 
     const [bAddPostDiagVisible, setbAddPostDiagVisible] = useState(false);
@@ -77,7 +77,7 @@ const home = () => {
         });
         setbIsSummitingPost(false);
 
-        console.log(res);
+        // console.log(res);
         getFollowedPosts();
 
         if (toast.current) {
@@ -90,7 +90,7 @@ const home = () => {
 
     const footerContent = (
         <Button label="Post" onClick={() => {
-            console.log('post content', postContent);
+            // console.log('post content', postContent);
             handlePostSubmit();
         }} loading={bIsSummitingPost} />
     );
