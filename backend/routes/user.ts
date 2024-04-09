@@ -427,11 +427,13 @@ const userRouter = s.router(apiContract.user, {
                 }
 
                 changeObject.userConfig = {
-                    displayName: displayName,
-                    imageUrl: newImageUrl ? newImageUrl : deleteAvatar ? null : undefined,
-                    bannerUrl: newBannerUrl ? newBannerUrl : deleteBanner ? null : undefined,
-                    bio: bio,
-                    lastUpdated: new Date(),
+                    update: {
+                        displayName: displayName,
+                        imageUrl: newImageUrl ? newImageUrl : deleteAvatar ? null : undefined,
+                        bannerUrl: newBannerUrl ? newBannerUrl : deleteBanner ? null : undefined,
+                        bio: bio,
+                        lastUpdated: new Date(),
+                    },
                 };
             }
 
@@ -455,9 +457,11 @@ const userRouter = s.router(apiContract.user, {
                 }
 
                 changeObject.userCryptoInfo = {
-                    cryptoBookmarks: cryptoBookmarks,
-                    cryptoHoldings: cryptoHoldings,
-                    lastUpdated: new Date(),
+                    update: {
+                        cryptoBookmarks: cryptoBookmarks,
+                        cryptoHoldings: cryptoHoldings,
+                        lastUpdated: new Date(),
+                    },
                 };
             }
 

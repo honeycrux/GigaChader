@@ -37,6 +37,7 @@ export const userProfileSchema = z.object({
         displayName: z.string(),
         imageUrl: z.nullable(z.string()),
         bannerUrl: z.nullable(z.string()),
+        bio: z.string(),
     }),
     userCryptoInfo: z.object({
         cryptoBookmarks: z.array(cryptoInfoSchema.nullable()),

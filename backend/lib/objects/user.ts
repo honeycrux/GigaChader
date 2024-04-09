@@ -102,6 +102,7 @@ const userProfileSelectObj = {
             displayName: true,
             imageUrl: true,
             bannerUrl: true,
+            bio: true,
         },
     },
     userCryptoInfo: {

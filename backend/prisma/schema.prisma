@@ -129,6 +129,15 @@ model DirectMessage {
   receiver User @relation(name: "DirectMessageReceiver", references: [id], fields: [receiverId], onDelete: NoAction)
 }
 
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  link      String?
+  unread    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  expiry    DateTime
+}
+
 //////////////////////
 // Group B: Post-related
 //////////////////////
@@ -264,9 +273,9 @@ model ModerationRecord {
 }
 
 enum ModerationTargetType {
-  User
-  Post
-  Community
+  USER
+  POST
+  COMMUNITY
 }
 
 //////////////////////
