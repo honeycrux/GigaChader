@@ -73,6 +73,13 @@ const LeftSidebar = () => {
                     <i className="pi pi-user text-2xl"></i>
                     <span className="ml-3 text-2xl">Profile</span>
                 </button>
+                <button
+                    className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === 'Crypto' ? 'bg-orange1 text-white' : ' text-black'}`}
+                    onClick={() => {setSelectedButton('Crypto'); router.push('/crypto')}}
+                >
+                    <i className=' pi pi-bitcoin text-2xl'></i>
+                    <span className="ml-3 text-2xl">Crypto</span>
+                </button>
             </>
         )}
         {bIsGuest && (<button
