@@ -37,9 +37,11 @@ export const postCreationPropsSchema = z.object({
     content: z.string(),
     repostingPostId: z.optional(z.string()),
     parentPostId: z.optional(z.string()),
-    mediaProps: z.optional(
+    userMedia: z.optional(
         z.array(
             z.object({
+                url: z.string(),
+                type: userMediaTypeSchema,
                 altText: z.optional(z.string()),
             })
         )

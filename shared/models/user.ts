@@ -13,7 +13,7 @@ export const personalUserInfoSchema = z.object({
     role: userRoleSchema,
     userConfig: z.object({
         displayName: z.string(),
-        imageUrl: z.nullable(z.string()),
+        avatarUrl: z.nullable(z.string()),
         bannerUrl: z.nullable(z.string()),
         bio: z.string(),
     }),
@@ -35,7 +35,7 @@ export const userProfileSchema = z.object({
     username: z.string(),
     userConfig: z.object({
         displayName: z.string(),
-        imageUrl: z.nullable(z.string()),
+        avatarUrl: z.nullable(z.string()),
         bannerUrl: z.nullable(z.string()),
         bio: z.string(),
     }),
@@ -60,7 +60,7 @@ export type UserProfile = z.infer<typeof userProfileSchema>;
 export const simpleUserInfoSchema = z.object({
     username: z.string(),
     displayName: z.string(),
-    imageUrl: z.nullable(z.string()),
+    avatarUrl: z.nullable(z.string()),
 });
 
 export type SimpleUserInfo = z.infer<typeof simpleUserInfoSchema>;
@@ -76,13 +76,13 @@ export const userSessionSchema = z.object({
 export type UserSession = z.infer<typeof userSessionSchema>;
 
 export const userConfigProps = z.object({
-    // Account
-    username: z.optional(z.string()),
     // UserConfig
     displayName: z.optional(z.string()),
     bio: z.optional(z.string()),
     deleteAvatar: z.optional(z.boolean()),
     deleteBanner: z.optional(z.boolean()),
+    avatarUrl: z.optional(z.string()),
+    bannerUrl: z.optional(z.string()),
     // UserCryptoInfo
     cryptoBookmarks: z.optional(z.array(z.string())),
     cryptoHoldings: z.optional(
@@ -93,5 +93,4 @@ export const userConfigProps = z.object({
             })
         )
     ),
-    avatar: z.optional(z.any()),
 });

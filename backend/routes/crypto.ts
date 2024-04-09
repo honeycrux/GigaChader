@@ -6,7 +6,7 @@ import { cryptoInfoFindManyOrdered } from "@/lib/objects/crypto";
 
 const s = initServer();
 
-const cryptoRouter = s.router(apiContract.crypto, {
+export const cryptoRouter = s.router(apiContract.crypto, {
     getCrypto: {
         handler: async ({ params: { cryptoId } }) => {
             const check = await checkExchange();
@@ -61,5 +61,3 @@ const cryptoRouter = s.router(apiContract.crypto, {
         },
     },
 });
-
-export { cryptoRouter };

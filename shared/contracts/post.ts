@@ -71,7 +71,6 @@ export const postContract = c.router({
 
     postCreate: {
         method: "POST",
-        contentType: "multipart/form-data",
         path: "/api/post/create",
         body: postCreationPropsSchema,
         responses: {

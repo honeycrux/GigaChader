@@ -110,7 +110,6 @@ export const userContract = c.router({
     userConfig: {
         method: "POST",
         path: "/api/user/config",
-        contentType: "multipart/form-data",
         body: userConfigProps,
         responses: {
             200: userProfileSchema.nullable(),

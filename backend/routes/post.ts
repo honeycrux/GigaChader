@@ -9,7 +9,7 @@ import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 
 const s = initServer();
 
-const postRouter = s.router(apiContract.post, {
+export const postRouter = s.router(apiContract.post, {
     getPost: {
         middleware: [validateUser],
         handler: async ({ params: { postId }, res }) => {
@@ -160,8 +160,8 @@ const postRouter = s.router(apiContract.post, {
     },
 
     postCreate: {
-        middleware: [protectRoute.user, mediaUploadMiddleware],
-        handler: async ({ req, res, body: { content, repostingPostId, parentPostId, mediaProps } }) => {
+        middleware: [protectRoute.user],
+        handler: async ({ req, res, body: { content, repostingPostId, parentPostId, userMedia } }) => {
             if (repostingPostId) {
                 const post = await prismaClient.post.findUnique({
                     select: {
@@ -195,50 +195,6 @@ const postRouter = s.router(apiContract.post, {
                 }
             }
 
-            mediaProps = mediaProps || [];
-            const uploadPromises: ReturnType<typeof compressAndUploadMedia>[] = [];
-            const mediaData: {
-                altText: string | undefined;
-                type: "IMAGE" | "VIDEO";
-            }[] = [];
-            const files = req.files as MediaUploadFiles;
-            if (files) {
-                if (files.media) {
-                    for (const i in files.media) {
-                        const file = files.media[i];
-                        let type = file.mimetype.split("/")[0];
-                        if (["image", "video"].indexOf(type) === -1) {
-                            return {
-                                status: 400,
-                                body: { error: `Unknown media type ${file.mimetype}` },
-                            };
-                        }
-                        const goodtype = type as "image" | "video";
-                        const goodtype2 = type.toUpperCase() as "IMAGE" | "VIDEO";
-                        uploadPromises.push(
-                            compressAndUploadMedia({
-                                maxPixelSize: 1920,
-                                container: "media",
-                                file: file,
-                                type: goodtype,
-                            })
-                        );
-                        mediaData.push({
-                            altText: mediaProps[i]?.altText,
-                            type: goodtype2,
-                        });
-                    }
-                }
-            }
-            const uploadResults = await Promise.all(uploadPromises);
-            const mediaUrls = uploadResults.map((res) => res.url);
-            const userMedia = mediaData.map((data, i) => {
-                return {
-                    ...data,
-                    url: mediaUrls[i],
-                };
-            });
-
             const hashtagex = /#[^ !"#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]*/g;
             const hashtagMatches = content.match(hashtagex);
             let hashtags: string[] = [];
@@ -250,7 +206,7 @@ const postRouter = s.router(apiContract.post, {
             const data = await prismaClient.post.create({
                 data: {
                     content: content,
-                    // userMedia: userMedia,
+                    userMedia: userMedia,
                     author: {
                         connect: { id: res.locals.user!.id },
                     },
@@ -397,5 +353,3 @@ const postRouter = s.router(apiContract.post, {
         },
     },
 });
-
-export { postRouter };

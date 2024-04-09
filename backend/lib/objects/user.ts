@@ -13,7 +13,7 @@ const personalUserInfoSelectObj = {
     userConfig: {
         select: {
             displayName: true,
-            imageUrl: true,
+            avatarUrl: true,
             bannerUrl: true,
             bio: true,
         },
@@ -100,7 +100,7 @@ const userProfileSelectObj = {
     userConfig: {
         select: {
             displayName: true,
-            imageUrl: true,
+            avatarUrl: true,
             bannerUrl: true,
             bio: true,
         },
@@ -225,7 +225,7 @@ const simpleUserInfoSelectObj = {
     userConfig: {
         select: {
             displayName: true,
-            imageUrl: true,
+            avatarUrl: true,
         },
     },
 } satisfies Prisma.UserSelect;
@@ -244,7 +244,7 @@ export async function simpleUserInfoFindMany(props: { username: string[] }): Pro
         return {
             ...rest,
             displayName: userConfig.displayName,
-            imageUrl: userConfig.imageUrl,
+            avatarUrl: userConfig.avatarUrl,
         };
     });
     return simpleUserInfo;

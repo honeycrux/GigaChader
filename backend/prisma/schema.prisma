@@ -64,7 +64,7 @@ enum Role {
 
 type UserConfig {
   displayName String   @default("")
-  imageUrl    String?
+  avatarUrl   String?
   bannerUrl   String?
   bio         String   @default("")
   lastUpdated DateTime @default(now()) @db.Date
@@ -237,7 +237,7 @@ model Community {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   handle        String   @unique
   displayedName String
-  imageUrl      String?
+  avatarUrl     String?
   bannerUrl     String?
   description   String   @default("")
   isExclusive   Boolean

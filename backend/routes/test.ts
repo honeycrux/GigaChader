@@ -1,11 +1,11 @@
 import { apiContract } from "#/shared/contracts";
-import { compressAndUploadMedia } from "@/lib/data/mediaHandler";
+import { checkMediaUpload, compressAndUploadMedia } from "@/lib/data/mediaHandler";
 import { TestUploadFiles, testUploadMiddleware } from "@/middlewares/mediaUpload";
 import { initServer } from "@ts-rest/express";
 
 const s = initServer();
 
-const testRouter = s.router(apiContract.test, {
+export const testRouter = s.router(apiContract.test, {
     upload: {
         middleware: [testUploadMiddleware],
         handler: async ({ req }) => {
@@ -17,11 +17,20 @@ const testRouter = s.router(apiContract.test, {
                     console.log(`[test/upload] received ${files.media.length} files.`);
                     for (const file of files.media) {
                         console.log(`Uploading file originally named ${file.originalname}`);
+                        const type = checkMediaUpload({ file: file, allowedTypes: ["IMAGE", "VIDEO"] });
+                        if (!type) {
+                            return {
+                                status: 400,
+                                body: {
+                                    error: `File type ${file.mimetype} is unsupported`,
+                                },
+                            };
+                        }
                         const response = await compressAndUploadMedia({
                             maxPixelSize: 1920,
                             container: "test",
                             file: file,
-                            type: "image",
+                            type: type,
                         });
                         console.log(`Destination url: ${response.url}`);
                         urls.push(response.url);
@@ -37,5 +46,3 @@ const testRouter = s.router(apiContract.test, {
         },
     },
 });
-
-export { testRouter };

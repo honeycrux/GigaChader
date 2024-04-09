@@ -24,26 +24,46 @@ const storagePathToUrl = (name: string) => `/image/${name}`;
 
 const urlToStoragePath = (url: string) => url.replace(/^\/image\//, "");
 
+export type SupportedMediaType = "IMAGE" | "VIDEO";
+const allSupportedTypes: SupportedMediaType[] = ["IMAGE", "VIDEO"];
+
+interface CheckUploadProps {
+    allowedTypes?: SupportedMediaType[];
+    file: Express.Multer.File;
+}
+export function checkMediaUpload(input: CheckUploadProps): SupportedMediaType | null {
+    const allowedTypes = input.allowedTypes || allSupportedTypes;
+    const allowedTypesLower = allowedTypes.map((s) => s.toLowerCase());
+    let type = input.file.mimetype.split("/")[0];
+    if (allowedTypesLower.indexOf(type) === -1) {
+        return null;
+    }
+    const typeUpper = type.toUpperCase() as SupportedMediaType;
+    return typeUpper;
+}
+
 interface CompressUploadProps {
     container: ExistingContainerName;
     file: Express.Multer.File;
-    type: "image" | "video";
+    type: SupportedMediaType;
     maxPixelSize: number;
 }
 // Uploads image and returns the new url
 export async function compressAndUploadMedia(input: CompressUploadProps) {
+    const type = input.type;
     let filebuf = input.file.buffer;
     const newFileName = generateFileName();
     let ext = mime.extension(input.file.mimetype);
 
-    if (input.type === "image") {
+    if (type === "IMAGE") {
         // resizing and compression
         const sharpInstance = sharp(input.file.buffer);
         filebuf = await sharpInstance.jpeg({ mozjpeg: true }).toBuffer();
         // compression disabled
         // .resize({ width: input.maxPixelSize, height: input.maxPixelSize, fit: "contain", withoutEnlargement: true })
         ext = "jpeg";
-    } else {
+    }
+    if (type === "VIDEO") {
         // video: no action for now
     }
 
@@ -52,7 +72,8 @@ export async function compressAndUploadMedia(input: CompressUploadProps) {
 
     const url = storagePathToUrl(blobName);
     return {
-        url,
+        url: url,
+        type: type,
         ...response,
     };
 }

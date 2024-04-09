@@ -10,7 +10,7 @@ import { postInfoFindManyOrdered } from "@/lib/objects/post";
 
 const s = initServer();
 
-const userRouter = s.router(apiContract.user, {
+export const userRouter = s.router(apiContract.user, {
     getInfo: {
         middleware: [protectRoute.user],
         handler: async ({ res }) => {
@@ -327,110 +327,44 @@ const userRouter = s.router(apiContract.user, {
     },
 
     userConfig: {
-        middleware: [protectRoute.user, profileUploadMiddleware],
-        handler: async ({ req, res, body: { username, displayName, bio, deleteAvatar, deleteBanner, cryptoBookmarks, cryptoHoldings } }) => {
+        middleware: [protectRoute.user],
+        handler: async ({ res, body: { displayName, bio, deleteAvatar, deleteBanner, avatarUrl, bannerUrl, cryptoBookmarks, cryptoHoldings } }) => {
             const changeObject: Prisma.UserUpdateInput = {};
-            if (username) {
-                const existing = await prismaClient.user.findUnique({
+
+            // handle old avatar/banner deletion
+            if (avatarUrl || deleteAvatar || bannerUrl || deleteBanner) {
+                const userdata = await prismaClient.user.findUnique({
                     select: {
-                        id: true,
+                        userConfig: {
+                            select: {
+                                avatarUrl: true,
+                                bannerUrl: true,
+                            },
+                        },
                     },
                     where: {
-                        username: username,
+                        id: res.locals.user!.id,
                     },
                 });
-                if (existing) {
-                    return {
-                        status: 400,
-                        body: { error: `Username ${username} was taken` },
-                    };
+                if (userdata) {
+                    if (userdata.userConfig.avatarUrl && (avatarUrl || deleteAvatar)) {
+                        // asynchronously delete old avatar
+                        deleteMedia({ url: userdata.userConfig.avatarUrl });
+                    }
+                    if (userdata.userConfig.bannerUrl && (bannerUrl || deleteBanner)) {
+                        // asynchronously delete old banner
+                        deleteMedia({ url: userdata.userConfig.bannerUrl });
+                    }
                 }
-                changeObject.username = username;
-                changeObject.accountInfoLastUpdated = new Date();
             }
 
             // handle changes to userConfig
-            let avatarFile: Express.Multer.File | undefined;
-            let bannerFile: Express.Multer.File | undefined;
-            const files = req.files as ProfileUploadFiles;
-            if (files) {
-                if (files.avatar) {
-                    avatarFile = files.avatar[0];
-                }
-                if (files.banner) {
-                    bannerFile = files.banner[0];
-                }
-            }
-            if (displayName || bio || deleteAvatar || deleteBanner || avatarFile || bannerFile) {
-                let newImageUrl: string | undefined;
-                let newBannerUrl: string | undefined;
-
-                if (avatarFile) {
-                    const data = await prismaClient.user.findUnique({
-                        select: {
-                            userConfig: {
-                                select: { imageUrl: true },
-                            },
-                        },
-                        where: {
-                            id: res.locals.user!.id,
-                        },
-                    });
-                    if (data?.userConfig.imageUrl) {
-                        // Delete image from storage
-                        const res = await deleteMedia({ url: data.userConfig.imageUrl });
-                        if (!res) {
-                            return {
-                                status: 400,
-                                body: { error: "Something went wrong when changing avatar" },
-                            };
-                        }
-                        // Upload media
-                        const res2 = await compressAndUploadMedia({
-                            maxPixelSize: 550,
-                            container: "avatar",
-                            file: avatarFile,
-                            type: "image",
-                        });
-                        newImageUrl = res2.url;
-                    }
-                }
-                if (bannerFile) {
-                    const data = await prismaClient.user.findUnique({
-                        select: {
-                            userConfig: {
-                                select: { bannerUrl: true },
-                            },
-                        },
-                        where: {
-                            id: res.locals.user!.id,
-                        },
-                    });
-                    if (data?.userConfig.bannerUrl) {
-                        // Delete image from storage
-                        const res = await deleteMedia({ url: data.userConfig.bannerUrl });
-                        if (!res) {
-                            return {
-                                status: 400,
-                                body: { error: "Something went wrong when changing banner" },
-                            };
-                        }
-                        // Upload media
-                        const res2 = await compressAndUploadMedia({
-                            maxPixelSize: 1080,
-                            container: "avatar",
-                            file: bannerFile,
-                            type: "image",
-                        });
-                        newBannerUrl = res2.url;
-                    }
-                }
-
+            if (displayName || bio || deleteAvatar || deleteBanner || avatarUrl || bannerUrl) {
                 changeObject.userConfig = {
                     update: {
                         displayName: displayName,
-                        imageUrl: newImageUrl ? newImageUrl : deleteAvatar ? null : undefined,
-                        bannerUrl: newBannerUrl ? newBannerUrl : deleteBanner ? null : undefined,
+                        avatarUrl: avatarUrl ? avatarUrl : deleteAvatar ? null : undefined,
+                        bannerUrl: bannerUrl ? bannerUrl : deleteBanner ? null : undefined,
                         bio: bio,
                         lastUpdated: new Date(),
                     },
@@ -571,5 +505,3 @@ const userRouter = s.router(apiContract.user, {
         },
     },
 });
-
-export { userRouter };

@@ -9,7 +9,7 @@ import { validateUser } from "@/middlewares/auth";
 
 const s = initServer();
 
-const authRouter = s.router(apiContract.auth, {
+export const authRouter = s.router(apiContract.auth, {
     signup: {
         handler: async ({ body, res }) => {
             const username: string | null = body.username ?? null;
@@ -227,5 +227,3 @@ const authRouter = s.router(apiContract.auth, {
         },
     },
 });
-
-export { authRouter };

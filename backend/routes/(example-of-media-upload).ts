@@ -1,25 +1,34 @@
 // import { profileUploadMiddleware, ProfileUploadFiles } from "@/middlewares/mediaUpload";
-// import { compressAndUploadMedia } from "@/lib/mediaHandler";
-//
+// import { checkMediaUpload, compressAndUploadMedia } from "@/lib/data/mediaHandler";
+
 // const someRouter = s.router(apiContract.something, {
 //     someField: {
 //         middleware: [profileUploadMiddleware],
 //         handler: async ({ req, res }) => {
 //             const files = req.files as ProfileUploadFiles;
 //             if (files) {
-//                 if ("avatar" in req.files) {
+//                 if (files.avatar) {
 //                     const avatarFile = files.avatar[0];
 //                     if (avatarFile) {
 //                         /* TODO: Delete the old avatar here */
-//
+
 //                         // Upload media
+//                         const type = checkMediaUpload({ file: avatarFile, allowedTypes: ["IMAGE", "VIDEO"] });
+//                         if (!type) {
+//                             return {
+//                                 status: 400,
+//                                 body: {
+//                                     error: `File type ${avatarFile.mimetype} is unsupported`,
+//                                 },
+//                             };
+//                         }
 //                         const response = await compressAndUploadMedia({
-//                             maxPixelSize: 300,
+//                             maxPixelSize: 550,
 //                             container: "avatar",
 //                             file: avatarFile,
-//                             type: "image",
+//                             type: type,
 //                         });
-//
+
 //                         /* TODO: Place response.url to the database */
 //                     }
 //                 }

@@ -19,7 +19,7 @@ interface Props {
   author: {
     username: string;
     displayName: string;
-    imageUrl: string;
+    avatarUrl: string;
     id: string;
   };
   createdAt: string;
