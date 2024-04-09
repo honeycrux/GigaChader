@@ -17,6 +17,7 @@ export const lucia = new Lucia(adapter, {
             // only essential attributes
             username: databaseUserAttributes.username,
             role: databaseUserAttributes.role,
+            suspended: databaseUserAttributes.suspended,
         };
     },
 });
@@ -33,5 +34,6 @@ type DatabaseUserAttributes = Prisma.UserGetPayload<{
         // only essential attributes
         username: true;
         role: true;
+        suspended: true;
     };
 }>;

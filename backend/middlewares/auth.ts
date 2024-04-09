@@ -5,6 +5,7 @@ import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
 import { Role } from "@prisma/client";
+import { prismaClient } from "@/lib/data/db";
 
 /* App-level middleware */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {
@@ -48,7 +49,7 @@ function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
     return async (req: any, res: Pick<Response, "status" | "json" | "end" | "locals" | "appendHeader">, next: NextFunction) => {
         await validateUser(req, res, function () {
             const result = (res: string) => `[middleware] protectRoute level=${restrictionLevel} result=${res}`;
-            if (!res.locals.user || !res.locals.session || allowedRoles.indexOf(res.locals.user.role) === -1) {
+            if (!res.locals.user || !res.locals.session || res.locals.user.suspended || allowedRoles.indexOf(res.locals.user.role) === -1) {
                 console.log(result("failed"));
                 return res
                     .status(401)
@@ -64,7 +65,7 @@ function protectionFunction(restrictionLevel: Role, allowedRoles: Role[]) {
 }
 
 // To get a specific authorization middleware, use this object (e.g. protectRoute.admin)
-export const protectRoute: Record<Lowercase<Role>, ReturnType<typeof protectionFunction>> = {
+export const protectRoute = {
     admin: protectionFunction("ADMIN", ["ADMIN"]),
     verified_user: protectionFunction("VERIFIED_USER", ["ADMIN", "VERIFIED_USER"]),
     user: protectionFunction("USER", ["ADMIN", "VERIFIED_USER", "USER"]),

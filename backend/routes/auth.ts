@@ -138,12 +138,17 @@ export const authRouter = s.router(apiContract.auth, {
             const password: string | null = body.password ?? null;
 
             const existingUser = await prismaClient.user.findUnique({
+                select: {
+                    id: true,
+                    suspended: true,
+                    password: true,
+                },
                 where: {
                     email: email,
                 },
             });
 
-            if (!existingUser) {
+            if (!existingUser || existingUser.suspended) {
                 // NOTE:
                 // Returning immediately allows malicious actors to figure out valid usernames from response times,
                 // allowing them to only focus on guessing passwords in brute-force attacks.

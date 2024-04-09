@@ -1,5 +1,6 @@
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
+import { lucia } from "@/lib/helpers/auth";
 import { postInfoFindManyOrdered } from "@/lib/objects/post";
 import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 import { protectRoute } from "@/middlewares/auth";
@@ -28,6 +29,7 @@ export const adminRouter = s.router(apiContract.admin, {
             if (set !== prerequest.suspended) {
                 const data = await prismaClient.user.update({
                     select: {
+                        id: true,
                         suspended: true,
                     },
                     where: {
@@ -42,6 +44,10 @@ export const adminRouter = s.router(apiContract.admin, {
                         status: 200,
                         body: { success: false },
                     };
+                }
+                if (set) {
+                    // Asynchronously invalidate this user's session tokens
+                    lucia.invalidateUserSessions(data.id);
                 }
             }
             return {

@@ -11,7 +11,6 @@ import { createLog } from "@/middlewares/logger";
 import { uploadErrorHandler } from "./middlewares/mediaUpload";
 import { downloadMedia } from "./lib/data/mediaHandler";
 import cors from "cors";
-// import cors from '@types/cors';
 
 // construct express app
 

@@ -9,6 +9,7 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 // and are useful for displaying or configuring in places other than user profile
 export const personalUserInfoSchema = z.object({
     username: z.string(),
+    suspended: z.boolean(),
     email: z.string(),
     role: userRoleSchema,
     userConfig: z.object({
@@ -33,6 +34,7 @@ export type PersonalUserInfo = z.infer<typeof personalUserInfoSchema>;
 // scope: information for user profile
 export const userProfileSchema = z.object({
     username: z.string(),
+    suspended: z.boolean(),
     userConfig: z.object({
         displayName: z.string(),
         avatarUrl: z.nullable(z.string()),
@@ -59,6 +61,7 @@ export type UserProfile = z.infer<typeof userProfileSchema>;
 // scope: the most basic information for displaying any user on the platform
 export const simpleUserInfoSchema = z.object({
     username: z.string(),
+    suspended: z.boolean(),
     displayName: z.string(),
     avatarUrl: z.nullable(z.string()),
 });

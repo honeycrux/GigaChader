@@ -8,6 +8,7 @@ import { Prisma } from "@prisma/client";
 
 const personalUserInfoSelectObj = {
     username: true,
+    suspended: true,
     email: true,
     role: true,
     userConfig: {
@@ -97,6 +98,7 @@ export async function personalUserInfoFindOne(props: { username: string }): Prom
 
 const userProfileSelectObj = {
     username: true,
+    suspended: true,
     userConfig: {
         select: {
             displayName: true,
@@ -222,6 +224,7 @@ export async function userProfileFindOne(props: { username: string; requesterId:
 
 const simpleUserInfoSelectObj = {
     username: true,
+    suspended: true,
     userConfig: {
         select: {
             displayName: true,

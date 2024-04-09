@@ -2,8 +2,6 @@ import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { protectRoute, validateUser } from "@/middlewares/auth";
-import { MediaUploadFiles, mediaUploadMiddleware } from "@/middlewares/mediaUpload";
-import { compressAndUploadMedia } from "@/lib/data/mediaHandler";
 import { postInfoFindManyOrdered, postInfoFindOne } from "@/lib/objects/post";
 import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 
@@ -48,7 +46,12 @@ export const postRouter = s.router(apiContract.post, {
                     },
                 },
                 where: {
-                    postId: postId,
+                    post: {
+                        id: postId,
+                    },
+                    user: {
+                        suspended: false,
+                    },
                 },
             });
             if (!data) {
@@ -80,7 +83,9 @@ export const postRouter = s.router(apiContract.post, {
                     id: true,
                 },
                 where: {
-                    parentPostId: postId,
+                    parentPost: {
+                        id: postId,
+                    },
                 },
             });
             if (!data) {
@@ -112,7 +117,9 @@ export const postRouter = s.router(apiContract.post, {
                     id: true,
                 },
                 where: {
-                    repostingPostId: postId,
+                    repostingPost: {
+                        id: postId,
+                    },
                 },
             });
             if (!data) {
@@ -141,6 +148,10 @@ export const postRouter = s.router(apiContract.post, {
                     id: true,
                 },
                 where: {
+                    suspended: false,
+                    author: {
+                        suspended: false,
+                    },
                     OR: [{ content: { contains: query } }, { author: { username: { contains: query } } }],
                 },
             });
@@ -172,6 +183,12 @@ export const postRouter = s.router(apiContract.post, {
                 select: {
                     id: true,
                 },
+                where: {
+                    suspended: false,
+                    author: {
+                        suspended: false,
+                    },
+                },
             });
             if (!data) {
                 return {
@@ -190,7 +207,7 @@ export const postRouter = s.router(apiContract.post, {
 
     postCreate: {
         middleware: [protectRoute.user],
-        handler: async ({ req, res, body: { content, repostingPostId, parentPostId, userMedia } }) => {
+        handler: async ({ res, body: { content, repostingPostId, parentPostId, userMedia } }) => {
             if (repostingPostId) {
                 const post = await prismaClient.post.findUnique({
                     select: {
@@ -198,6 +215,10 @@ export const postRouter = s.router(apiContract.post, {
                     },
                     where: {
                         id: repostingPostId,
+                        suspended: false,
+                        author: {
+                            suspended: false,
+                        },
                     },
                 });
                 if (!post) {
@@ -214,6 +235,10 @@ export const postRouter = s.router(apiContract.post, {
                     },
                     where: {
                         id: parentPostId,
+                        suspended: false,
+                        author: {
+                            suspended: false,
+                        },
                     },
                 });
                 if (!post) {
@@ -279,6 +304,24 @@ export const postRouter = s.router(apiContract.post, {
     postLike: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { postId, set } }) => {
+            const postdata = await prismaClient.post.findUnique({
+                select: {
+                    id: true,
+                },
+                where: {
+                    id: postId,
+                    suspended: false,
+                    author: {
+                        suspended: false,
+                    },
+                },
+            });
+            if (!postdata) {
+                return {
+                    status: 400,
+                    body: { error: `Post ${postId} does not exist` },
+                };
+            }
             const data = await prismaClient.post.update({
                 data: {
                     postLikes: set
@@ -332,6 +375,24 @@ export const postRouter = s.router(apiContract.post, {
     postSave: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { postId, set } }) => {
+            const postdata = await prismaClient.post.findUnique({
+                select: {
+                    id: true,
+                },
+                where: {
+                    id: postId,
+                    suspended: false,
+                    author: {
+                        suspended: false,
+                    },
+                },
+            });
+            if (!postdata) {
+                return {
+                    status: 400,
+                    body: { error: `Post ${postId} does not exist` },
+                };
+            }
             const data = await prismaClient.post.update({
                 data: {
                     postSaves: set

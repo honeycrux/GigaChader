@@ -2,9 +2,8 @@ import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { protectRoute, validateUser } from "@/middlewares/auth";
 import { prismaClient } from "@/lib/data/db";
-import { ProfileUploadFiles, profileUploadMiddleware } from "@/middlewares/mediaUpload";
 import { Prisma } from "@prisma/client";
-import { compressAndUploadMedia, deleteMedia } from "@/lib/data/mediaHandler";
+import { deleteMedia } from "@/lib/data/mediaHandler";
 import { personalUserInfoFindOne, simpleUserInfoFindManyOrdered, userProfileFindOne } from "@/lib/objects/user";
 import { postInfoFindManyOrdered } from "@/lib/objects/post";
 
@@ -42,13 +41,17 @@ export const userRouter = s.router(apiContract.user, {
                         select: {
                             targetId: true,
                         },
+                        where: {
+                            target: {
+                                suspended: false,
+                            },
+                        },
                     },
                 },
                 where: {
                     username: res.locals.user!.username,
                 },
             });
-
             if (!userdata) {
                 return {
                     status: 200,
@@ -72,9 +75,13 @@ export const userRouter = s.router(apiContract.user, {
                     id: true,
                 },
                 where: {
-                    authorId: {
-                        in: listOfFollowedUserIds,
+                    author: {
+                        id: {
+                            in: listOfFollowedUserIds,
+                        },
+                        suspended: false,
                     },
+                    suspended: false,
                 },
             });
             if (!data) {
@@ -134,6 +141,9 @@ export const userRouter = s.router(apiContract.user, {
                 },
                 where: {
                     targetId: userdata.id,
+                    initiator: {
+                        suspended: false,
+                    },
                 },
             });
             if (!data) {
@@ -193,6 +203,9 @@ export const userRouter = s.router(apiContract.user, {
                 },
                 where: {
                     initiatorId: userdata.id,
+                    target: {
+                        suspended: false,
+                    },
                 },
             });
             if (!data) {
@@ -238,7 +251,11 @@ export const userRouter = s.router(apiContract.user, {
                     id: true,
                 },
                 where: {
-                    authorId: userdata.id,
+                    author: {
+                        id: userdata.id,
+                        suspended: false,
+                    },
+                    suspended: false,
                     OR:
                         filter === "post"
                             ? [{ parentPostId: { isSet: false } }, { parentPostId: null }]
@@ -280,7 +297,9 @@ export const userRouter = s.router(apiContract.user, {
                     },
                 },
                 where: {
-                    userId: res.locals.user!.id,
+                    user: {
+                        id: res.locals.user!.id,
+                    },
                 },
             });
             if (!data) {
@@ -308,6 +327,7 @@ export const userRouter = s.router(apiContract.user, {
                     username: true,
                 },
                 where: {
+                    suspended: false,
                     OR: [{ username: { contains: query } }],
                 },
             });
@@ -432,6 +452,7 @@ export const userRouter = s.router(apiContract.user, {
                 },
                 where: {
                     username: username,
+                    suspended: false,
                 },
             });
             if (!userdata) {
