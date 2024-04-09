@@ -140,6 +140,9 @@ export const postRouter = s.router(apiContract.post, {
     postSearch: {
         middleware: [validateUser],
         handler: async ({ query: { query, from, limit }, res }) => {
+            const isTag = !!query.trim().match(/^#\S*$/g);
+            const tagText = query.trim().replace(/^#/g, "");
+            console.log(isTag, tagText);
             const data = await prismaClient.post.findMany({
                 take: limit,
                 cursor: from ? { id: from } : undefined,
@@ -152,7 +155,12 @@ export const postRouter = s.router(apiContract.post, {
                     author: {
                         suspended: false,
                     },
-                    OR: [{ content: { contains: query } }, { author: { username: { contains: query } } }],
+                    postHashtags: isTag
+                        ? {
+                              some: { tagText: { contains: tagText } },
+                          }
+                        : undefined,
+                    OR: isTag ? undefined : [{ content: { contains: query } }, { author: { username: { contains: query } } }],
                 },
             });
             if (!data) {
@@ -255,6 +263,8 @@ export const postRouter = s.router(apiContract.post, {
             if (hashtagMatches) {
                 // remove duplicate tags
                 hashtags = hashtagMatches.filter((tag, i) => hashtagMatches?.indexOf(tag) === i);
+                // remove preceding "#"
+                hashtags = hashtags.map((tag) => tag.replace(/^#/g, ""));
             }
 
             const data = await prismaClient.post.create({

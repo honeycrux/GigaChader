@@ -11,7 +11,7 @@ const s = initServer();
 export const adminRouter = s.router(apiContract.admin, {
     suspendUser: {
         middleware: [protectRoute.admin],
-        handler: async ({ body: { username, set } }) => {
+        handler: async ({ res, body: { username, set } }) => {
             const prerequest = await prismaClient.user.findUnique({
                 select: {
                     suspended: true,
@@ -46,9 +46,26 @@ export const adminRouter = s.router(apiContract.admin, {
                     };
                 }
                 if (set) {
-                    // Asynchronously invalidate this user's session tokens
-                    lucia.invalidateUserSessions(data.id);
+                    await lucia.invalidateUserSessions(data.id);
                 }
+                await prismaClient.moderationRecord.create({
+                    data: {
+                        comment: "",
+                        descriptor: "SUSPEND_USER",
+                        details: [{ user: { suspended: { from: !set, to: set } } }],
+                        initiator: {
+                            connect: {
+                                id: res.locals.user!.id,
+                            },
+                        },
+                        targetType: ["USER"],
+                        targetUser: {
+                            connect: {
+                                username: username,
+                            },
+                        },
+                    },
+                });
             }
             return {
                 status: 200,
@@ -59,7 +76,7 @@ export const adminRouter = s.router(apiContract.admin, {
 
     suspendPost: {
         middleware: [protectRoute.admin],
-        handler: async ({ body: { postId, set } }) => {
+        handler: async ({ res, body: { postId, set } }) => {
             const prerequest = await prismaClient.post.findUnique({
                 select: {
                     suspended: true,
@@ -92,6 +109,24 @@ export const adminRouter = s.router(apiContract.admin, {
                         body: { success: false },
                     };
                 }
+                await prismaClient.moderationRecord.create({
+                    data: {
+                        comment: "",
+                        descriptor: "SUSPEND_POST",
+                        details: [{ post: { suspended: { from: !set, to: set } } }],
+                        initiator: {
+                            connect: {
+                                id: res.locals.user!.id,
+                            },
+                        },
+                        targetType: ["POST"],
+                        targetPost: {
+                            connect: {
+                                id: postId,
+                            },
+                        },
+                    },
+                });
             }
             return {
                 status: 200,

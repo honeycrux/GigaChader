@@ -224,13 +224,14 @@ model PollVote {
 
 model PostHashtag {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
-  tagText String @unique
+  tagText String
 
   parentPostId String @db.ObjectId
 
   parentPost Post @relation(name: "PostHashtag", references: [id], fields: [parentPostId], onDelete: Cascade)
 
   @@unique([tagText, parentPostId])
+  @@index([tagText])
 }
 
 model Community {
