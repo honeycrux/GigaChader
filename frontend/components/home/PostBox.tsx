@@ -10,6 +10,7 @@ import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 import { Dialog } from "primereact/dialog";
 import { on } from "events";
+import { classNames } from "primereact/utils";
 interface Props {
   id: string;
   currentUserName: string; // for checking if the current user can delete a post
@@ -31,6 +32,7 @@ interface Props {
   bshowBorder?: boolean;
   onRepostSubmit?: any;
   likedByRequester: boolean;
+  userMedia?: any;
 }
 
 const PostBox = ({
@@ -49,6 +51,7 @@ const PostBox = ({
   bshowBorder = false,
   onRepostSubmit,
   likedByRequester,
+  userMedia,
 }: Props) => {
   // console.log("Likedbyrequester:", likedByRequester);
   const toast = useRef<Toast>(null);
@@ -71,6 +74,7 @@ const PostBox = ({
     bButtonvisible,
     bshowBorder,
     likedByRequester,
+    userMedia,
   };
 
   const [parentPost, setParentPost] = useState<any>();
@@ -191,6 +195,25 @@ const PostBox = ({
           </div>
           <div>
             <p>{content}</p>
+            {/* retrieve image */}
+            {userMedia && userMedia.length > 0 && (
+              <div className="flex flex-wrap">
+                {userMedia.map((media: { url: string; type: string }, index: number) => (
+                  <div key={index} className="my-2">
+                    {media.type === "IMAGE" ? (
+                      <Image src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} alt="image" preview
+                      pt={{
+                        image: { className: "rounded-lg" },
+                      }} />
+                    ) : (
+                      <video controls>
+                        <source src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} type="video/mp4" />
+                      </video>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
             {repostingPostId && parentPost && (
               <div className="border border-gray-500 rounded-lg m-2">
                 <PostBox {...parentPost} bButtonvisible={true} currentUserName={currentUserName} />

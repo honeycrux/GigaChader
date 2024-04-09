@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRef, useState, useEffect, Key } from "react";
+import { useRef, useState, useEffect, Key, memo } from "react";
 import { Image } from 'primereact/image';
 import cheem from "@/public/cheem.jpg";
 import { Avatar } from 'primereact/avatar';
@@ -11,7 +11,7 @@ import dummyPost from "@/dummy_data/dummyPosts.json";
 import { Dialog } from 'primereact/dialog';
 import { useAuthContext } from "@/providers/auth-provider";
 import { getUserInfo } from "@/lib/actions/user";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, axiosClient } from "@/lib/apiClient";
 import { set } from "zod";
 
 const home = () => {
@@ -31,7 +31,7 @@ const home = () => {
 
     const getFollowedPosts = async () => {
         const followedPosts = (await apiClient.user.getFeeds()).body;
-        // console.log(followedPosts);
+        console.log(followedPosts);
         setFollowedPosts(followedPosts);
     };
 
@@ -69,12 +69,28 @@ const home = () => {
 
     const handlePostSubmit = async () => {
         setbIsSummitingPost(true);
-        const res = await apiClient.post.postCreate({
-            body: {
-                content: postContent,
-                // mediaProps: []
-            },
-        });
+        if (!mediaPreview && !videoPreview) {
+            const res = await apiClient.post.postCreate({
+                body: {
+                    content: postContent,
+                    // mediaProps: []
+                },
+            });
+        } else if (mediaPreview) {
+            const res = await apiClient.post.postCreate({
+                body: {
+                    content: postContent,
+                    userMedia: [{ url: mediaPreview, type: "IMAGE" }]
+                },
+            });
+        } else if (videoPreview) {
+            const res = await apiClient.post.postCreate({
+                body: {
+                    content: postContent,
+                    userMedia: [{ url: videoPreview, type: "VIDEO" }]
+                },
+            });
+        }
         setbIsSummitingPost(false);
 
         // console.log(res);
@@ -88,50 +104,105 @@ const home = () => {
         setbAddPostDiagVisible(false);
     }
 
+    const [mediaPreview, setMediaPreview] = useState<any>();
+    const [videoPreview, setVideoPreview] = useState<any>();
+    const handleMediaUpload = async () => {
+        setMediaPreview(undefined);
+        setVideoPreview(undefined);
+        const formData = new FormData();
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*,video/*';
+        input.click();
+        input.addEventListener('change', async () => {
+            if (input.files) {
+                for (let i = 0; i < input.files.length; i++) {
+                    formData.append('media', input.files[i]);
+                }
+                const res = await apiClient.upload.uploadMedia({
+                    body: formData,
+                });
+                console.log(res);
+                if (res.status === 200 && res.body) {
+                    const mediaUrls: any = res.body.map((media: { type: "IMAGE" | "VIDEO"; url: string; }) => media.url);
+                    console.log(mediaUrls[0]);
+                    // axiosClient.get(mediaUrls[0], { responseType: 'blob' }).then((response) => {
+                    //     const reader = new FileReader();
+                    //     reader.readAsDataURL(response.data);
+                    //     reader.onload = () => {
+                    //         setMediaPreview(reader.result);
+                    //     }
+                    // });
+                    if (res.body[0].type === 'IMAGE') {
+                        setMediaPreview(mediaUrls[0]);
+                    } else {
+                        setVideoPreview(mediaUrls[0]);
+                    }
+                }
+            }
+        });
+    }
+
     const footerContent = (
         <Button label="Post" onClick={() => {
             // console.log('post content', postContent);
             handlePostSubmit();
         }} loading={bIsSummitingPost} />
     );
-    
-  return (
-    <>
-        <Dialog header="Create Post"
-        footer={footerContent}
-        visible={bAddPostDiagVisible} style={{ width: '50vw' }}
-        onHide={() => setbAddPostDiagVisible(false)}>
-            <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
-        </Dialog>
-        <Toast ref={toast}></Toast>
-        {/* main content start */}
-        <main className='flex w-full justify-center overflow-y-auto'>
-            {/* main content with margin */}
-            <div className="flex flex-col w-[60%] space-y-4">
-                <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">
-                    <p className="text-3xl font-bold">{bIsLoggedin ? "Home" : "All Posts"}</p>
-                    {bIsLoggedin && (
-                        <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />
+
+    return (
+        <>
+            <Dialog header="Create Post"
+                footer={footerContent}
+                visible={bAddPostDiagVisible} style={{ width: '50vw' }}
+                onHide={() => setbAddPostDiagVisible(false)}>
+                <div className="flex flex-col">
+                    <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
+                    <img src="/upload-image.svg" alt="upload image" className="cursor-pointer w-10"
+                        onClick={handleMediaUpload} />
+                    {mediaPreview &&
+                        <div>
+                            <p className="text-xl">Media Preview</p>
+                            <Image src={process.env.NEXT_PUBLIC_BACKEND_URL + mediaPreview} alt="media preview" preview />
+                        </div>}
+                    {videoPreview &&
+                        <div>
+                            <p className="text-xl">Video Preview</p>
+                            <video controls>
+                                <source src={process.env.NEXT_PUBLIC_BACKEND_URL + videoPreview} type="video/mp4" />
+                            </video>
+                        </div>}
+                </div>
+            </Dialog>
+            <Toast ref={toast}></Toast>
+            {/* main content start */}
+            <main className='flex w-full justify-center overflow-y-auto'>
+                {/* main content with margin */}
+                <div className="flex flex-col w-[60%] space-y-4">
+                    <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">
+                        <p className="text-3xl font-bold">{bIsLoggedin ? "Home" : "All Posts"}</p>
+                        {bIsLoggedin && (
+                            <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />
+                        )}
+                    </div>
+
+                    {globalFeeds && (
+                        globalFeeds.map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                    )}
+
+                    {(followedPosts && followedPosts.length > 0) && (
+                        followedPosts.map((post: any, index: Key | null | undefined) =>
+                            <PostBox key={index} {...post}
+                                currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)
+                    )}
+
+                    {((!globalFeeds && !followedPosts) || ((globalFeeds?.length === 0 || followedPosts?.length === 0))) && (
+                        <p className="text-xl">No posts to display yet ._.</p>
                     )}
                 </div>
-
-                {globalFeeds && (
-                    globalFeeds.map((post: any, index: Key | null | undefined) => <PostBox key={index} {...post} currentUserName={user?.username} />)
-                )}
-
-                {(followedPosts && followedPosts.length > 0) && (
-                    followedPosts.map((post: any, index: Key | null | undefined) => 
-                    <PostBox key={index} {...post} 
-                    currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)
-                )}
-
-                {((!globalFeeds && !followedPosts) || ((globalFeeds?.length === 0 || followedPosts?.length === 0))) && (
-                    <p className="text-xl">No posts to display yet ._.</p>
-                )}
-            </div>              
-        </main>
-        {/* main content end */}
-    </>
+            </main>
+            {/* main content end */}
+        </>
     )
 }
 
