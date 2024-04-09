@@ -50,7 +50,7 @@ const PostBox = ({
   onRepostSubmit,
   likedByRequester,
 }: Props) => {
-  console.log("Likedbyrequester:", likedByRequester);
+  // console.log("Likedbyrequester:", likedByRequester);
   const toast = useRef<Toast>(null);
   const [heartPath, setHeartPath] = useState("/heart.svg");
   const bisLiked = useRef(likedByRequester);
@@ -78,7 +78,7 @@ const PostBox = ({
   const getParentpostInfo = async () => {
     if (repostingPostId) {
       const res = await apiClient.post.getPost({ params: { postId: repostingPostId } });
-      console.log(res.body);
+      // console.log(res.body);
       setParentPost(res.body);
     }
   };
@@ -143,6 +143,8 @@ const PostBox = ({
     setVisible(true);
   };
   const handleRepostSubmit = async () => {
+    console.log(id, typeof id);
+
     const res = await apiClient.post.postCreate({
       body: {
         content: postContent,
@@ -164,6 +166,14 @@ const PostBox = ({
     </div>
   );
 
+  const [bookmarkPath, setBookmarkPath] = useState("/bookmark_empty.svg");
+  const handleBookmarkClick = () => {
+    if (bookmarkPath === "/bookmark_empty.svg") {
+      setBookmarkPath("/bookmark_filled.svg");
+    } else {
+      setBookmarkPath("/bookmark_empty.svg");
+    }
+  };
   return (
     <div className="flex flex-col w-full bg-orange2 rounded-2xl p-4">
       <Toast ref={toast}></Toast>
@@ -195,6 +205,7 @@ const PostBox = ({
                 <Image src="/comment.svg" width="24" alt="comment" className="cursor-pointer" />
               </Link>
               {currentUserName && <Image src="/retweet-round.svg" width="24" alt="repost" onClick={handleRepostClick} className="cursor-pointer" />}
+              {currentUserName && <Image src={bookmarkPath}  width="24" alt="bookmark" onClick={handleBookmarkClick} className="cursor-pointer" />}
               <span className="text-gray-600 text-sm">
                 {likeCountInternal} like(s), {commentCount} comment(s)
               </span>

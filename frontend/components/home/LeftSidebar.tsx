@@ -37,6 +37,8 @@ const LeftSidebar = () => {
             setSelectedButton('Activity');
         } else if (pathname.includes('profile')) {
             setSelectedButton('Profile');
+        }else if (pathname.includes('bookmarks')) {
+            setSelectedButton('Bookmarks');
         }
     }, [pathname]); // Re-run the effect when `pathname` changes
   return (
@@ -72,6 +74,13 @@ const LeftSidebar = () => {
                 >
                     <i className="pi pi-user text-2xl"></i>
                     <span className="ml-3 text-2xl">Profile</span>
+                </button>
+                <button
+                    className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === 'Bookmarks' ? 'bg-orange1 text-white' : ' text-black'}`}
+                    onClick={() => {setSelectedButton('Bookmarks'); router.push('/bookmarks')}}
+                >
+                    <i className="pi pi-bookmark text-2xl"></i>
+                    <span className="ml-3 text-2xl">Bookmarks</span>
                 </button>
                 <button
                     className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === 'Crypto' ? 'bg-orange1 text-white' : ' text-black'}`}
