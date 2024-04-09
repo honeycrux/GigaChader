@@ -130,6 +130,35 @@ export const postRouter = s.router(apiContract.post, {
         },
     },
 
+    postSearch: {
+        middleware: [validateUser],
+        handler: async ({ query: { query, from, limit }, res }) => {
+            const data = await prismaClient.post.findMany({
+                take: limit,
+                cursor: from ? { id: from } : undefined,
+                skip: from ? 1 : undefined,
+                select: {
+                    id: true,
+                },
+                where: {
+                    OR: [{ content: { contains: query } }, { author: { username: { contains: query } } }],
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+            const postlist = data.map((post) => post.id);
+            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
+            return {
+                status: 200,
+                body: postinfo,
+            };
+        },
+    },
+
     getGlobalFeeds: {
         middleware: [validateUser],
         handler: async ({ query: { from, limit }, res }) => {

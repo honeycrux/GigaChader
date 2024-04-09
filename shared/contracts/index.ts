@@ -7,6 +7,7 @@ import { userContract } from "./user";
 import { cryptoContract } from "./crypto";
 import { uploadContract } from "./upload";
 import { testContract } from "./test";
+import { adminContract } from "./admin";
 
 const c = initContract();
 export const apiContract = c.router({
@@ -15,5 +16,6 @@ export const apiContract = c.router({
     user: userContract,
     crypto: cryptoContract,
     upload: uploadContract,
+    admin: adminContract,
     test: testContract,
 });

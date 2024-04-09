@@ -56,6 +56,20 @@ export const postContract = c.router({
         summary: "Get reposts on a post",
     },
 
+    postSearch: {
+        method: "GET",
+        path: "/api/post/search",
+        query: z.object({
+            query: z.string(),
+            from: z.optional(z.string()),
+            limit: z.optional(z.coerce.number().int().min(1)),
+        }),
+        responses: {
+            200: z.array(postInfoSchema).nullable(),
+        },
+        summary: "Search for post by context or username",
+    },
+
     getGlobalFeeds: {
         method: "GET",
         path: "/api/post/global-feeds",
