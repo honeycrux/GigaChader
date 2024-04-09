@@ -117,7 +117,20 @@ const profile = ({ params }: { params: { username: string } }) => {
   const [selectedButton, setSelectedButton] = useState("Posts");
 
   const handleSaveProfile = async () => {
-    const res = await apiClient.user.userConfig({ body: { displayName: editDisplayName, bio: editBio } });
+    const userConfig: { displayName: string; bio: string; avatarUrl?: string; bannerUrl?: string; } = {
+      displayName: editDisplayName,
+      bio: editBio,
+    };
+
+    if (editAvatarUrl) {
+      userConfig.avatarUrl = editAvatarUrl;
+    }
+
+    if (editBannerUrl) {
+      userConfig.bannerUrl = editBannerUrl;
+    }
+
+    const res = await apiClient.user.userConfig({ body: userConfig });
     console.log(res);
     const userinfo_fetched = await getUserInfo();
     if ("error" in userinfo_fetched) {
@@ -130,13 +143,61 @@ const profile = ({ params }: { params: { username: string } }) => {
     setbEditProfileDiagVisible(false);
   }
 
+  const [editBannerUrl, setEditBannerUrl] = useState<any>();
+  const handleEditBannerClicked = () => {
+    const formData = new FormData();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.click();
+    input.addEventListener('change', async () => {
+      if (input.files) {
+        for (let i = 0; i < input.files.length; i++) {
+          formData.append('banner', input.files[i]);
+        }
+        const res = await apiClient.upload.uploadProfile({
+          body: formData,
+        });
+        console.log(res);
+        if (res.status === 200 && res.body) {
+          const bannerUrl = res.body.bannerUrl;
+          setEditBannerUrl(bannerUrl);
+        }
+      }
+    });
+  }
+
+  const [editAvatarUrl, setEditAvatarUrl] = useState<any>();
+  const handleEditProfilePicClicked = () => {
+    const formData = new FormData();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.click();
+    input.addEventListener('change', async () => {
+      if (input.files) {
+        for (let i = 0; i < input.files.length; i++) {
+          formData.append('avatar', input.files[i]);
+        }
+        const res = await apiClient.upload.uploadProfile({
+          body: formData,
+        });
+        console.log(res);
+        if (res.status === 200 && res.body) {
+          const avatarUrl = res.body.avatarUrl;
+          setEditAvatarUrl(avatarUrl);
+        }
+      }
+    });
+  }
+
   const footerElement = (
     <div>
       <Button label="Save" icon="pi pi-check" onClick={handleSaveProfile} />
     </div>
   );
   const [editDisplayName, setEditDisplayName] = useState("");
-  const [editUsername, setEditUsername] = useState("");
+  // const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
 
   const [bHasFollowed, setbHasFollowed] = useState<boolean>(false);
@@ -161,24 +222,29 @@ const profile = ({ params }: { params: { username: string } }) => {
           <div className="flex flex-col w-full bg-[#e5eeee] relative">
             <Image
               className="z-0 h-40"
-              src="/art-rachen-yJpjLD3c9bU-unsplash.jpg"
-              alt="profile background pic"
+              src={(editBannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl) ||
+                (userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) ||
+                ""}
+              // alt="profile background pic"
               pt={{
+                root: { className: "cursor-pointer" },
                 image: { className: "object-cover h-full w-full" },
                 previewContainer: { className: "z-20" },
               }}
-              preview
+              onClick={handleEditBannerClicked}
             />
             <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
-              <div className="flex mb-4">
+              <div className="flex mb-4 w-fit">
                 <Image
-                  src="/cheem.jpg"
+                  src={(editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) || 
+                    (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
+                    "/placeholder_profilePic_white-bg.jpg"}
                   alt="profile pic"
                   pt={{
-                    image: { className: "rounded-full h-36 w-36 object-cover" },
+                    image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
                     previewContainer: { className: "z-20" },
                   }}
-                  preview
+                  onClick={handleEditProfilePicClicked}
                 />
               </div>
               <div className="[&>div]:mb-4">
@@ -208,7 +274,8 @@ const profile = ({ params }: { params: { username: string } }) => {
       <div className="flex flex-col w-full bg-[#e5eeee] relative">
         <Image
           className="z-0 h-72"
-          src="/art-rachen-yJpjLD3c9bU-unsplash.jpg"
+          src={(userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) || 
+            ""}
           alt="profile background pic"
           pt={{
             image: { className: "object-cover h-full w-full" },
@@ -219,7 +286,8 @@ const profile = ({ params }: { params: { username: string } }) => {
         <div ref={divRef} className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
           <div className="flex mb-4">
             <Image
-              src="/cheem.jpg"
+              src={(userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) || 
+                "/placeholder_profilePic_white-bg.jpg"}
               alt="profile pic"
               pt={{
                 image: { className: "rounded-full h-36 w-36 object-cover" },
@@ -233,7 +301,7 @@ const profile = ({ params }: { params: { username: string } }) => {
             </div>
           </div>
           <p className="text-xl whitespace-pre-wrap max-w-96">
-           {userinfo && userinfo.userConfig.bio}
+            {userinfo && userinfo.userConfig.bio}
           </p>
         </div>
 
@@ -256,9 +324,9 @@ const profile = ({ params }: { params: { username: string } }) => {
             label="Posts"
             text
             onClick={() => setSelectedButton("Posts")}
-            // pt={{
-            //   root: {className: "!border-0"},
-            // }}
+          // pt={{
+          //   root: {className: "!border-0"},
+          // }}
           />
           <Button
             className={`w-full ${selectedButton === "Replies" ? "border-0 !border-b-2 border-orange1" : ""}`}
