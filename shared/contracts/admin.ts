@@ -45,6 +45,7 @@ export const adminContract = c.router({
         method: "GET",
         path: "/api/admin/list-users",
         query: z.object({
+            query: z.string(),
             from: z.optional(z.string()),
             limit: z.optional(z.coerce.number().int().min(1)),
         }),
@@ -58,6 +59,7 @@ export const adminContract = c.router({
         method: "GET",
         path: "/api/admin/list-posts",
         query: z.object({
+            query: z.string(),
             from: z.optional(z.string()),
             limit: z.optional(z.coerce.number().int().min(1)),
         }),

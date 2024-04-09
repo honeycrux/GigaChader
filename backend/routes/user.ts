@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import { deleteMedia } from "@/lib/data/mediaHandler";
 import { personalUserInfoFindOne, simpleUserInfoFindManyOrdered, userProfileFindOne } from "@/lib/objects/user";
 import { postInfoFindManyOrdered } from "@/lib/objects/post";
+import { searchUser } from "@/lib/helpers/search";
 
 const s = initServer();
 
@@ -319,29 +320,10 @@ export const userRouter = s.router(apiContract.user, {
 
     userSearch: {
         handler: async ({ query: { query, from, limit } }) => {
-            const data = await prismaClient.user.findMany({
-                take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
-                select: {
-                    username: true,
-                },
-                where: {
-                    suspended: false,
-                    OR: [{ username: { contains: query } }],
-                },
-            });
-            if (!data) {
-                return {
-                    status: 200,
-                    body: null,
-                };
-            }
-            const userlist = data.map((user) => user.username);
-            const userinfo = await simpleUserInfoFindManyOrdered({ username: userlist });
+            const result = await searchUser({ query, from, limit });
             return {
                 status: 200,
-                body: userinfo,
+                body: result,
             };
         },
     },

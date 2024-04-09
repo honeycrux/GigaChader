@@ -1,6 +1,7 @@
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { lucia } from "@/lib/helpers/auth";
+import { searchPost, searchUser } from "@/lib/helpers/search";
 import { postInfoFindManyOrdered } from "@/lib/objects/post";
 import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 import { protectRoute } from "@/middlewares/auth";
@@ -137,58 +138,22 @@ export const adminRouter = s.router(apiContract.admin, {
 
     opListUsers: {
         middleware: [protectRoute.admin],
-        handler: async ({ query: { from, limit } }) => {
-            const data = await prismaClient.user.findMany({
-                take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
-                select: {
-                    username: true,
-                },
-                orderBy: {
-                    createdAt: "desc",
-                },
-            });
-            if (!data) {
-                return {
-                    status: 200,
-                    body: null,
-                };
-            }
-            const userlist = data.map((user) => user.username);
-            const userinfo = await simpleUserInfoFindManyOrdered({ username: userlist });
+        handler: async ({ query: { query, from, limit } }) => {
+            const result = await searchUser({ query, from, limit, previliged: true });
             return {
                 status: 200,
-                body: userinfo,
+                body: result,
             };
         },
     },
 
     opListPosts: {
         middleware: [protectRoute.admin],
-        handler: async ({ query: { from, limit }, res }) => {
-            const data = await prismaClient.post.findMany({
-                take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
-                select: {
-                    id: true,
-                },
-                orderBy: {
-                    createdAt: "desc",
-                },
-            });
-            if (!data) {
-                return {
-                    status: 200,
-                    body: null,
-                };
-            }
-            const postlist = data.map((post) => post.id);
-            const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
+        handler: async ({ query: { query, from, limit }, res }) => {
+            const result = await searchPost({ query, from, limit, previliged: true, requesterId: res.locals.user!.id });
             return {
                 status: 200,
-                body: postinfo,
+                body: result,
             };
         },
     },
