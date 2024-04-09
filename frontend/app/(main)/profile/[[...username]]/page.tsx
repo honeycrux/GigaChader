@@ -46,6 +46,8 @@ const profile = ({ params }: { params: { username: string } }) => {
             console.log("Your own profile requested not found");
           } else {
             setUserinfo(userinfo_fetched);
+            setEditDisplayName(userinfo_fetched.userConfig.displayName);
+            setEditBio(userinfo_fetched.userConfig.bio);
           }
         }
       } else {
@@ -110,13 +112,27 @@ const profile = ({ params }: { params: { username: string } }) => {
     if (divRef.current) {
       setMarginTop(divRef.current.clientHeight - 70);
     }
-  }, []);
+  }, [userinfo]);
 
   const [selectedButton, setSelectedButton] = useState("Posts");
 
+  const handleSaveProfile = async () => {
+    const res = await apiClient.user.userConfig({ body: { displayName: editDisplayName, bio: editBio } });
+    console.log(res);
+    const userinfo_fetched = await getUserInfo();
+    if ("error" in userinfo_fetched) {
+      console.log("Your own profile requested not found");
+    } else {
+      setUserinfo(userinfo_fetched);
+      setEditDisplayName(userinfo_fetched.userConfig.displayName);
+      setEditBio(userinfo_fetched.userConfig.bio);
+    }
+    setbEditProfileDiagVisible(false);
+  }
+
   const footerElement = (
     <div>
-      <Button label="Save" icon="pi pi-check" />
+      <Button label="Save" icon="pi pi-check" onClick={handleSaveProfile} />
     </div>
   );
   const [editDisplayName, setEditDisplayName] = useState("");
@@ -156,7 +172,7 @@ const profile = ({ params }: { params: { username: string } }) => {
             <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
               <div className="flex mb-4">
                 <Image
-                  src="/anh-meme-cheems-hmmm.jpg"
+                  src="/cheem.jpg"
                   alt="profile pic"
                   pt={{
                     image: { className: "rounded-full h-36 w-36 object-cover" },
@@ -170,10 +186,10 @@ const profile = ({ params }: { params: { username: string } }) => {
                 <div className="flex w-96">
                   <InputText className="w-full" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} />
                 </div>
-                <p className="text-xl">Username</p>
+                {/* <p className="text-xl">Username</p>
                 <div className="flex w-96">
                   <InputText className="w-full" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
-                </div>
+                </div> */}
                 <p className="text-xl">Bio</p>
                 <div className="flex w-96">
                   <InputTextarea className="w-full" value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
@@ -203,7 +219,7 @@ const profile = ({ params }: { params: { username: string } }) => {
         <div ref={divRef} className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
           <div className="flex mb-4">
             <Image
-              src="/anh-meme-cheems-hmmm.jpg"
+              src="/cheem.jpg"
               alt="profile pic"
               pt={{
                 image: { className: "rounded-full h-36 w-36 object-cover" },
@@ -217,7 +233,7 @@ const profile = ({ params }: { params: { username: string } }) => {
             </div>
           </div>
           <p className="text-xl whitespace-pre-wrap max-w-96">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+           {userinfo && userinfo.userConfig.bio}
           </p>
         </div>
 

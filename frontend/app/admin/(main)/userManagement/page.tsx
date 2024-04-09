@@ -10,6 +10,7 @@ import { apiClient } from '@/lib/apiClient';
 const userManagement = () => {
 
     const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+    const [showUnsuspendDialog, setShowUnsuspendDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -32,7 +33,15 @@ const userManagement = () => {
             <div>
                 <Button label="Yes" className="p-button-danger" onClick={() => handleSuspendUser()} />
                 <Button label="No" className="p-button" onClick={() => setShowSuspendDialog(false)} />
+            </div>
+        );
+    };
 
+    const renderUnsuspendFooter = () => {
+        return (
+            <div>
+                <Button label="Yes" className="p-button-danger" onClick={() => handleUnsuspendUser()} />
+                <Button label="No" className="p-button" onClick={() => setShowUnsuspendDialog(false)} />
             </div>
         );
     };
@@ -42,11 +51,26 @@ const userManagement = () => {
         setShowSuspendDialog(true);
     };
 
-    const handleSuspendUser = () => {
+    const handleUnsuspendClick = (user: any) => {
+        setSelectedUser(user);
+        setShowUnsuspendDialog(true);
+    }
+
+    const handleSuspendUser = async () => {
         // Add logic here to Suspend the user
-        console.log("(fake) user " + selectedUser.username + " suspended");
+        // console.log("(fake) user " + selectedUser.username + " suspended");
+        const res = await apiClient.admin.suspendUser({ body: { username: selectedUser.username, set: true } });  
+        console.log(res);
         setShowSuspendDialog(false);
     };
+
+    const handleUnsuspendUser = async () => {
+        // Add logic here to Unsuspend the user
+        // console.log("(fake) user " + selectedUser.username + " unsuspended");
+        const res = await apiClient.admin.suspendUser({ body: { username: selectedUser.username, set: false } });  
+        console.log(res);
+        setShowUnsuspendDialog(false);
+    }
 
     const [selectedUser, setSelectedUser] = useState({ id: '', username: '', displayName: '' });
     const handleEditClick = (user: any) => { // Add this function
@@ -71,7 +95,20 @@ const userManagement = () => {
         return (
             <Dialog visible={showSuspendDialog} className='w-[50vw]' header="Delete User"
                 modal footer={renderFooter()} onHide={() => setShowSuspendDialog(false)}>
-                <p className='text-xl font-bold'>Confirm delete the following user?</p>
+                <p className='text-xl font-bold'>Confirm suspend the following user?</p>
+                {/* <p>UserID: {selectedUser.id}</p> */}
+                <p>Username: {selectedUser.username}</p>
+                <p>Display Name: {selectedUser.displayName}</p>
+            </Dialog>
+        );
+    };
+
+    const renderUnsuspendDialog = () => {
+        // if (!selectedUser) return null;
+        return (
+            <Dialog visible={showUnsuspendDialog} className='w-[50vw]' header="Delete User"
+                modal footer={renderUnsuspendFooter()} onHide={() => setShowUnsuspendDialog(false)}>
+                <p className='text-xl font-bold'>Confirm unsuspend the following user?</p>
                 {/* <p>UserID: {selectedUser.id}</p> */}
                 <p>Username: {selectedUser.username}</p>
                 <p>Display Name: {selectedUser.displayName}</p>
@@ -102,15 +139,17 @@ const userManagement = () => {
                                 {/* <th className="px-8 py-2">UserID</th> */}
                                 <th className="px-8 py-2">Username</th>
                                 <th className="px-8 py-2">Display Name</th>
+                                <th className="px-8 py-2">Suspend Status</th>
                                 <th className="px-8 py-2">Action</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm font-normal text-gray-700">
-                            {searchResult && searchResult.map((user: any) => (
-                                <tr className="hover:bg-gray-100 border-b border-gray-300 py-10" key={user.username}>
+                            {searchResult && searchResult.map((user: any, index: number) => (
+                                <tr className="hover:bg-gray-100 border-b border-gray-300 py-10" key={index}>
                                     {/* <td className="px-8 py-4">{user.id}</td> */}
                                     <td className="px-8 py-4">{user.username}</td>
                                     <td className="px-8 py-4">{user.displayName}</td>
+                                    <td className="px-8 py-4">{user.suspended.toString()}</td>
                                     <td className="px-8 py-4 flex space-x-4">
                                         {/* <button className="bg-orange1  text-white py-2 px-10 rounded-lg"
                                             onClick={() => handleEditClick(user)}>
@@ -118,7 +157,11 @@ const userManagement = () => {
                                         </button> */}
                                         <button className="bg-red-500 text-white py-2 px-7 rounded-lg"
                                             onClick={() => handleSuspendClick(user)}>
-                                            Delete
+                                            Suspend
+                                        </button>
+                                        <button className="bg-orange1 text-white py-2 px-7 rounded-lg"
+                                            onClick={() => handleUnsuspendClick(user)}>
+                                            Unsuspend
                                         </button>
                                     </td>
                                 </tr>
@@ -127,6 +170,7 @@ const userManagement = () => {
                     </table>
                     {renderEditDialog()}
                     {renderSuspendDialog()}
+                    {renderUnsuspendDialog()}
                 </div>
 
             </main>
