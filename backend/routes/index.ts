@@ -9,6 +9,7 @@ import { cryptoRouter } from "./crypto";
 import { uploadRouter } from "./upload";
 import { testRouter } from "./test";
 import { adminRouter } from "./admin";
+import { trendsRouter } from "./trends";
 
 // construct all API routes
 
@@ -21,6 +22,7 @@ const apiRouter = s.router(apiContract, {
     crypto: cryptoRouter,
     upload: uploadRouter,
     admin: adminRouter,
+    trends: trendsRouter,
     test: testRouter,
 });
 

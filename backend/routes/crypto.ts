@@ -45,11 +45,14 @@ export const cryptoRouter = s.router(apiContract.crypto, {
                 take: limit,
                 cursor: from ? { cryptoId: from } : undefined,
                 skip: from ? 1 : undefined,
+                orderBy: {
+                    cryptoId: "asc",
+                },
                 select: {
                     cryptoId: true,
                 },
                 where: {
-                    OR: [{ symbol: { contains: query } }, { name: { contains: query } }, { cryptoId: { contains: query } }],
+                    OR: [{ symbol: { startsWith: query } }, { name: { startsWith: query } }, { cryptoId: { startsWith: query } }],
                 },
             });
             if (!data) {

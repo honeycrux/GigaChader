@@ -2,8 +2,6 @@ import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { lucia } from "@/lib/helpers/auth";
 import { searchPost, searchUser } from "@/lib/helpers/search";
-import { postInfoFindManyOrdered } from "@/lib/objects/post";
-import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 import { protectRoute } from "@/middlewares/auth";
 import { initServer } from "@ts-rest/express";
 

@@ -21,7 +21,7 @@ export async function searchUser({ query, from, limit, previliged }: SearchUserP
         },
         where: {
             suspended: previliged ? undefined : false,
-            OR: [{ username: { contains: query } }],
+            OR: [{ username: { startsWith: query } }],
         },
     });
     if (!data) {
@@ -40,6 +40,8 @@ type SearchPostProps = {
     requesterId: string | undefined;
 };
 export async function searchPost({ query, from, limit, previliged, requesterId }: SearchPostProps) {
+    const isTopic = !!query.trim().match(/^[Tt]opic:/g);
+    const topicText = query.trim().replace(/^[Tt]opic:/g, "");
     const isTag = !!query.trim().match(/^#\S*$/g);
     const tagText = query.trim().replace(/^#/g, "");
     const data = await prismaClient.post.findMany({
@@ -59,12 +61,17 @@ export async function searchPost({ query, from, limit, previliged, requesterId }
                 : {
                       suspended: false,
                   },
-            postHashtags: isTag
+            postCryptoTopics: isTopic
                 ? {
-                      some: { tagText: { contains: tagText } },
+                      some: { OR: [{ cryptoId: { startsWith: topicText } }] },
                   }
                 : undefined,
-            OR: isTag ? undefined : [{ content: { contains: query } }, { author: { username: { contains: query } } }],
+            postHashtags: isTag
+                ? {
+                      some: { tagText: { startsWith: tagText } },
+                  }
+                : undefined,
+            OR: isTopic || isTag ? undefined : [{ content: { contains: query } }, { author: { username: { startsWith: query } } }],
         },
     });
     if (!data) {
