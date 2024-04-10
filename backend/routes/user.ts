@@ -391,8 +391,13 @@ export const userRouter = s.router(apiContract.user, {
 
     userConfig: {
         middleware: [protectRoute.user],
-        handler: async ({ res, body: { displayName, bio, deleteAvatar, deleteBanner, avatarUrl, bannerUrl, cryptoBookmarks, cryptoHoldings } }) => {
-            const changeObject: Prisma.UserUpdateInput = {};
+        handler: async ({
+            res,
+            body: { displayName, bio, onBoardingCompleted, deleteAvatar, deleteBanner, avatarUrl, bannerUrl, cryptoBookmarks, cryptoHoldings },
+        }) => {
+            const changeObject: Prisma.UserUpdateInput = {
+                onBoardingCompleted: onBoardingCompleted,
+            };
 
             // handle old avatar/banner deletion
             if (avatarUrl || deleteAvatar || bannerUrl || deleteBanner) {

@@ -10,6 +10,7 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 export const personalUserInfoSchema = z.object({
     username: z.string(),
     suspended: z.boolean(),
+    onBoardingCompleted: z.boolean(),
     email: z.string(),
     role: userRoleSchema,
     userConfig: z.object({
@@ -87,6 +88,7 @@ export const userConfigProps = z.object({
     deleteBanner: z.optional(z.boolean()),
     avatarUrl: z.optional(z.string()),
     bannerUrl: z.optional(z.string()),
+    onBoardingCompleted: z.optional(z.boolean()),
     // UserCryptoInfo
     cryptoBookmarks: z.optional(z.array(z.string())),
     cryptoHoldings: z.optional(

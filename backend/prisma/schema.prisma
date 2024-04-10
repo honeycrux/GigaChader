@@ -41,6 +41,7 @@ model User {
   userConfig             UserConfig
   userCryptoInfo         UserCryptoInfo
   suspended              Boolean        @default(false)
+  onBoardingCompleted    Boolean        @default(false)
 
   followers              UserFollow[]         @relation(name: "UserFollowTarget")
   followedUsers          UserFollow[]         @relation(name: "UserFollow")

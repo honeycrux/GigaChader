@@ -9,6 +9,7 @@ import { Prisma } from "@prisma/client";
 const personalUserInfoSelectObj = {
     username: true,
     suspended: true,
+    onBoardingCompleted: true,
     email: true,
     role: true,
     userConfig: {
