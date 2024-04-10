@@ -86,11 +86,35 @@ function DiscoverPage() {
         <div className="flex w-full justify-center overflow-y-auto mt-5">
           <div className="flex flex-col w-[60%] space-y-4">
             {selectedButton === "Posts" ? (
-              trendingPosts && trendingPosts.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+              trendingPosts ? (
+                trendingPosts.length > 0 ? (
+                  trendingPosts.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                ) : (
+                  <p className="text-center">No trending post</p>
+                )
+              ) : (
+                <p className="text-center">Not loaded yet</p>
+              )
             ) : selectedButton === "Hashtags" ? (
-              trendingHashtags && trendingHashtags.map((hashtag, index) => <HashtagCard key={index} index={index} {...hashtag} />)
+              trendingHashtags ? (
+                trendingHashtags.length > 0 ? (
+                  trendingHashtags.map((hashtag, index) => <HashtagCard key={index} index={index} {...hashtag} />)
+                ) : (
+                  <p className="text-center">No trending hashtags</p>
+                )
+              ) : (
+                <p className="text-center">Not loaded yet</p>
+              )
             ) : selectedButton === "Topics" ? (
-              trendingTopics && trendingTopics.map((data, index) => <CryptoTopicCard key={index} index={index} {...data} />)
+              trendingTopics ? (
+                trendingTopics.length > 0 ? (
+                  trendingTopics.map((data, index) => <CryptoTopicCard key={index} index={index} {...data} />)
+                ) : (
+                  <p className="text-center">No trending topics</p>
+                )
+              ) : (
+                <p className="text-center">Not loaded yet</p>
+              )
             ) : (
               <></>
             )}

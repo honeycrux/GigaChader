@@ -336,12 +336,12 @@ export const userRouter = s.router(apiContract.user, {
                 cursor: mode === "read" && from ? { id: from } : undefined,
                 skip: mode === "read" && from ? 1 : undefined,
                 orderBy: {
-                    createdAt: "asc",
+                    createdAt: "desc",
                 },
                 where: {
                     unread: mode === "unread" ? true : false,
                     receiver: {
-                        username: res.locals.user!.id,
+                        id: res.locals.user!.id,
                     },
                 },
             });
@@ -352,26 +352,39 @@ export const userRouter = s.router(apiContract.user, {
                 };
             }
 
-            // mark unread posts as read
-            const unreadPostIds = notifdata.filter((notif) => notif.unread).map((notif) => notif.id);
-            if (unreadPostIds.length > 0) {
-                await prismaClient.notification.updateMany({
-                    data: {
-                        unread: false,
-                    },
-                    where: {
-                        id: {
-                            in: unreadPostIds,
-                        },
-                    },
-                });
-            }
-
             return {
                 status: 200,
                 body: notifdata.map(({ content, link, unread, createdAt }) => {
                     return { content, link, unread, createdAt };
                 }),
+            };
+        },
+    },
+
+    readNotifications: {
+        middleware: [protectRoute.user],
+        handler: async ({ res }) => {
+            // mark all unread posts as read
+            const data = await prismaClient.notification.updateMany({
+                data: {
+                    unread: false,
+                },
+                where: {
+                    receiver: {
+                        id: res.locals.user!.id,
+                    },
+                    unread: true,
+                },
+            });
+            if (!data) {
+                return {
+                    status: 200,
+                    body: { success: false },
+                };
+            }
+            return {
+                status: 200,
+                body: { success: true },
             };
         },
     },

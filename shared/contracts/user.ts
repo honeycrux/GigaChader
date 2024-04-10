@@ -121,6 +121,18 @@ export const userContract = c.router({
         summary: 'Get user\'s own notifications (from/limit only applies to "read" mode)',
     },
 
+    readNotifications: {
+        method: "POST",
+        path: "/api/user/read-notifications",
+        body: z.object({}),
+        responses: {
+            200: z.object({
+                success: z.boolean(),
+            }),
+        },
+        summary: "Indicate user have read the notifications.",
+    },
+
     userConfig: {
         method: "POST",
         path: "/api/user/config",

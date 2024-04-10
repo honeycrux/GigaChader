@@ -188,8 +188,8 @@ export const postRouter = s.router(apiContract.post, {
     postCreate: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { content, repostingPostId, parentPostId, userMedia } }) => {
-            let repostOriginalAuthor: string | undefined;
-            let commentOriginalAuthor: string | undefined;
+            let repostOriginalAuthorId: string | undefined;
+            let commentOriginalAuthorId: string | undefined;
 
             if (repostingPostId) {
                 const post = await prismaClient.post.findUnique({
@@ -197,7 +197,7 @@ export const postRouter = s.router(apiContract.post, {
                         id: true,
                         author: {
                             select: {
-                                username: true,
+                                id: true,
                             },
                         },
                     },
@@ -215,7 +215,7 @@ export const postRouter = s.router(apiContract.post, {
                         body: { error: `Reposted post ${repostingPostId} does not exist` },
                     };
                 }
-                repostOriginalAuthor = post.author.username;
+                repostOriginalAuthorId = post.author.id;
             }
             if (parentPostId) {
                 const post = await prismaClient.post.findUnique({
@@ -223,7 +223,7 @@ export const postRouter = s.router(apiContract.post, {
                         id: true,
                         author: {
                             select: {
-                                username: true,
+                                id: true,
                             },
                         },
                     },
@@ -241,7 +241,7 @@ export const postRouter = s.router(apiContract.post, {
                         body: { error: `Parent post ${parentPostId} does not exist` },
                     };
                 }
-                commentOriginalAuthor = post.author.username;
+                commentOriginalAuthorId = post.author.id;
             }
 
             const { hashtags, cryptoTopics, textualContexts } = await analysePostContent({ content: content });
@@ -294,7 +294,7 @@ export const postRouter = s.router(apiContract.post, {
             const postinfo = await postInfoFindOne({ postId: data.id, requesterId: res.locals.user?.id });
 
             // Handle push noitifications
-            if (repostingPostId && repostOriginalAuthor) {
+            if (repostingPostId && repostOriginalAuthorId && res.locals.user!.id !== repostOriginalAuthorId) {
                 await prismaClient.notification.create({
                     data: {
                         content: `@${res.locals.user!.username} reposted your post.`,
@@ -302,13 +302,13 @@ export const postRouter = s.router(apiContract.post, {
                         expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
                         receiver: {
                             connect: {
-                                username: repostOriginalAuthor,
+                                id: repostOriginalAuthorId,
                             },
                         },
                     },
                 });
             }
-            if (parentPostId && commentOriginalAuthor) {
+            if (parentPostId && commentOriginalAuthorId && res.locals.user!.id !== commentOriginalAuthorId) {
                 await prismaClient.notification.create({
                     data: {
                         content: `@${res.locals.user!.username} added a comment to your post.`,
@@ -316,7 +316,7 @@ export const postRouter = s.router(apiContract.post, {
                         expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
                         receiver: {
                             connect: {
-                                username: repostOriginalAuthor,
+                                id: commentOriginalAuthorId,
                             },
                         },
                     },
@@ -402,7 +402,7 @@ export const postRouter = s.router(apiContract.post, {
             const postinfo = await postInfoFindOne({ postId: data.id, requesterId: res.locals.user?.id });
 
             // Handle push notification
-            if (set) {
+            if (set && res.locals.user!.id !== originalPostAuthorId) {
                 await prismaClient.notification.create({
                     data: {
                         content: `@${res.locals.user!.username} liked your post.`,
