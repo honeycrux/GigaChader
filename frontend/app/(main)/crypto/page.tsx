@@ -44,7 +44,7 @@ function Crypto({ symbol }: Props) {
         if (set) {
             setAddedItems([...addedItems, result]);
         } else {
-            setAddedItems(addedItems.filter((item) => item !== result));
+            setAddedItems(addedItems.filter((item) => item.cryptoId !== result.cryptoId));
         }
     }
 
