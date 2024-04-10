@@ -13,17 +13,16 @@ import { on } from "events";
 import { classNames } from "primereact/utils";
 interface Props {
   id: string;
-  currentUserName: string; // for checking if the current user can delete a post
+  currentUserName?: string; // for checking if the current user can delete a post
   parentPostId: string | null; // for comments
   repostingPostId?: string | null; // for reposts
   content: string;
   author: {
     username: string;
     displayName: string;
-    avatarUrl: string;
-    id: string;
+    avatarUrl: string | null;
   };
-  createdAt: string;
+  createdAt: Date;
   isComment?: boolean;
   commentCount: number;
   likeCount: number;
@@ -31,8 +30,9 @@ interface Props {
   bButtonvisible?: boolean;
   bshowBorder?: boolean;
   onRepostSubmit?: any;
-  likedByRequester: boolean;
+  likedByRequester: boolean | null;
   userMedia?: any;
+  savedByRequester: boolean | null;
 }
 
 const PostBox = ({
@@ -52,6 +52,7 @@ const PostBox = ({
   onRepostSubmit,
   likedByRequester,
   userMedia,
+  savedByRequester,
 }: Props) => {
   // console.log("Likedbyrequester:", likedByRequester);
   const toast = useRef<Toast>(null);
@@ -75,6 +76,7 @@ const PostBox = ({
     bshowBorder,
     likedByRequester,
     userMedia,
+    savedByRequester,
   };
 
   const [parentPost, setParentPost] = useState<any>();
@@ -106,7 +108,7 @@ const PostBox = ({
   };
 
   useEffect(() => {
-    updateLiked(likedByRequester, likeCount);
+    updateLiked(!!likedByRequester, likeCount);
   }, [id]);
 
   useEffect(() => {
@@ -171,13 +173,35 @@ const PostBox = ({
   );
 
   const [bookmarkPath, setBookmarkPath] = useState("/bookmark_empty.svg");
-  const handleBookmarkClick = () => {
-    if (bookmarkPath === "/bookmark_empty.svg") {
+  const bisBookmarked = useRef(savedByRequester);
+  const updateBookmarked = async (bookmarked: boolean) => {
+    bisBookmarked.current = bookmarked;
+    if (bookmarked) {
       setBookmarkPath("/bookmark_filled.svg");
     } else {
       setBookmarkPath("/bookmark_empty.svg");
     }
-  };
+  }
+
+  useEffect(() => {
+    updateBookmarked(!!savedByRequester);
+  }, [id]);
+
+const handleBookmarkClick = async () => {
+  bisBookmarked.current = !bisBookmarked.current;
+  if (bisBookmarked.current) {
+    setBookmarkPath("/bookmark_filled.svg");
+  } else {
+    setBookmarkPath("/bookmark_empty.svg");
+  }
+  const res = await apiClient.post.postSave({ body: { postId: id, set: bisBookmarked.current } });
+  console.log(res);
+  if (res.status === 200 && res.body) {
+    updateBookmarked(!!res.body.savedByRequester);
+  }
+}  
+
+
   return (
     <div className="flex flex-col w-full bg-orange2 rounded-2xl p-4">
       <Toast ref={toast}></Toast>
@@ -236,7 +260,7 @@ const PostBox = ({
           )}
         </div>
       </div>
-      <p className="text-gray-600">{formatDate(createdAt)}</p>
+      <p className="text-gray-600">{formatDate(createdAt.toString())}</p>
       {parentPostId && (
         <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">
           Go to parent post
