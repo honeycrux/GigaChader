@@ -37,11 +37,18 @@ function Crypto ({symbol} : Props) {
     const [searchResult, setSearchResult] = useState<CryptoInfo[] | null>(null);
     const [bEditCryptoDiagVisible, setbEditCryptoDiagVisible] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const [bHasAdded, setbHasAdded] = useState<boolean>(false);
 
     async function handleButtonClick(add: boolean) {
+        const eachcryptoStatus = await 
         // if add, find item in cryptobookmarks. if not found, add the crypto into the cryptobookmarks
+        
 
+        
         // if not add, find item in cryptobookmarks. if found, remove it.
+        
+            setbHasAdded(!bHasAdded)
+        
 
     }
 
@@ -152,7 +159,8 @@ function Crypto ({symbol} : Props) {
                         <Button 
                             className="`flex items-center py-2 px-7 rounded-lg 
                                         ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`" 
-                            icon="pi pi-plus"
+                            label={bHasAdded ? "Added": "Add"}
+                            icon={bHasAdded? "pi pi-check":"pi pi-plus"}
                             onClick={() => {handleButtonClick(true)}}
                         />
                     </div>
