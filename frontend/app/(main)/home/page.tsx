@@ -13,12 +13,15 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { getUserInfo } from "@/lib/actions/user";
 import { apiClient, axiosClient } from "@/lib/apiClient";
 import { set } from "zod";
+import { useRouter } from "next/navigation";
 
 const home = () => {
     const toast = useRef<Toast>(null);
     // const handleAddPost = () => {
     //     setbAddPostDiagVisible(true);
     // }
+
+    const router = useRouter();
 
     const { user, logout } = useAuthContext();
     const [globalFeeds, setGlobalFeeds] = useState<any>();
@@ -40,9 +43,11 @@ const home = () => {
     useEffect(() => {
         const wrapper = async () => {
             const userinfo = await getUserInfo();
-            if (!user && "error" in userinfo) { // logged out users
+            if (!user || "error" in userinfo) { // logged out users or error
                 setbIsLoggedin(false);
                 getGlobalFeeds();
+            } else if (user && userinfo.onBoardingCompleted === false) {
+                router.replace("/onboarding");
             } else {
                 setbIsLoggedin(true);
                 getFollowedPosts();

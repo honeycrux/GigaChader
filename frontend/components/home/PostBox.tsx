@@ -206,9 +206,11 @@ const PostBox = ({
       <Toast ref={toast}></Toast>
       <div className="flex">
         <div className="flex flex-col items-center">
-          <Avatar className="mr-2"
-          image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
-          shape="circle" size="large" />
+          <Link href={`/profile/${author.username}`}>
+            <Avatar className="mr-2"
+            image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
+            shape="circle" size="large" />
+          </Link>
           <div className="relative mt-2 grow w-0.5 rounded-full bg-gray-600" />
         </div>
         <div className="whitespace-pre-wrap">
