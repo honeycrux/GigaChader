@@ -3,6 +3,11 @@ import { simpleUserInfoSchema } from "./user";
 
 export const userMediaTypeSchema = z.union([z.literal("IMAGE"), z.literal("VIDEO")]);
 
+export const textualContextSchema = z.object({
+    href: z.string().nullable(),
+    text: z.string(),
+});
+
 export const postInfoSchema = z.object({
     id: z.string(),
     content: z.string(),
@@ -13,6 +18,9 @@ export const postInfoSchema = z.object({
             type: userMediaTypeSchema,
         })
     ),
+    postHashtags: z.array(z.string()),
+    postCryptoTopics: z.array(z.string()),
+    textualContexts: z.array(textualContextSchema),
     author: simpleUserInfoSchema,
     repostingPostId: z.string().nullable(),
     parentPostId: z.string().nullable(),

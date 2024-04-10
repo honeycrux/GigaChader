@@ -15,4 +15,14 @@ export const testContract = c.router({
         },
         summary: "Test endpoint for image upload",
     },
+
+    test: {
+        method: "GET",
+        path: "/api/test/test",
+        query: z.object({
+            text: z.string(),
+        }),
+        responses: c.type<any>(),
+        summary: "Test endpoint to test anything",
+    },
 });

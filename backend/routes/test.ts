@@ -1,5 +1,6 @@
 import { apiContract } from "#/shared/contracts";
 import { checkMediaUpload, compressAndUploadMedia } from "@/lib/data/mediaHandler";
+import { analysePostContent } from "@/lib/helpers/textual";
 import { TestUploadFiles, testUploadMiddleware } from "@/middlewares/mediaUpload";
 import { initServer } from "@ts-rest/express";
 
@@ -42,6 +43,16 @@ export const testRouter = s.router(apiContract.test, {
             return {
                 status: 200,
                 body: { urls },
+            };
+        },
+    },
+
+    test: {
+        handler: async ({ query: { text } }) => {
+            const payload = await analysePostContent({ content: text });
+            return {
+                status: 200,
+                body: payload,
             };
         },
     },

@@ -63,19 +63,24 @@ async function fetchCoincapAsset(id: string): Promise<Omit<CryptoInfo, "updatedA
     };
 }
 
-export async function checkExchange(): Promise<boolean> {
+function readLastUpdatedData(value: Prisma.JsonValue): number {
+    return (value as { lastUpdated: number }).lastUpdated;
+}
+
+export async function checkExchange() {
+    const expiryPeriod = 24 * 60 * 60 * 1000;
     const currentTime = new Date();
     let systemdata = await prismaClient.systemMetadata.findUnique({
         where: {
             key: "crypto/coincap-fetch-everything",
         },
     });
-    const dataIsFresh =
-        systemdata &&
-        typeof systemdata.value === "object" &&
-        currentTime.valueOf() - (systemdata.value as { lastUpdated: number }).lastUpdated < 24 * 60 * 60 * 1000;
+    const dataIsFresh = systemdata && typeof systemdata.value === "object" && currentTime.valueOf() < readLastUpdatedData(systemdata.value) + expiryPeriod;
     if (dataIsFresh) {
-        return true;
+        return {
+            lastUpdated: readLastUpdatedData(systemdata.value),
+            expiry: readLastUpdatedData(systemdata.value) + expiryPeriod,
+        };
     }
     const assetsdata = await fetchCoincapAssets();
     if (!assetsdata) {
@@ -89,7 +94,10 @@ export async function checkExchange(): Promise<boolean> {
     await prismaClient.crypto.createMany({
         data: assetsdata,
     });
-    await prismaClient.systemMetadata.upsert({
+    const newsystemdata = await prismaClient.systemMetadata.upsert({
+        select: {
+            value: true,
+        },
         update: {
             value: { lastUpdated: Date.now() },
         },
@@ -101,7 +109,26 @@ export async function checkExchange(): Promise<boolean> {
             key: "crypto/coincap-fetch-everything",
         },
     });
-    return true;
+    return {
+        lastUpdated: readLastUpdatedData(newsystemdata.value),
+        expiry: readLastUpdatedData(newsystemdata.value) + expiryPeriod,
+    };
+}
+
+// get full crypto list for internal use (currently for textual topic identification)
+export async function getFullCryptoList() {
+    const res = await checkExchange();
+    if (!res) {
+        return null;
+    }
+    const cryptoList = await prismaClient.crypto.findMany({
+        select: {
+            cryptoId: true,
+            name: true,
+            symbol: true,
+        },
+    });
+    return cryptoList;
 }
 
 export async function fetchCrypto(cryptoId: string): Promise<CryptoInfo | null> {
