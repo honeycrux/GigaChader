@@ -4,7 +4,9 @@ import { PostInfo } from "#/shared/models/post";
 import PostBox from "@/components/home/PostBox";
 import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
+import Link from "next/link";
 import { Button } from "primereact/button";
+import { Card } from "primereact/card";
 import { useEffect, useState } from "react";
 
 type ButtonTabState = "Posts" | "Hashtags" | "Topics";
@@ -86,9 +88,9 @@ function DiscoverPage() {
             {selectedButton === "Posts" ? (
               trendingPosts && trendingPosts.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} />)
             ) : selectedButton === "Hashtags" ? (
-              <div>Hashtags</div>
+              trendingHashtags && trendingHashtags.map((hashtag, index) => <HashtagCard key={index} index={index} {...hashtag} />)
             ) : selectedButton === "Topics" ? (
-              <div>Topics</div>
+              trendingTopics && trendingTopics.map((data, index) => <CryptoTopicCard key={index} index={index} {...data} />)
             ) : (
               <></>
             )}
@@ -96,6 +98,76 @@ function DiscoverPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+type HashtagCardProps = {
+  index: number;
+  tagText: string;
+  postCount: number;
+};
+function HashtagCard({ index, tagText, postCount }: HashtagCardProps) {
+  return (
+    <Card
+      pt={{
+        content: { className: "p-0" },
+      }}
+    >
+      <div className="flex justify-between items-center">
+        <div className="flex flex-row items-center">
+          <i className="pi pi-hashtag text-xl"></i>
+          <div className="pl-4">
+            <p className="text-lg text-black font-bold">
+              <span>{index + 1}</span>
+            </p>
+            <p className="text-sm text-gray-500">
+              #{tagText} · On {postCount} post(s)
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-row items-center">
+          <Link href={`/search?query=${encodeURIComponent("#" + tagText)}`}>
+            <Button label={`See #${tagText}`.toUpperCase()} className="bg-blue-400 border-blue-400 hover:bg-blue-600" />
+          </Link>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+type CryptoTopicCardProps = {
+  index: number;
+  cryptoInfo: CryptoInfo;
+  postCount: number;
+};
+function CryptoTopicCard({ index, cryptoInfo, postCount }: CryptoTopicCardProps) {
+  return (
+    <Card
+      pt={{
+        content: { className: "p-0" },
+      }}
+    >
+      <div className="flex justify-between items-center">
+        <div className="flex flex-row items-center">
+          <i className="pi pi-dollar text-xl"></i>
+          <div className="pl-4">
+            <p className="text-lg text-black font-bold">
+              #{index + 1} {cryptoInfo.name}
+            </p>
+            {/* <p className="text-sm text-gray-500">{cryptoInfo.symbol}</p> */}
+            <p className="text-sm text-gray-500">{postCount} POST(S)</p>
+          </div>
+        </div>
+
+        <div className="flex flex-row items-center">
+          <p className="text-lg text-black font-bold pr-4">${cryptoInfo.priceUsd}</p>
+          <Link href={`/search?query=${encodeURIComponent("topic:" + cryptoInfo.cryptoId)}`}>
+            <Button label="Discover Topic" />
+          </Link>
+        </div>
+      </div>
+    </Card>
   );
 }
 
