@@ -8,6 +8,8 @@ import { apiClient } from '@/lib/apiClient';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import Link from 'next/link';
+import { SimpleUserInfo } from '#/shared/models/user';
+import { PostInfo } from '#/shared/models/post';
 
 const search = () => {
   const router = useRouter();
@@ -15,7 +17,7 @@ const search = () => {
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // This will run after every render
@@ -23,7 +25,8 @@ const search = () => {
     inputRef.current?.focus();
   });
 
-  const [searchResult, setSearchResult] = useState<any>();
+  const [userSearchResult, setSearchResult] = useState<SimpleUserInfo[] | null>(null);
+  const [postSearchResult, setPostSearchResult] = useState<PostInfo[] | null>(null);
 
   const handleSearch = useCallback(async (term: string) => {
     const params = new URLSearchParams(searchParams);
@@ -34,11 +37,19 @@ const search = () => {
     }
     replace(`${pathname}?${params.toString()}`);
   
-    const searchResult = await apiClient.user.userSearch({ query: {query: term} });
-    console.log(searchResult.body);
-    setSearchResult(searchResult.body);
+    const userSearchResult = await apiClient.user.userSearch({ query: {query: term} });
+    const postSearchResult = await apiClient.post.postSearch({ query: {query: term} });
 
-    // @ts-ignore
+    if (userSearchResult.status === 200) {
+      console.log(userSearchResult.body);
+      setSearchResult(userSearchResult.body);
+    }
+    if (postSearchResult.status === 200) {
+      console.log(postSearchResult.body);
+      setPostSearchResult(postSearchResult.body);
+    }
+    
+
     inputRef.current?.focus();
   }, [replace, searchParams, setSearchResult, apiClient]);
 
@@ -48,7 +59,7 @@ const search = () => {
       handleSearch(searchParams.get('query')?.toString());
     }
   }, []);
-
+  
   return (
     <div className='flex w-full overflow-y-auto justify-center min-h-full'>
       <div className="flex flex-col w-[60%] space-y-4">
@@ -70,10 +81,9 @@ const search = () => {
       
         {/* display table */}
         <div className="flex w-full gap-9">
-        {searchResult && (
+        {userSearchResult &&(
           <div className='w-full space-y-2'>
-            {/* @ts-ignore */}
-            {searchResult.map((result, index) => (
+            {userSearchResult.map((result, index) => (
               <Card key={index} {...result}
               pt={{
                 content: {className: 'p-0'}
@@ -92,6 +102,30 @@ const search = () => {
           </div>
         )}
         </div>
+        <div className="flex w-full gap-9">
+        {postSearchResult &&(
+          <div className='w-full space-y-2'>
+            {postSearchResult.map((result, index) => (
+              <Card key={index} {...result}
+              pt={{
+                content: {className: 'p-0'}
+              }}>
+                <div className='flex justify-between items-center'>
+                  <div >
+                    <p className='text-lg text-black font-bold  overflow-ellipsis overflow-hidden max-w-2xl'>{result.content}</p>
+                    <p className='text-sm text-gray-500'>@{result.author.username}</p>
+                  </div>
+                  <Link href={`/post/${result.id}`}>
+                    <Button label="View Post" />
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+        </div>
+
+
       </div>
     </div>
   );
