@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import { Avatar } from "primereact/avatar";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -9,14 +9,14 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 import { Dialog } from "primereact/dialog";
-import { on } from "events";
-import { classNames } from "primereact/utils";
+
 interface Props {
   id: string;
   currentUserName?: string; // for checking if the current user can delete a post
   parentPostId: string | null; // for comments
   repostingPostId?: string | null; // for reposts
   content: string;
+  textualContexts: { href: string | null; text: string }[];
   author: {
     username: string;
     displayName: string;
@@ -31,8 +31,8 @@ interface Props {
   bshowBorder?: boolean;
   onRepostSubmit?: any;
   likedByRequester: boolean | null;
-  userMedia?: any;
   savedByRequester: boolean | null;
+  userMedia?: { url: string; type: string }[];
 }
 
 const PostBox = ({
@@ -41,6 +41,7 @@ const PostBox = ({
   parentPostId,
   repostingPostId,
   content,
+  textualContexts,
   author,
   createdAt,
   isComment,
@@ -66,6 +67,7 @@ const PostBox = ({
     parentPostId,
     repostingPostId,
     content,
+    textualContexts,
     author,
     createdAt,
     isComment,
@@ -181,26 +183,25 @@ const PostBox = ({
     } else {
       setBookmarkPath("/bookmark_empty.svg");
     }
-  }
+  };
 
   useEffect(() => {
     updateBookmarked(!!savedByRequester);
   }, [id]);
 
-const handleBookmarkClick = async () => {
-  bisBookmarked.current = !bisBookmarked.current;
-  if (bisBookmarked.current) {
-    setBookmarkPath("/bookmark_filled.svg");
-  } else {
-    setBookmarkPath("/bookmark_empty.svg");
-  }
-  const res = await apiClient.post.postSave({ body: { postId: id, set: bisBookmarked.current } });
-  console.log(res);
-  if (res.status === 200 && res.body) {
-    updateBookmarked(!!res.body.savedByRequester);
-  }
-}  
-
+  const handleBookmarkClick = async () => {
+    bisBookmarked.current = !bisBookmarked.current;
+    if (bisBookmarked.current) {
+      setBookmarkPath("/bookmark_filled.svg");
+    } else {
+      setBookmarkPath("/bookmark_empty.svg");
+    }
+    const res = await apiClient.post.postSave({ body: { postId: id, set: bisBookmarked.current } });
+    console.log(res);
+    if (res.status === 200 && res.body) {
+      updateBookmarked(!!res.body.savedByRequester);
+    }
+  };
 
   return (
     <div className="flex flex-col w-full bg-orange2 rounded-2xl p-4">
@@ -218,17 +219,35 @@ const handleBookmarkClick = async () => {
             </Link>
           </div>
           <div>
-            <p>{content}</p>
+            <p>
+              {textualContexts
+                ? textualContexts.map((context, index) => {
+                    if (context.href) {
+                      return (
+                        <Link key={index} href={context.href} className="text-orange1 hover:underline">
+                          {context.text}
+                        </Link>
+                      );
+                    } else {
+                      return <span key={index}>{context.text}</span>;
+                    }
+                  })
+                : content}
+            </p>
             {/* retrieve image */}
             {userMedia && userMedia.length > 0 && (
               <div className="flex flex-wrap">
                 {userMedia.map((media: { url: string; type: string }, index: number) => (
                   <div key={index} className="my-2">
                     {media.type === "IMAGE" ? (
-                      <Image src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} alt="image" preview
-                      pt={{
-                        image: { className: "rounded-lg" },
-                      }} />
+                      <Image
+                        src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url}
+                        alt="image"
+                        preview
+                        pt={{
+                          image: { className: "rounded-lg" },
+                        }}
+                      />
                     ) : (
                       <video controls>
                         <source src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} type="video/mp4" />
@@ -252,7 +271,7 @@ const handleBookmarkClick = async () => {
                 <Image src="/comment.svg" width="24" alt="comment" className="cursor-pointer" />
               </Link>
               {currentUserName && <Image src="/retweet-round.svg" width="24" alt="repost" onClick={handleRepostClick} className="cursor-pointer" />}
-              {currentUserName && <Image src={bookmarkPath}  width="24" alt="bookmark" onClick={handleBookmarkClick} className="cursor-pointer" />}
+              {currentUserName && <Image src={bookmarkPath} width="24" alt="bookmark" onClick={handleBookmarkClick} className="cursor-pointer" />}
               <span className="text-gray-600 text-sm">
                 {likeCountInternal} like(s), {commentCount} comment(s)
               </span>
