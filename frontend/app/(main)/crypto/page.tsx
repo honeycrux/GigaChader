@@ -3,72 +3,111 @@ import { PersonalUserInfo } from "#/shared/models/user";
 import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
 import { Button } from "primereact/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card } from 'primereact/card';
 import Link from 'next/link';
 import { Dialog } from "primereact/dialog";
 import { InputText } from 'primereact/inputtext';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { CryptoInfo } from "#/shared/models/crypto";
 
 type Props = {
     symbol: string
 }
 
 async function getUserInfo() {
-  const { body, status } = await apiClient.user.getInfo();
+  const { body, status } = await apiClient.user.getInfo({});
   if (!(status === 200)) {
     return null;
   }
     return body;
 }
 
+async function getCryptoInfo(query: string) {
+    const { body, status } = await apiClient.crypto.cryptoSearch({query: {query: query, limit: 20}});
+    if (!(status === 200)) {
+      return null;
+    }
+      return body;
+  }
+
 function Crypto ({symbol} : Props) {
     const {user} = useAuthContext();
-    const [userInfo, setUserInfo] = useState<PersonalUserInfo | null>(null)
+    const [cryptoBookmarks, setCryptoBookmarks] = useState<CryptoInfo[] | null>(null);
+    const [searchResult, setSearchResult] = useState<CryptoInfo[] | null>(null);
     const [bEditCryptoDiagVisible, setbEditCryptoDiagVisible] = useState<boolean>(false);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    async function handleButtonClick(add: boolean) {
+        // if add, find item in cryptobookmarks. if not found, add the crypto into the cryptobookmarks
+
+        // if not add, find item in cryptobookmarks. if found, remove it.
+
+    }
+
+    async function handleSave() {
+        if (cryptoBookmarks) {
+      const { body, status } = await apiClient.user.userConfig({
+          body: {
+              cryptoBookmarks: cryptoBookmarks.map((value) => value.cryptoId)
+          }
+      })
+      if (status === 200 && body) {
+        if (body.userCryptoInfo.cryptoBookmarks) {
+            const nonNull: CryptoInfo[] = [];
+            for (const bookmark of body.userCryptoInfo.cryptoBookmarks) {
+                if (bookmark) {
+                    nonNull.push(bookmark)
+                }
+            }
+
+            setCryptoBookmarks(nonNull);
+        }
+      }
+    }
+    setbEditCryptoDiagVisible(false);
+    }
 
     useEffect(() => {
         const wrapper = async () => {
             const response = await getUserInfo();
             console.log(response)
-            setUserInfo(response);
+            setCryptoBookmarks(response?.userCryptoInfo.cryptoBookmarks || null);
         };
 
         wrapper();
     }, [user]);
 
+    {/*   crypto edit display */}
+    const handlecryptoSearch = useCallback(async (term: string) => {      
+        const searchResult = await getCryptoInfo(term);
+        setSearchResult(searchResult);
+    
+        inputRef.current?.focus();
+    }, [setSearchResult, apiClient]);
+    
+    useEffect(() => {
+        handlecryptoSearch("");
+    }, []);
+
     if (!user) {
         return <div>Go back to login</div>;
     }
 
-    if (!userInfo) {
+    if (!cryptoBookmarks) {
         return <div>Cannot fetch ._.</div>;
     }
 
-    const cryptoBookmarks = userInfo.userCryptoInfo.cryptoBookmarks;
 
     
-   {/*  const handleSaveCrypto = async () => {
-        const res = await apiClient.user.userConfig({ body: { displayName: editDisplayName, bio: editBio } });
-        console.log(res);
-        const userinfo_fetched = await getUserInfo();
-        if ("error" in userinfo_fetched) {
-          console.log("Your own profile requested not found");
-        } else {
-          setUserinfo(userinfo_fetched);
-          setEditDisplayName(userinfo_fetched.userConfig.displayName);
-          setEditBio(userinfo_fetched.userConfig.bio);
-        }
-        setbEditCryptoDiagVisible(false);
-      }
-      */}
 
     const footerElement = (
         <div>
-          <Button label="Save" icon="pi pi-check" />
+          <Button label="Save" icon="pi pi-check" onClick={handleSave}/>
         </div>
       );
 
-      {/* onClick={handleSaveCrypto} */}
+      
 
   return (
     <div className='flex w-full overflow-y-auto justify-center min-h-full'>
@@ -84,22 +123,21 @@ function Crypto ({symbol} : Props) {
             <div className="relative w-full">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 pi pi-search"></span>
                     <InputText
-                        
+                        ref={inputRef} 
                         className="pl-10 pr-10 font-medium center w-full"
-                        placeholder="Search User"
-                  
+                        placeholder="Search Crypto"
+                        onChange={(e) => {
+                            handlecryptoSearch(e.target.value);
+                            }}
                     />
-                    {/*  ref={inputRef} */}
-                    {/*  onChange={(e) => {
-                        handleSearch(e.target.value);
-                        }}
-                        defaultValue={searchParams.get('query')?.toString()} */}
+                  
+                      
             </div>
             <div className="flex w-full gap-9">
-                {userInfo && (
+                {cryptoBookmarks && (
                 <div className='w-full space-y-2'>
                
-                {cryptoBookmarks.map((result, index) => (
+                {searchResult && searchResult.map((result, index) => (
                 <Card key={index} {...result}
                 pt={{
                     content: {className: 'p-0'}
@@ -110,11 +148,12 @@ function Crypto ({symbol} : Props) {
                             <p className='text-sm text-gray-500'>{result.symbol}</p>
                         </div>
                         
-                        <p className='text-lg text-black font-bold'>{result.priceUsd}</p>
+                        <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
                         <Button 
                             className="`flex items-center py-2 px-7 rounded-lg 
                                         ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`" 
                             icon="pi pi-plus"
+                            onClick={() => {handleButtonClick(true)}}
                         />
                     </div>
                 </Card>
@@ -141,7 +180,7 @@ function Crypto ({symbol} : Props) {
 
             
             <div className="flex w-full gap-9">
-                {userInfo && (
+                {cryptoBookmarks && (
                 <div className='w-full space-y-2'>
                
                 {cryptoBookmarks.map((result, index) => (
@@ -155,7 +194,7 @@ function Crypto ({symbol} : Props) {
                         <p className='text-sm text-gray-500'>{result.symbol}</p>
                     </div>
                     
-                     <p className='text-lg text-black font-bold'>{result.priceUsd}</p>
+                     <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
                     
                     </div>
                 </Card>
