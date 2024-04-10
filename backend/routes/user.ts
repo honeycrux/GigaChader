@@ -328,6 +328,54 @@ export const userRouter = s.router(apiContract.user, {
         },
     },
 
+    getNotifications: {
+        middleware: [protectRoute.user],
+        handler: async ({ query: { from, limit, mode }, res }) => {
+            const notifdata = await prismaClient.notification.findMany({
+                take: mode === "read" ? limit : undefined,
+                cursor: mode === "read" && from ? { id: from } : undefined,
+                skip: mode === "read" && from ? 1 : undefined,
+                orderBy: {
+                    createdAt: "asc",
+                },
+                where: {
+                    unread: mode === "unread" ? true : false,
+                    receiver: {
+                        username: res.locals.user!.id,
+                    },
+                },
+            });
+            if (!notifdata) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
+
+            // mark unread posts as read
+            const unreadPostIds = notifdata.filter((notif) => notif.unread).map((notif) => notif.id);
+            if (unreadPostIds.length > 0) {
+                await prismaClient.notification.updateMany({
+                    data: {
+                        unread: false,
+                    },
+                    where: {
+                        id: {
+                            in: unreadPostIds,
+                        },
+                    },
+                });
+            }
+
+            return {
+                status: 200,
+                body: notifdata.map(({ content, link, unread, createdAt }) => {
+                    return { content, link, unread, createdAt };
+                }),
+            };
+        },
+    },
+
     userConfig: {
         middleware: [protectRoute.user],
         handler: async ({ res, body: { displayName, bio, deleteAvatar, deleteBanner, avatarUrl, bannerUrl, cryptoBookmarks, cryptoHoldings } }) => {
@@ -499,6 +547,23 @@ export const userRouter = s.router(apiContract.user, {
                     },
                 };
             }
+
+            // Handle push notification
+            if (set) {
+                await prismaClient.notification.create({
+                    data: {
+                        content: `@${res.locals.user!.username} started to follow you.`,
+                        link: `/user/${res.locals.user!.username}`,
+                        expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
+                        receiver: {
+                            connect: {
+                                id: userdata.id,
+                            },
+                        },
+                    },
+                });
+            }
+
             return {
                 status: 200,
                 body: {

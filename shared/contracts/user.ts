@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { personalUserInfoSchema, simpleUserInfoSchema, userConfigProps, userProfileSchema } from "../models/user";
+import { notificationInfoSchema, personalUserInfoSchema, simpleUserInfoSchema, userConfigProps, userProfileSchema } from "../models/user";
 import { postInfoSchema } from "../models/post";
 import { z } from "zod";
 
@@ -105,6 +105,20 @@ export const userContract = c.router({
             200: z.array(simpleUserInfoSchema).nullable(),
         },
         summary: "Search for users by username",
+    },
+
+    getNotifications: {
+        method: "GET",
+        path: "/api/user/notifications",
+        query: z.object({
+            from: z.optional(z.string()),
+            limit: z.optional(z.coerce.number().int().min(1)),
+            mode: z.union([z.literal("unread"), z.literal("read")]),
+        }),
+        responses: {
+            200: z.array(notificationInfoSchema).nullable(),
+        },
+        summary: 'Get user\'s own notifications (from/limit only applies to "read" mode)',
     },
 
     userConfig: {

@@ -79,13 +79,16 @@ const LeftSidebar = () => {
               <i className=" pi pi-compass text-2xl"></i>
               <span className="ml-3 text-2xl">Discover</span>
             </button>
-            {/* <button
-                    className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === 'Activity' ? 'bg-orange1 text-white' : ' text-black'}`}
-                    onClick={() => {setSelectedButton('Activity'); router.push('/activity')}}
-                >
-                    <i className="pi pi-heart text-2xl"></i>
-                    <span className="ml-3 text-2xl">Activity</span>
-                </button> */}
+            <button
+              className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Activity" ? "bg-orange1 text-white" : " text-black"}`}
+              onClick={() => {
+                setSelectedButton("Activity");
+                router.push("/activity");
+              }}
+            >
+              <i className="pi pi-bell text-2xl"></i>
+              <span className="ml-3 text-2xl">Activity</span>
+            </button>
             <button
               className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Profile" ? "bg-orange1 text-white" : " text-black"}`}
               onClick={() => {

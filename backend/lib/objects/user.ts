@@ -25,6 +25,15 @@ const personalUserInfoSelectObj = {
             cryptoBookmarks: true,
         },
     },
+    _count: {
+        select: {
+            notifications: {
+                where: {
+                    unread: true,
+                },
+            },
+        },
+    },
 } satisfies Prisma.UserSelect;
 
 export async function personalUserInfoFindMany(props: { username: string[] }): Promise<PersonalUserInfo[]> {
@@ -48,7 +57,7 @@ export async function personalUserInfoFindMany(props: { username: string[] }): P
     const cryptodata = await cryptoInfoFindManyAsRecord({ cryptoId: allCryptoIds });
 
     const personalUserInfo: PersonalUserInfo[] = data.map((user) => {
-        const { userCryptoInfo, ...rest } = user;
+        const { userCryptoInfo, _count, ...rest } = user;
 
         const cryptoHoldings = (userCryptoInfo.cryptoHoldings || []).map((holding) => {
             return {
@@ -67,6 +76,7 @@ export async function personalUserInfoFindMany(props: { username: string[] }): P
                 cryptoBookmarks: cryptoBookmarks,
                 cryptoHoldings: cryptoHoldings,
             },
+            unreadNotificationCount: _count.notifications,
         };
     });
 

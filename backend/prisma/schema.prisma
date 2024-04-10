@@ -54,6 +54,7 @@ model User {
   pollVotes              PollVote[]           @relation(name: "UserPollVote")
   postLikes              PostLike[]           @relation(name: "UserPostLike")
   postSaves              PostSave[]           @relation(name: "UserPostSave")
+  notifications          Notification[]       @relation(name: "UserNotification")
 }
 
 enum Role {
@@ -136,6 +137,10 @@ model Notification {
   unread    Boolean  @default(true)
   createdAt DateTime @default(now())
   expiry    DateTime
+
+  receiverId String @db.ObjectId
+
+  receiver User @relation(name: "UserNotification", references: [id], fields: [receiverId], onDelete: Cascade)
 }
 
 //////////////////////

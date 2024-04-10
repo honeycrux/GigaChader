@@ -99,6 +99,12 @@ export const authRouter = s.router(apiContract.auth, {
                             cryptoBookmarks: [],
                             cryptoHoldings: [],
                         },
+                        notifications: {
+                            create: {
+                                content: "Welcome to Gigachader!",
+                                expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
+                            },
+                        },
                     },
                 });
 

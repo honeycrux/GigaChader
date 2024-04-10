@@ -27,6 +27,7 @@ export const personalUserInfoSchema = z.object({
             })
         ),
     }),
+    unreadNotificationCount: z.number(),
 });
 
 export type PersonalUserInfo = z.infer<typeof personalUserInfoSchema>;
@@ -97,3 +98,12 @@ export const userConfigProps = z.object({
         )
     ),
 });
+
+export const notificationInfoSchema = z.object({
+    content: z.string(),
+    link: z.string().nullable(),
+    unread: z.boolean(),
+    createdAt: z.date(),
+});
+
+export type NotificationInfo = z.infer<typeof notificationInfoSchema>;
