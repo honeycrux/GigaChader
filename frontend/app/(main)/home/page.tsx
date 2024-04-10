@@ -15,7 +15,7 @@ import { apiClient, axiosClient } from "@/lib/apiClient";
 import { set } from "zod";
 import { useRouter } from "next/navigation";
 
-const home = () => {
+const Home = () => {
     const toast = useRef<Toast>(null);
     // const handleAddPost = () => {
     //     setbAddPostDiagVisible(true);
@@ -211,4 +211,4 @@ const home = () => {
     )
 }
 
-export default home
+export default Home

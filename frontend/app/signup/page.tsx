@@ -3,7 +3,7 @@
 import LogoSideBar from '@/components/authentication/LogoSideBar'
 import SignupBox from '@/components/authentication/SignupBox'
 
-const signup = () => {
+const Signup = () => {
     return (
         <>
         <div className="flex overflow-y-auto">
@@ -16,4 +16,4 @@ const signup = () => {
     )
 }
 
-export default signup
+export default Signup

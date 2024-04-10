@@ -7,7 +7,7 @@ import { Button } from 'primereact/button';
 import { apiClient } from '@/lib/apiClient';
 
 
-const userManagement = () => {
+const UserManagement = () => {
 
     const [showSuspendDialog, setShowSuspendDialog] = useState(false);
     const [showUnsuspendDialog, setShowUnsuspendDialog] = useState(false);
@@ -180,4 +180,4 @@ const userManagement = () => {
 
 }
 
-export default userManagement
+export default UserManagement

@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { SimpleUserInfo } from '#/shared/models/user';
 import { PostInfo } from '#/shared/models/post';
 
-const search = () => {
+const Search = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -131,4 +131,4 @@ const search = () => {
   );
 };
 
-export default search;
+export default Search;

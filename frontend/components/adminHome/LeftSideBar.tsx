@@ -28,13 +28,13 @@ const LeftSideBar = () => {
                     <i className="pi pi-user-edit text-2xl"></i>
                     <span className="ml-3 text-2xl">User management</span>
                 </button>
-                {/* <button
+                <button
                     className={`flex items-center my-4 w-full py-2 h-16 pl-5 rounded-lg ${selectedButton === 'Post management' ? 'bg-orange1 text-white' : ' text-black'}`}
                     onClick={() => {setSelectedButton('Post management'); router.push('/admin/postManagement')}}
                 >
                     <i className="pi pi-comments text-2xl"></i>
                     <span className="ml-3 text-2xl">Post management</span>
-                </button> */}
+                </button>
             </aside>
 
             {/* sidebar end */}

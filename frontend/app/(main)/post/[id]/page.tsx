@@ -10,7 +10,7 @@ import { apiClient } from "@/lib/apiClient";
 import { set } from "zod";
 import { useAuthContext } from "@/providers/auth-provider";
 
-const postDetails = ({ params }: { params: { id: string } }) => {
+const PostDetails = ({ params }: { params: { id: string } }) => {
     // const post = fakeFetchPost(params.id);
     const [post, setPost] = useState<any>();
     const [comments, setComments] = useState<any>();
@@ -98,4 +98,4 @@ const postDetails = ({ params }: { params: { id: string } }) => {
     )
 }
 
-export default postDetails
+export default PostDetails

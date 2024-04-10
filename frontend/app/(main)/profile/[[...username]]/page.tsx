@@ -14,7 +14,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { apiClient } from "@/lib/apiClient";
 import { set } from "zod";
 
-const profile = ({ params }: { params: { username: string } }) => {
+const Profile = ({ params }: { params: { username: string } }) => {
   const { user, logout } = useAuthContext();
   let profileUsername = params.username;
 
@@ -365,4 +365,4 @@ const profile = ({ params }: { params: { username: string } }) => {
   );
 };
 
-export default profile;
+export default Profile;

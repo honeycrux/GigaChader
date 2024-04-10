@@ -8,12 +8,12 @@ import { Card } from 'primereact/card';
 import Link from 'next/link';
 import { Dialog } from "primereact/dialog";
 import { InputText } from 'primereact/inputtext';
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+// import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { CryptoInfo } from "#/shared/models/crypto";
 
-type Props = {
-    symbol: string
-}
+// type Props = {
+//     symbol: string
+// }
 
 async function getUserInfo() {
     const { body, status } = await apiClient.user.getInfo({});
@@ -31,7 +31,7 @@ async function getCryptoInfo(query: string) {
     return body;
 }
 
-function Crypto({ symbol }: Props) {
+function Crypto({ symbol }: any) {
     const { user } = useAuthContext();
     const [cryptoBookmarks, setCryptoBookmarks] = useState<CryptoInfo[] | null>(null);
     const [searchResult, setSearchResult] = useState<CryptoInfo[] | null>(null);

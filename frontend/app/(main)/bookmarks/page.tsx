@@ -6,7 +6,7 @@ import {useEffect, useState } from "react";
 import { PostInfo } from '#/shared/models/post';
 import { useAuthContext } from "@/providers/auth-provider";
 
-const bookmarkedPost = ({ params }: { params: { id: string } }) => {
+const BookmarkedPost = ({ params }: { params: { id: string } }) => {
 
   const { user } = useAuthContext();
   const [savedPosts, setsavedPosts] = useState<PostInfo[] | null>(null);
@@ -42,4 +42,4 @@ const bookmarkedPost = ({ params }: { params: { id: string } }) => {
   )
 }
 
-export default bookmarkedPost;
+export default BookmarkedPost;

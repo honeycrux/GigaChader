@@ -10,7 +10,7 @@ interface ActionOption {
     code: string;
 }
 
-const postMangement = () => {
+const PostMangement = () => {
 
     const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
     const actions: ActionOption[] = [
@@ -101,4 +101,4 @@ const postMangement = () => {
 
 }
 
-export default postMangement
+export default PostMangement

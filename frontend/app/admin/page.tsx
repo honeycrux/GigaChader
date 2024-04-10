@@ -1,7 +1,7 @@
 "use client";
 import LoginBox from '@/components/authentication/LoginBox';
 
-const adminLogin = () => {
+const AdminLogin = () => {
   return (
     <>
     <div className="flex items-center justify-center h-screen w-screen">
@@ -11,4 +11,4 @@ const adminLogin = () => {
   )
 }
 
-export default adminLogin
+export default AdminLogin

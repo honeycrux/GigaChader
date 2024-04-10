@@ -3,7 +3,7 @@
 import LogoSideBar from '@/components/authentication/LogoSideBar'
 import SignupSuccessBox from '@/components/authentication/SignupSuccessBox'
 
-const signupSuccess = () => {    
+const SignupSuccess = () => {    
     return (
         <>
         <div className="flex">
@@ -16,4 +16,4 @@ const signupSuccess = () => {
     )
 }
 
-export default signupSuccess
+export default SignupSuccess

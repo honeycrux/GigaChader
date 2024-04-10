@@ -7,7 +7,7 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const login = () => {
+const Login = () => {
   const { user, logout } = useAuthContext();
   const router = useRouter();
 
@@ -34,4 +34,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;
