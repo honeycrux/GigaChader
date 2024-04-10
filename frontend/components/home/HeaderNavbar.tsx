@@ -15,6 +15,7 @@ const HeaderNavbar = () => {
   const toast = useRef<Toast>(null);
   const [displayName, setDisplayName] = useState<string>("");
   const router = useRouter();
+  const [profilePicUrl, setProfilePicUrl] = useState<string>("");
 
   useEffect(() => {
     const wrapper = async () => {
@@ -26,6 +27,9 @@ const HeaderNavbar = () => {
           setDisplayName("guest");
         } else {
           setDisplayName(userinfo.userConfig.displayName);
+          if (userinfo.userConfig.avatarUrl) {
+            setProfilePicUrl(userinfo.userConfig.avatarUrl);
+          }
           console.log("from HeaderNavbar");
           console.log(userinfo);
         }
@@ -59,7 +63,11 @@ const HeaderNavbar = () => {
           rounded-md p-2"
           onClick={(e) => (op.current as OverlayPanel | null)?.toggle(e)}
         >
-          <Image src="/placeholder_profilePic.png" alt="user profile pic" width="50" />
+          <Image src={(profilePicUrl && process.env.NEXT_PUBLIC_BACKEND_URL + profilePicUrl) || 
+            ("/placeholder_profilePic_white-bg.jpg")} alt="user profile pic"
+            pt={{
+              image: { className: "rounded-full object-cover h-14 w-14" },
+            }} />
           <span>{displayName}</span>
         </button>)}
       </nav>
