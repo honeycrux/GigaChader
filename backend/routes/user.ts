@@ -571,7 +571,7 @@ export const userRouter = s.router(apiContract.user, {
                 await prismaClient.notification.create({
                     data: {
                         content: `@${res.locals.user!.username} started to follow you.`,
-                        link: `/user/${res.locals.user!.username}`,
+                        link: `/profile/${res.locals.user!.username}`,
                         expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
                         receiver: {
                             connect: {

@@ -41,12 +41,14 @@ const LeftSidebar = () => {
       setSelectedButton("Bookmarks");
     } else if (pathname.includes("discover")) {
       setSelectedButton("Discover");
+    } else if (pathname.includes("crypto")) {
+      setSelectedButton("Crypto");
     }
   }, [pathname]); // Re-run the effect when `pathname` changes
   return (
     <>
       {/* sidebar start */}
-      <aside className="flex flex-col bg-orange2 w-60 px-4 py-2 overflow-y-auto">
+      <aside className="flex flex-col bg-orange2 w-60 px-4 py-2 overflow-y-auto overflow-x-hidden">
         {!bIsGuest && (
           <>
             <button
@@ -100,7 +102,7 @@ const LeftSidebar = () => {
               <span className="ml-3 text-2xl">Profile</span>
             </button>
             <button
-              className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Bookmarks" ? "bg-orange1 text-white" : " text-black"}`}
+              className={`-translate-x-[2px] flex items-center my-2 w-fit pr-2 py-2 h-14 pl-5 rounded-lg ${selectedButton === "Bookmarks" ? "bg-orange1 text-white" : " text-black"}`}
               onClick={() => {
                 setSelectedButton("Bookmarks");
                 router.push("/bookmarks");
