@@ -5,6 +5,7 @@ import { protectRoute, validateUser } from "@/middlewares/auth";
 import { postInfoFindManyOrdered, postInfoFindOne } from "@/lib/objects/post";
 import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 import { searchPost } from "@/lib/helpers/search";
+import { analysePostContent } from "@/lib/helpers/textual";
 
 const s = initServer();
 
@@ -228,15 +229,7 @@ export const postRouter = s.router(apiContract.post, {
                 }
             }
 
-            const hashtagex = /#[^ !"#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]*/g;
-            const hashtagMatches = content.match(hashtagex);
-            let hashtags: string[] = [];
-            if (hashtagMatches) {
-                // remove duplicate tags
-                hashtags = hashtagMatches.filter((tag, i) => hashtagMatches?.indexOf(tag) === i);
-                // remove preceding "#"
-                hashtags = hashtags.map((tag) => tag.replace(/^#/g, ""));
-            }
+            const { hashtags, cryptoTopics, textualContexts } = await analysePostContent({ content: content });
 
             const data = await prismaClient.post.create({
                 data: {
@@ -255,11 +248,20 @@ export const postRouter = s.router(apiContract.post, {
                               connect: { id: parentPostId },
                           }
                         : undefined,
+                    textualContexts: textualContexts,
                     postHashtags:
                         hashtags.length > 0
                             ? {
                                   create: hashtags.map((tag) => {
                                       return { tagText: tag };
+                                  }),
+                              }
+                            : undefined,
+                    postCryptoTopics:
+                        cryptoTopics.length > 0
+                            ? {
+                                  create: cryptoTopics.map((topic) => {
+                                      return { cryptoId: topic };
                                   }),
                               }
                             : undefined,

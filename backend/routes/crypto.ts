@@ -34,7 +34,13 @@ export const cryptoRouter = s.router(apiContract.crypto, {
 
     cryptoSearch: {
         handler: async ({ query: { query, from, limit } }) => {
-            await checkExchange();
+            const res = await checkExchange();
+            if (!res) {
+                return {
+                    status: 200,
+                    body: null,
+                };
+            }
             const data = await prismaClient.crypto.findMany({
                 take: limit,
                 cursor: from ? { cryptoId: from } : undefined,

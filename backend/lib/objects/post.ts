@@ -11,6 +11,13 @@ const postInfoSelectObj = {
     content: true,
     createdAt: true,
     userMedia: true,
+    postHashtags: {
+        select: {
+            tagText: true,
+        },
+    },
+    postCryptoTopics: true,
+    textualContexts: true,
     author: {
         select: {
             username: true,
@@ -92,9 +99,11 @@ export async function postInfoFindMany(props: { postId: string[]; requesterId: s
     }
 
     const postInfo: PostInfo[] = data.map((post) => {
-        const { _count, author, ...rest } = post;
+        const { _count, author, postHashtags, postCryptoTopics, ...rest } = post;
         return {
             ...rest,
+            postHashtags: postHashtags.map((tag) => tag.tagText),
+            postCryptoTopics: postCryptoTopics.map((topic) => topic.cryptoId),
             author: authordata[author.username],
             likeCount: _count.postLikes,
             saveCount: _count.postSaves,

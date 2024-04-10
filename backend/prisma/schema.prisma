@@ -143,29 +143,31 @@ model Notification {
 //////////////////////
 
 model Post {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  content     String
-  createdAt   DateTime     @default(now())
-  pollOptions PollOption[]
-  userMedia   UserMedia[]
-  suspended   Boolean      @default(false)
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  content         String
+  createdAt       DateTime         @default(now())
+  pollOptions     PollOption[]
+  userMedia       UserMedia[]
+  textualContexts TextualContext[]
+  suspended       Boolean          @default(false)
 
   authorId          String  @db.ObjectId
   repostingPostId   String? @db.ObjectId
   parentPostId      String? @db.ObjectId
   parentCommunityId String? @db.ObjectId
 
-  postHashtags    PostHashtag[]      @relation(name: "PostHashtag")
-  author          User               @relation(name: "UserPost", fields: [authorId], references: [id], onDelete: NoAction)
-  repostingPost   Post?              @relation(name: "Repost", references: [id], fields: [repostingPostId], onDelete: NoAction, onUpdate: NoAction)
-  repostedOnPosts Post[]             @relation(name: "Repost")
-  parentPost      Post?              @relation(name: "PostTree", references: [id], fields: [parentPostId], onDelete: NoAction, onUpdate: NoAction)
-  childPosts      Post[]             @relation(name: "PostTree")
-  parentCommunity Community?         @relation(name: "CommunityPost", references: [id], fields: [parentCommunityId], onDelete: NoAction)
-  moderationHits  ModerationRecord[] @relation(name: "PostModerationHit")
-  pollVotes       PollVote[]         @relation(name: "PostPollVote")
-  postLikes       PostLike[]         @relation(name: "PostPostLike")
-  postSaves       PostSave[]         @relation(name: "PostPostSave")
+  postHashtags     PostHashtag[]      @relation(name: "PostHashtag")
+  postCryptoTopics PostCryptoTopic[]  @relation(name: "PostCryptoTopic")
+  author           User               @relation(name: "UserPost", fields: [authorId], references: [id], onDelete: NoAction)
+  repostingPost    Post?              @relation(name: "Repost", references: [id], fields: [repostingPostId], onDelete: NoAction, onUpdate: NoAction)
+  repostedOnPosts  Post[]             @relation(name: "Repost")
+  parentPost       Post?              @relation(name: "PostTree", references: [id], fields: [parentPostId], onDelete: NoAction, onUpdate: NoAction)
+  childPosts       Post[]             @relation(name: "PostTree")
+  parentCommunity  Community?         @relation(name: "CommunityPost", references: [id], fields: [parentCommunityId], onDelete: NoAction)
+  moderationHits   ModerationRecord[] @relation(name: "PostModerationHit")
+  pollVotes        PollVote[]         @relation(name: "PostPollVote")
+  postLikes        PostLike[]         @relation(name: "PostPostLike")
+  postSaves        PostSave[]         @relation(name: "PostPostSave")
 }
 
 type PollOption {
@@ -176,6 +178,11 @@ type UserMedia {
   url     String
   type    UserMediaType
   altText String?
+}
+
+type TextualContext {
+  href String?
+  text String
 }
 
 enum UserMediaType {
@@ -223,15 +230,29 @@ model PollVote {
 }
 
 model PostHashtag {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  tagText String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tagText   String
+  createdAt DateTime @default(now())
 
-  parentPostId String @db.ObjectId
+  postId String @db.ObjectId
 
-  parentPost Post @relation(name: "PostHashtag", references: [id], fields: [parentPostId], onDelete: Cascade)
+  post Post @relation(name: "PostHashtag", references: [id], fields: [postId], onDelete: Cascade)
 
-  @@unique([tagText, parentPostId])
+  @@unique([tagText, postId])
   @@index([tagText])
+}
+
+model PostCryptoTopic {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cryptoId  String
+  createdAt DateTime @default(now())
+
+  postId String @db.ObjectId
+
+  post Post @relation(name: "PostCryptoTopic", references: [id], fields: [postId], onDelete: Cascade)
+
+  @@unique([cryptoId, postId])
+  @@index([cryptoId])
 }
 
 model Community {
