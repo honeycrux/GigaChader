@@ -7,8 +7,10 @@
     "install:backend": "cd backend && npm install",
     "postinstall": "run-p -l install:*",
     "dev:frontend": "cd frontend && npm run dev",
+    "start:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run dev",
-    "dev": "run-p -l dev:*"
+    "dev": "run-p -l dev:*",
+    "start": "run-p -l start:frontend dev:backend"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
