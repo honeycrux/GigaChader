@@ -4,14 +4,9 @@ import { InputText } from "primereact/inputtext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/providers/auth-provider";
-import ErrorBoundary from "next/dist/client/components/error-boundary";
 import { Password } from "primereact/password";
 
-const LoginBox = (
-    {
-      bUseAdmin
-    }: any
-  ) => {
+const LoginBox = ({ bUseAdmin }: { bUseAdmin?: boolean }) => {
   const { login } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,18 +45,21 @@ const LoginBox = (
       <div className="flex w-2/3 items-center justify-center">
         <div className="flex flex-col p-12 w-[34rem] h-fit custom-shadow-border rounded-[50px]">
           <p className="text-3xl">Sign in</p>
-          {!bUseAdmin ? (<p className="text-xl font-light">to connect with other chads</p>)
-          : (<p className="text-xl font-light">to access admin panel</p>)}
+          {!bUseAdmin ? <p className="text-xl font-light">to connect with other chads</p> : <p className="text-xl font-light">to access admin panel</p>}
           <hr className="h-px my-10 bg-gray-400" />
           <form onSubmit={handleSubmit} className="flex flex-col h-full [&>*]:my-2">
             <p className="text-2xl">Email address</p>
             <InputText className="custom-shadow-border-light" value={email} onChange={(e) => setEmail(e.target.value)} />
             {/* <br className='my-2' /> */}
             <p className="text-2xl">Password</p>
-            <Password className="custom-shadow-border-light w-full" toggleMask feedback={false}
-            value={password} onChange={(e) => setPassword(e.target.value)} 
+            <Password
+              className="custom-shadow-border-light w-full"
+              toggleMask
+              feedback={false}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               pt={{
-                input: {className: "w-full"}
+                input: { className: "w-full" },
               }}
             />
             {error ? <div className="text-red-600">{error}</div> : <br className="!my-5" />}
@@ -76,14 +74,16 @@ const LoginBox = (
               />
             </div>
 
-            {!bUseAdmin && (<br className="!my-5" />)}
+            {!bUseAdmin && <br className="!my-5" />}
 
-            {!bUseAdmin && (<span className="font-light">
-              No account?&nbsp;
-              <Link href="/signup" className="text-orange1 hover:underline">
-                Sign up
-              </Link>
-            </span>)}
+            {!bUseAdmin && (
+              <span className="font-light">
+                No account?&nbsp;
+                <Link href="/signup" className="text-orange1 hover:underline">
+                  Sign up
+                </Link>
+              </span>
+            )}
           </form>
         </div>
       </div>

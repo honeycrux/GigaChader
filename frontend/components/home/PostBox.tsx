@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 import { Dialog } from "primereact/dialog";
+import { PostInfo } from "#/shared/models/post";
 
 interface Props {
   id: string;
@@ -29,7 +30,7 @@ interface Props {
   bVisitParentPost?: boolean;
   bButtonvisible?: boolean;
   bshowBorder?: boolean;
-  onRepostSubmit?: any;
+  onRepostSubmit?: Function;
   likedByRequester: boolean | null;
   savedByRequester: boolean | null;
   userMedia?: { url: string; type: string }[];
@@ -81,13 +82,15 @@ const PostBox = ({
     savedByRequester,
   };
 
-  const [parentPost, setParentPost] = useState<any>();
+  const [parentPost, setParentPost] = useState<PostInfo | null>(null);
 
   const getParentpostInfo = async () => {
     if (repostingPostId) {
       const res = await apiClient.post.getPost({ params: { postId: repostingPostId } });
       // console.log(res.body);
-      setParentPost(res.body);
+      if (res.status === 200 && res.body) {
+        setParentPost(res.body);
+      }
     }
   };
 
@@ -207,9 +210,12 @@ const PostBox = ({
       <div className="flex">
         <div className="flex flex-col items-center">
           <Link href={`/profile/${author.username}`}>
-            <Avatar className="mr-2"
-            image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
-            shape="circle" size="large" />
+            <Avatar
+              className="mr-2"
+              image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
+              shape="circle"
+              size="large"
+            />
           </Link>
           <div className="relative mt-2 grow w-0.5 rounded-full bg-gray-600" />
         </div>

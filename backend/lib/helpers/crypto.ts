@@ -31,7 +31,9 @@ async function fetchCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
             break;
         }
         cryptoinfo = cryptoinfo.concat(
-            response.data.data.map((d) => {
+            response.data.data.filter((d) => {
+                return d.id.trim() !== "" && d.name.trim() !== "" && d.symbol.trim() !== ""
+            }).map((d) => {
                 const { id: cryptoId, symbol, name, priceUsd } = d;
                 return {
                     cryptoId,
@@ -49,6 +51,9 @@ async function fetchCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
 }
 
 async function fetchCoincapAsset(id: string): Promise<Omit<CryptoInfo, "updatedAt"> | null> {
+    if (id.trim() === "") {
+        return null;
+    }
     const assetsUrl = "https://api.coincap.io/v2/assets/";
     const response = await axios.get<{ data: CoincapAsset }>(`${assetsUrl}/${id}`);
     if (!("data" in response)) {

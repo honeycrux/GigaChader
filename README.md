@@ -7,7 +7,6 @@ This is a monorepo containing several folders:
   - `app/`: [Next app router](https://nextjs.org/docs/app/building-your-application/routing)
   - `components/`: Web components
   - `lib/`: Useful functionalities you define
-  - `lib/actions/`: Server actions
 - `backend/`: Backend services
   - `server.ts`: The main file that is run
   - `prisma/`: Database schema and crud operations
@@ -47,8 +46,10 @@ For client components (with `"use client";` at top of script):
 - Use validateUser from `@/lib/actions/auth`. Call `const auth = await validateUser();`.
 - Check for absence of a session using the condition `"error" in auth`. Check user information using the `auth.user` object.
 
-### Web Server: Interacting with the Backend (as a server action)
-To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
+### Web Server: Interacting with the Backend (with client component)
+~~To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.~~
+
+In order to use the browser cookie, the only currently known way is to make API calls under client components (session cookie will fail if you call from server components). Feel free to use server actions `front/lib/actions/` to make those calls if code is reused, though make sure you invoke them from client component. Please see existing examples, for example, `frontend/app/(main)/home/page.tsx`.
 
 If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/apiClient.ts`.
 

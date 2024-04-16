@@ -1,10 +1,8 @@
 "use client";
 
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
-import { Avatar } from "primereact/avatar";
 import PostBox from "@/components/home/PostBox";
-import dummyPost from "@/dummy_data/dummyPosts.json";
 import { Button } from "primereact/button";
 import { getUserInfo, getProfileInfo } from "@/lib/actions/user";
 import { useAuthContext } from "@/providers/auth-provider";
@@ -12,15 +10,20 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { apiClient } from "@/lib/apiClient";
-import { set } from "zod";
+import { PersonalUserInfo, UserProfile } from "#/shared/models/user";
+import { apiContract } from "#/shared/contracts";
+import { ClientInferResponseBody } from "@ts-rest/core";
+import { PostInfo } from "#/shared/models/post";
+
+type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
 const Profile = ({ params }: { params: { username: string } }) => {
   const { user, logout } = useAuthContext();
   let profileUsername = params.username;
 
-  const [userinfo, setUserinfo] = useState<any>();
+  const [userinfo, setUserinfo] = useState<PersonalUserInfo | UserProfile | null>(null);
   const [bEditProfileDiagVisible, setbEditProfileDiagVisible] = useState<boolean>(false);
-  const [followList, setFollowList] = useState<any>();
+  const [followList, setFollowList] = useState<FollowListResponse | null>(null);
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
 
   useEffect(() => {
@@ -75,8 +78,8 @@ const Profile = ({ params }: { params: { username: string } }) => {
     wrapper();
   }, [user, profileUsername]);
 
-  const [posts, setPosts] = useState<any>();
-  const [comments, setComments] = useState<any>();
+  const [posts, setPosts] = useState<PostInfo[] | null>(null);
+  const [comments, setComments] = useState<PostInfo[] | null>(null);
 
   const getFollowList = async () => {
     if (user) {
@@ -91,18 +94,20 @@ const Profile = ({ params }: { params: { username: string } }) => {
 
   const getPostsOfUser = async (username: string) => {
     // console.log("received username: " + username);
-    const posts = await apiClient.user.getPosts({ query: { username: username } });
-    console.log(posts.body);
+    const res = await apiClient.user.getPosts({ query: { username: username } });
 
-    // Filter posts where parentPostId is not empty and store them in comments
-    // @ts-ignore
-    const comments = posts.body.filter((post: any) => post.parentPostId);
-    setComments(comments);
+    if (res.status === 200 && res.body) {
+      let posts = res.body;
+      console.log(posts);
 
-    // Filter posts where parentPostId is empty and store them in posts
-    // @ts-ignore
-    const mainPosts = posts.body.filter((post: any) => !post.parentPostId);
-    setPosts(mainPosts);
+      // Filter posts where parentPostId is not empty and store them in comments
+      const comments = posts.filter((post) => post.parentPostId);
+      setComments(comments);
+
+      // Filter posts where parentPostId is empty and store them in posts
+      const mainPosts = posts.filter((post) => !post.parentPostId);
+      setPosts(mainPosts);
+    }
   };
 
   const divRef = useRef<HTMLDivElement>(null);
@@ -117,7 +122,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
   const [selectedButton, setSelectedButton] = useState("Posts");
 
   const handleSaveProfile = async () => {
-    const userConfig: { displayName: string; bio: string; avatarUrl?: string; bannerUrl?: string; } = {
+    const userConfig: { displayName: string; bio: string; avatarUrl?: string; bannerUrl?: string } = {
       displayName: editDisplayName,
       bio: editBio,
     };
@@ -141,19 +146,19 @@ const Profile = ({ params }: { params: { username: string } }) => {
       setEditBio(userinfo_fetched.userConfig.bio);
     }
     setbEditProfileDiagVisible(false);
-  }
+  };
 
-  const [editBannerUrl, setEditBannerUrl] = useState<any>();
+  const [editBannerUrl, setEditBannerUrl] = useState<string>();
   const handleEditBannerClicked = () => {
     const formData = new FormData();
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
     input.click();
-    input.addEventListener('change', async () => {
+    input.addEventListener("change", async () => {
       if (input.files) {
         for (let i = 0; i < input.files.length; i++) {
-          formData.append('banner', input.files[i]);
+          formData.append("banner", input.files[i]);
         }
         const res = await apiClient.upload.uploadProfile({
           body: formData,
@@ -165,19 +170,19 @@ const Profile = ({ params }: { params: { username: string } }) => {
         }
       }
     });
-  }
+  };
 
-  const [editAvatarUrl, setEditAvatarUrl] = useState<any>();
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string>();
   const handleEditProfilePicClicked = () => {
     const formData = new FormData();
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
     input.click();
-    input.addEventListener('change', async () => {
+    input.addEventListener("change", async () => {
       if (input.files) {
         for (let i = 0; i < input.files.length; i++) {
-          formData.append('avatar', input.files[i]);
+          formData.append("avatar", input.files[i]);
         }
         const res = await apiClient.upload.uploadProfile({
           body: formData,
@@ -189,7 +194,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
         }
       }
     });
-  }
+  };
 
   const footerElement = (
     <div>
@@ -222,10 +227,12 @@ const Profile = ({ params }: { params: { username: string } }) => {
           <div className="flex flex-col w-full bg-[#e5eeee] relative">
             <Image
               className="z-0 h-40"
-              src={(editBannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl) ||
+              src={
+                (editBannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl) ||
                 (userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) ||
-                ""}
-              // alt="profile background pic"
+                ""
+              }
+              alt="profile background pic"
               pt={{
                 root: { className: "cursor-pointer" },
                 image: { className: "object-cover h-full w-full" },
@@ -236,9 +243,11 @@ const Profile = ({ params }: { params: { username: string } }) => {
             <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
               <div className="flex mb-4 w-fit">
                 <Image
-                  src={(editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) || 
+                  src={
+                    (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
                     (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
-                    "/placeholder_profilePic_white-bg.jpg"}
+                    "/placeholder_profilePic_white-bg.jpg"
+                  }
                   alt="profile pic"
                   pt={{
                     image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
@@ -274,8 +283,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
       <div className="flex flex-col w-full bg-[#e5eeee] relative">
         <Image
           className="z-0 h-72"
-          src={(userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) || 
-            ""}
+          src={(userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) || ""}
           alt="profile background pic"
           pt={{
             image: { className: "object-cover h-full w-full" },
@@ -286,8 +294,10 @@ const Profile = ({ params }: { params: { username: string } }) => {
         <div ref={divRef} className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
           <div className="flex mb-4">
             <Image
-              src={(userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) || 
-                "/placeholder_profilePic_white-bg.jpg"}
+              src={
+                (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
+                "/placeholder_profilePic_white-bg.jpg"
+              }
               alt="profile pic"
               pt={{
                 image: { className: "rounded-full h-36 w-36 object-cover" },
@@ -300,9 +310,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
               <p className="text-xl text-gray-600">@{userinfo && userinfo.username}</p>
             </div>
           </div>
-          <p className="text-xl whitespace-pre-wrap max-w-96">
-            {userinfo && userinfo.userConfig.bio}
-          </p>
+          <p className="text-xl whitespace-pre-wrap max-w-96">{userinfo && userinfo.userConfig.bio}</p>
         </div>
 
         {user && !profileUsername ? (
@@ -324,9 +332,9 @@ const Profile = ({ params }: { params: { username: string } }) => {
             label="Posts"
             text
             onClick={() => setSelectedButton("Posts")}
-          // pt={{
-          //   root: {className: "!border-0"},
-          // }}
+            // pt={{
+            //   root: {className: "!border-0"},
+            // }}
           />
           <Button
             className={`w-full ${selectedButton === "Replies" ? "border-0 !border-b-2 border-orange1" : ""}`}
@@ -344,7 +352,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
         selectedButton === "Posts" ? (
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
-              {posts.map((post: any, index: any) => (
+              {posts.map((post, index) => (
                 <PostBox key={index} {...post} currentUserName={user?.username} />
               ))}
             </div>
@@ -352,9 +360,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
         ) : selectedButton === "Replies" ? (
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
-              {comments.map((comment: any, index: any) => (
-                <PostBox key={index} {...comment} currentUserName={user?.username} bVisitParentPost={true} />
-              ))}
+              {comments && comments.map((comment, index) => <PostBox key={index} {...comment} currentUserName={user?.username} bVisitParentPost={true} />)}
             </div>
           </div>
         ) : null

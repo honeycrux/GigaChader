@@ -1,52 +1,10 @@
 import { apiContract } from "#/shared/contracts";
-import { checkMediaUpload, compressAndUploadMedia } from "@/lib/data/mediaHandler";
 import { analysePostContent } from "@/lib/helpers/textual";
-import { TestUploadFiles, testUploadMiddleware } from "@/middlewares/mediaUpload";
 import { initServer } from "@ts-rest/express";
 
 const s = initServer();
 
 export const testRouter = s.router(apiContract.test, {
-    upload: {
-        middleware: [testUploadMiddleware],
-        handler: async ({ req }) => {
-            console.log("Upload Handler");
-            const urls = [];
-            const files = req.files as TestUploadFiles;
-            if (files) {
-                if (files.media) {
-                    console.log(`[test/upload] received ${files.media.length} files.`);
-                    for (const file of files.media) {
-                        console.log(`Uploading file originally named ${file.originalname}`);
-                        const type = checkMediaUpload({ file: file, allowedTypes: ["IMAGE", "VIDEO"] });
-                        if (!type) {
-                            return {
-                                status: 400,
-                                body: {
-                                    error: `File type ${file.mimetype} is unsupported`,
-                                },
-                            };
-                        }
-                        const response = await compressAndUploadMedia({
-                            maxPixelSize: 1920,
-                            container: "test",
-                            file: file,
-                            type: type,
-                        });
-                        console.log(`Destination url: ${response.url}`);
-                        urls.push(response.url);
-                    }
-                }
-            } else {
-                console.error("No files received");
-            }
-            return {
-                status: 200,
-                body: { urls },
-            };
-        },
-    },
-
     test: {
         handler: async ({ query: { text } }) => {
             const payload = await analysePostContent({ content: text });
