@@ -61,7 +61,7 @@ const Home = () => {
     };
 
     wrapper();
-  }, [user]);
+  }, [user, router]);
 
   // useEffect(() => {
   //     console.log('bIsLoggedin', bIsLoggedin);
@@ -170,7 +170,7 @@ const Home = () => {
       <Dialog header="Create Post" footer={footerContent} visible={bAddPostDiagVisible} style={{ width: "50vw" }} onHide={() => setbAddPostDiagVisible(false)}>
         <div className="flex flex-col">
           <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
-          <img src="/upload-image.svg" alt="upload image" className="cursor-pointer w-10" onClick={handleMediaUpload} />
+          <Image src="/upload-image.svg" alt="upload image" className="cursor-pointer w-10" onClick={handleMediaUpload} />
           {mediaPreview && (
             <div>
               <p className="text-xl">Media Preview</p>
@@ -197,11 +197,11 @@ const Home = () => {
             {bIsLoggedin && <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />}
           </div>
 
-          {globalFeeds && globalFeeds.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} />)}
+          {globalFeeds && globalFeeds.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)}
 
           {followedPosts &&
             followedPosts.length > 0 &&
-            followedPosts.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)}
+            followedPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)}
 
           {((!globalFeeds && !followedPosts) || globalFeeds?.length === 0 || followedPosts?.length === 0) && (
             <p className="text-xl">No posts to display yet ._.</p>

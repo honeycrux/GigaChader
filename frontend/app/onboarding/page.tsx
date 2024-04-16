@@ -1,6 +1,6 @@
 "use client";
 import { Image } from "primereact/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -57,8 +57,6 @@ function Onboarding() {
           }
           console.log("from onboarding");
           console.log(userinfo);
-          const res = await apiClient.user.userConfig({ body: { avatarUrl: profilePicUrl } });
-          console.log(res);
         }
       }
     };
@@ -128,9 +126,9 @@ function Onboarding() {
                 <span className="text-gray-600">@{userName}</span>
               </p>
               <p className="text-xl">Display name</p>
-              <InputText className="custom-shadow-border-light w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+              <InputText className="custom-shadow-border-light w-full" value={displayName || ""} onChange={(e) => setDisplayName(e.target.value)} />
               <p className="text-xl">Bio</p>
-              <InputTextarea className="w-full" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} autoResize />
+              <InputTextarea className="w-full" value={bio || ""} onChange={(e) => setBio(e.target.value)} rows={4} autoResize />
               <div className="flex justify-center">
                 <Button onClick={handleContinue} className="px-20" label="Continue" />
               </div>

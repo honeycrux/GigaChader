@@ -2,7 +2,7 @@
 
 import PostBox from "@/components/home/PostBox";
 import { InputTextarea } from "primereact/inputtextarea";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { apiClient } from "@/lib/apiClient";
@@ -14,19 +14,19 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
   const [post, setPost] = useState<PostInfo | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
 
-  const getPost = async () => {
+  const getPost = useCallback(async () => {
     const res = await apiClient.post.getPost({ params: { postId: params.id } });
     if (res.status === 200 && res.body) {
       setPost(res.body);
     }
-  };
+  }, [params.id]);
 
-  const getComments = async () => {
+  const getComments = useCallback(async () => {
     const res = await apiClient.post.getComments({ query: { postId: params.id } });
     if (res.status === 200 && res.body) {
       setComments(res.body);
     }
-  };
+  }, [params.id]);
 
   useEffect(() => {
     const wrapper = async () => {
@@ -35,7 +35,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     };
 
     wrapper();
-  }, [params.id]);
+  }, [params.id, getComments, getPost]);
 
   // if (!params.id || !post) return null;
 
@@ -90,7 +90,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
       <div className="flex flex-col w-[60%]">
         <Toast ref={toast}></Toast>
         <br className="mt-10" />
-        {post && <PostBox {...post} currentUserName={user?.username} />}
+        {post && <PostBox post={post} currentUserName={user?.username} />}
         {bIsLoggedin && (
           <div className="flex flex-col w-full mt-4">
             <p className="text-xl">Make a Comment</p>
@@ -101,7 +101,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
         <p className="text-xl">Comments</p>
         <div className="mt-2 space-y-2">
           {comments && comments.length > 0 ? (
-            comments.map((comment) => <PostBox key={comment.id} {...comment} currentUserName={user?.username} />)
+            comments.map((comment) => <PostBox key={comment.id} post={comment} currentUserName={user?.username} />)
           ) : (
             <p>No comments yet ._.</p>
           )}

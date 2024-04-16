@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import { Avatar } from "primereact/avatar";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -11,80 +11,39 @@ import { apiClient } from "@/lib/apiClient";
 import { Dialog } from "primereact/dialog";
 import { PostInfo } from "#/shared/models/post";
 
-interface Props {
-  id: string;
-  currentUserName?: string; // for checking if the current user can delete a post
-  parentPostId: string | null; // for comments
-  repostingPostId?: string | null; // for reposts
-  content: string;
-  textualContexts: { href: string | null; text: string }[];
-  author: {
-    username: string;
-    displayName: string;
-    avatarUrl: string | null;
-  };
-  createdAt: Date;
-  isComment?: boolean;
-  commentCount: number;
-  likeCount: number;
+type Props = {
+  post: PostInfo;
+  currentUserName?: string; // for evaluating whether some actions (like/repost/save) are shown
   bVisitParentPost?: boolean;
   bButtonvisible?: boolean;
   bshowBorder?: boolean;
   onRepostSubmit?: Function;
-  likedByRequester: boolean | null;
-  savedByRequester: boolean | null;
-  userMedia?: { url: string; type: string }[];
-}
+};
 
-const PostBox = ({
-  id,
-  currentUserName,
-  parentPostId,
-  repostingPostId,
-  content,
-  textualContexts,
-  author,
-  createdAt,
-  isComment,
-  commentCount,
-  likeCount,
-  bVisitParentPost,
-  bButtonvisible = true,
-  bshowBorder = false,
-  onRepostSubmit,
-  likedByRequester,
-  userMedia,
-  savedByRequester,
-}: Props) => {
-  // console.log("Likedbyrequester:", likedByRequester);
-  const toast = useRef<Toast>(null);
-  const [heartPath, setHeartPath] = useState("/heart.svg");
-  const bisLiked = useRef(likedByRequester);
-  const [likeCountInternal, setlikeCountInternal] = useState(likeCount);
-
-  const parentPostInfo = {
+const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvisible = true, bshowBorder = false, onRepostSubmit }: Props) => {
+  const {
     id,
-    currentUserName,
     parentPostId,
     repostingPostId,
     content,
     textualContexts,
     author,
     createdAt,
-    isComment,
     commentCount,
     likeCount,
-    bVisitParentPost,
-    bButtonvisible,
-    bshowBorder,
     likedByRequester,
     userMedia,
     savedByRequester,
-  };
+  } = postInfo;
+
+  const toast = useRef<Toast>(null);
+  const [heartPath, setHeartPath] = useState("/heart.svg");
+  const bisLiked = useRef(likedByRequester);
+  const [likeCountInternal, setlikeCountInternal] = useState(likeCount);
 
   const [parentPost, setParentPost] = useState<PostInfo | null>(null);
 
-  const getParentpostInfo = async () => {
+  const getParentpostInfo = useCallback(async () => {
     if (repostingPostId) {
       const res = await apiClient.post.getPost({ params: { postId: repostingPostId } });
       // console.log(res.body);
@@ -92,7 +51,7 @@ const PostBox = ({
         setParentPost(res.body);
       }
     }
-  };
+  }, [repostingPostId]);
 
   const updateLiked = async (liked: boolean, likeCount: number) => {
     // const res = await apiClient.post.getLikes({ query: { postId: id } });
@@ -112,13 +71,13 @@ const PostBox = ({
 
   useEffect(() => {
     updateLiked(!!likedByRequester, likeCount);
-  }, [id]);
+  }, [id, likedByRequester, likeCount]);
 
   useEffect(() => {
     if (repostingPostId) {
       getParentpostInfo();
     }
-  }, [repostingPostId]);
+  }, [repostingPostId, getParentpostInfo]);
 
   const handleHeartClick = async () => {
     bisLiked.current = !bisLiked.current;
@@ -188,7 +147,7 @@ const PostBox = ({
 
   useEffect(() => {
     updateBookmarked(!!savedByRequester);
-  }, [id]);
+  }, [id, savedByRequester]);
 
   const handleBookmarkClick = async () => {
     bisBookmarked.current = !bisBookmarked.current;
@@ -267,7 +226,7 @@ const PostBox = ({
             )}
             {repostingPostId && parentPost && (
               <div className="border border-gray-500 rounded-lg m-2">
-                <PostBox {...parentPost} bButtonvisible={true} currentUserName={currentUserName} />
+                <PostBox post={parentPost} bButtonvisible={true} currentUserName={currentUserName} />
               </div>
             )}
           </div>
@@ -304,7 +263,7 @@ const PostBox = ({
       <Dialog header="Repost" visible={visible} style={{ width: "50vw" }} onHide={() => setVisible(false)} footer={dialogFooter}>
         <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
 
-        <PostBox {...parentPostInfo} bButtonvisible={false} />
+        <PostBox post={postInfo} bButtonvisible={false} />
       </Dialog>
     </div>
   );

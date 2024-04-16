@@ -52,14 +52,14 @@ const Search = () => {
 
       inputRef.current?.focus();
     },
-    [replace, searchParams, setSearchResult, apiClient]
+    [replace, searchParams, setSearchResult, pathname]
   );
 
   useEffect(() => {
     if (searchParams.get("query")) {
       handleSearch(searchParams.get("query")?.toString());
     }
-  }, []);
+  }, [handleSearch, searchParams]);
 
   return (
     <div className="flex w-full overflow-y-auto justify-center min-h-full">

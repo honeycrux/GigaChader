@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import PostBox from "@/components/home/PostBox";
 import { Button } from "primereact/button";
@@ -23,8 +23,19 @@ const Profile = ({ params }: { params: { username: string } }) => {
 
   const [userinfo, setUserinfo] = useState<PersonalUserInfo | UserProfile | null>(null);
   const [bEditProfileDiagVisible, setbEditProfileDiagVisible] = useState<boolean>(false);
-  const [followList, setFollowList] = useState<FollowListResponse | null>(null);
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
+  const [followList, setFollowList] = useState<FollowListResponse | null>(null);
+
+  const getFollowList = useCallback(async () => {
+    if (user) {
+      // const res = await apiClient.user.getFollows({ query: { username: user.username }});
+      const res = await apiClient.user.getFollowedUsers({ query: { username: user.username } });
+      if (res.status === 200 && res.body) {
+        console.log(res.body);
+        setFollowList(res.body);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     const wrapper = async () => {
@@ -71,7 +82,6 @@ const Profile = ({ params }: { params: { username: string } }) => {
 
       if (profileUsername) {
         getPostsOfUser(profileUsername[0]);
-        getFollowList();
       }
     };
 
@@ -80,17 +90,6 @@ const Profile = ({ params }: { params: { username: string } }) => {
 
   const [posts, setPosts] = useState<PostInfo[] | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
-
-  const getFollowList = async () => {
-    if (user) {
-      // const res = await apiClient.user.getFollows({ query: { username: user.username }});
-      const res = await apiClient.user.getFollowedUsers({ query: { username: user.username } });
-      if (res.status === 200 && res.body) {
-        console.log(res.body);
-        setFollowList(res.body);
-      }
-    }
-  };
 
   const getPostsOfUser = async (username: string) => {
     // console.log("received username: " + username);
@@ -346,21 +345,21 @@ const Profile = ({ params }: { params: { username: string } }) => {
       </div>
 
       {/* <div className="bg-slate-500 h-96 w-10"></div> */}
-      {/* {dummyPost.map((post, index) => <PostBox key={index} {...post} />)} */}
+      {/* {dummyPost.map((post, index) => <PostBox key={index} postInfo={post} />)} */}
 
       {posts && posts.length > 0 ? (
         selectedButton === "Posts" ? (
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
               {posts.map((post, index) => (
-                <PostBox key={index} {...post} currentUserName={user?.username} />
+                <PostBox key={index} post={post} currentUserName={user?.username} />
               ))}
             </div>
           </div>
         ) : selectedButton === "Replies" ? (
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
-              {comments && comments.map((comment, index) => <PostBox key={index} {...comment} currentUserName={user?.username} bVisitParentPost={true} />)}
+              {comments && comments.map((comment, index) => <PostBox key={index} post={comment} currentUserName={user?.username} bVisitParentPost={true} />)}
             </div>
           </div>
         ) : null

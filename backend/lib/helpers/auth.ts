@@ -1,3 +1,6 @@
+/* The following code snippet has heavy reference on an external reference on Lucia Auth: */
+/* https://lucia-auth.com/database/prisma */
+
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import { Lucia } from "lucia";
 import { prismaClient } from "../data/db";

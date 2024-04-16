@@ -93,7 +93,7 @@ function DiscoverPage() {
             {selectedButton === "Posts" ? (
               trendingPosts ? (
                 trendingPosts.length > 0 ? (
-                  trendingPosts.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                  trendingPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)
                 ) : (
                   <p className="text-center">No trending post</p>
                 )

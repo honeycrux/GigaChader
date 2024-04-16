@@ -8,19 +8,20 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const Login = () => {
-  const { user, logout } = useAuthContext();
+  const { user } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
     const wrapper = async () => {
-        const userinfo = await getUserInfo();
-        if (user && !("error" in userinfo)) { // logged in users
-          router.push("/home");
-        }
+      const userinfo = await getUserInfo();
+      if (user && !("error" in userinfo)) {
+        // logged in users
+        router.push("/home");
+      }
     };
 
     wrapper();
-}, [user]);
+  }, [user, router]);
 
   return (
     <>

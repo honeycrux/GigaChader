@@ -96,7 +96,7 @@ function Crypto() {
 
   useEffect(() => {
     handlecryptoSearch("");
-  }, []);
+  }, [handlecryptoSearch]);
 
   if (!user) {
     return <div>Go back to login</div>;

@@ -5,7 +5,7 @@ import { useAuthContext } from "@/providers/auth-provider";
 import Link from "next/link";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ButtonTabState = "Unread" | "Read";
 
@@ -26,18 +26,18 @@ function ActivityPage() {
     return null;
   }
 
-  async function getReadAndUnreadNotifications() {
+  const getReadAndUnreadNotifications = useCallback(async () => {
     getNotifications("unread").then((data) => {
       setUnreadNotif(data);
     });
     getNotifications("read").then((data) => {
       setReadNotif(data);
     });
-  }
+  }, []);
 
   useEffect(() => {
     getReadAndUnreadNotifications();
-  }, []);
+  }, [getReadAndUnreadNotifications]);
 
   return user ? (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
