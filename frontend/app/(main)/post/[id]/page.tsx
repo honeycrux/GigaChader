@@ -71,7 +71,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     }
   };
 
-  const { user, logout } = useAuthContext();
+  const { user } = useAuthContext();
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
   useEffect(() => {
     const wrapper = async () => {

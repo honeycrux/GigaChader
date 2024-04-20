@@ -18,7 +18,7 @@ import { PostInfo } from "#/shared/models/post";
 type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
 const Profile = ({ params }: { params: { username: string } }) => {
-  const { user, logout } = useAuthContext();
+  const { user } = useAuthContext();
   let profileUsername = params.username;
 
   const [userinfo, setUserinfo] = useState<PersonalUserInfo | UserProfile | null>(null);
@@ -345,7 +345,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
       </div>
 
       {/* <div className="bg-slate-500 h-96 w-10"></div> */}
-      {/* {dummyPost.map((post, index) => <PostBox key={index} postInfo={post} />)} */}
+      {/* {dummyPost.map((post, index) => <PostBox key={index} post={post} />)} */}
 
       {posts && posts.length > 0 ? (
         selectedButton === "Posts" ? (

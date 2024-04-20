@@ -13,7 +13,7 @@ import { PersonalUserInfo } from "#/shared/models/user";
 
 function Onboarding() {
   const toast = useRef<Toast>(null);
-  const { user, logout } = useAuthContext();
+  const { user } = useAuthContext();
   const router = useRouter();
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);

@@ -77,12 +77,19 @@ const LoginBox = ({ bUseAdmin }: { bUseAdmin?: boolean }) => {
             {!bUseAdmin && <br className="!my-5" />}
 
             {!bUseAdmin && (
-              <span className="font-light">
+              <div className="font-light">
                 No account?&nbsp;
                 <Link href="/signup" className="text-orange1 hover:underline">
                   Sign up
                 </Link>
-              </span>
+              </div>
+            )}
+
+            {!bUseAdmin && (
+              <Link href="/global" className="text-orange1 flex items-center">
+                <span>Visit as guest instead</span>
+                <i className="pi ml-2 pi-angle-double-right text-base"></i>
+              </Link>
             )}
           </form>
         </div>

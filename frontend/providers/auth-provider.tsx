@@ -1,7 +1,9 @@
 "use client";
 
+import { PersonalUserInfo } from "#/shared/models/user";
 import { login, logout, validateUser } from "@/lib/actions/auth";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { getUserInfo } from "@/lib/actions/user";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 type AuthContextProviderProps = {
   children: React.ReactNode;
@@ -17,8 +19,10 @@ type ValidateUserResponse = Exclude<
 type IAuthContext = {
   user: ValidateUserResponse["user"] | null;
   session: ValidateUserResponse["session"] | null;
+  userInfo: PersonalUserInfo | null;
   login: (props: { email: string; password: string }) => ReturnType<typeof login>;
   logout: () => ReturnType<typeof logout>;
+  refreshUserInfo: () => Promise<PersonalUserInfo | null>;
   print: () => void;
 };
 
@@ -30,6 +34,18 @@ const AuthContext = createContext<IAuthContext | null>(null);
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<ValidateUserResponse["user"] | null>(null);
   const [session, setSession] = useState<ValidateUserResponse["session"] | null>(null);
+  const [userInfo, setUserInfo] = useState<PersonalUserInfo | null>(null);
+
+  const refreshUserInfo = useCallback(async () => {
+    const userInfo = await getUserInfo();
+    if (!("error" in userInfo)) {
+      setUserInfo(userInfo);
+      return userInfo;
+    } else {
+      setUserInfo(null);
+    }
+    return null;
+  }, []);
 
   useEffect(() => {
     // hydrate on mount
@@ -41,13 +57,14 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         const sessionobj = JSON.parse(session);
         setUser(userobj);
         setSession(sessionobj);
+        refreshUserInfo();
       } catch (error) {
         console.log("Malformed user/session stored keys:", error, user, session);
         localStorage.removeItem(lsUserKey);
         localStorage.removeItem(lsSessionKey);
       }
     }
-  }, []);
+  }, [refreshUserInfo]);
 
   const loginHandler = async (props: { email: string; password: string }) => {
     const response = await login({ email: props.email, password: props.password });
@@ -58,6 +75,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         setSession(validate.session);
         localStorage.setItem(lsUserKey, JSON.stringify(validate.user));
         localStorage.setItem(lsSessionKey, JSON.stringify(validate.session));
+        await refreshUserInfo();
       }
     }
 
@@ -69,6 +87,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     if (response === true) {
       setUser(null);
       setSession(null);
+      setUserInfo(null);
       localStorage.removeItem(lsUserKey);
       localStorage.removeItem(lsSessionKey);
     }
@@ -84,6 +103,8 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const store = {
     user,
     session,
+    userInfo,
+    refreshUserInfo,
     login: loginHandler,
     logout: logoutHandler,
     print: printHandler,

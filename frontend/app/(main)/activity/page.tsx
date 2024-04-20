@@ -10,21 +10,22 @@ import { useCallback, useEffect, useState } from "react";
 type ButtonTabState = "Unread" | "Read";
 
 function ActivityPage() {
-  const { user } = useAuthContext();
+  const { user, refreshUserInfo } = useAuthContext();
   const [selectedButton, setSelectedButton] = useState<ButtonTabState>("Unread");
   const [unreadNotif, setUnreadNotif] = useState<NotificationInfo[] | null>(null);
   const [readNotif, setReadNotif] = useState<NotificationInfo[] | null>(null);
 
-  async function getNotifications(mode: "unread" | "read") {
+  const getNotifications = useCallback(async (mode: "unread" | "read") => {
     const res = await apiClient.user.getNotifications({ query: { mode } });
     if (res.status === 200) {
-      setTimeout(() => {
+      const tout = setTimeout(() => {
         apiClient.user.readNotifications({});
+        clearTimeout(tout);
       }, 3000);
       return res.body;
     }
     return null;
-  }
+  }, []);
 
   const getReadAndUnreadNotifications = useCallback(async () => {
     getNotifications("unread").then((data) => {
@@ -33,7 +34,8 @@ function ActivityPage() {
     getNotifications("read").then((data) => {
       setReadNotif(data);
     });
-  }, []);
+    refreshUserInfo();
+  }, [getNotifications, refreshUserInfo]);
 
   useEffect(() => {
     getReadAndUnreadNotifications();

@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRef, useState, useEffect, Key } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Image } from "primereact/image";
 import { InputTextarea } from "primereact/inputtextarea";
 import PostBox from "@/components/home/PostBox";
@@ -13,27 +13,15 @@ import { useRouter } from "next/navigation";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { apiContract } from "#/shared/contracts";
 
-type GlobalFeedsResponse = ClientInferResponseBody<typeof apiContract.post.getGlobalFeeds, 200>;
 type FollowedPostsResponse = ClientInferResponseBody<typeof apiContract.user.getFeeds, 200>;
 
 const Home = () => {
   const toast = useRef<Toast>(null);
-  // const handleAddPost = () => {
-  //     setbAddPostDiagVisible(true);
-  // }
 
   const router = useRouter();
 
-  const { user, logout } = useAuthContext();
-  const [globalFeeds, setGlobalFeeds] = useState<GlobalFeedsResponse | null>(null);
+  const { user } = useAuthContext();
   const [followedPosts, setFollowedPosts] = useState<FollowedPostsResponse | null>(null);
-
-  const getGlobalFeeds = async () => {
-    const res = await apiClient.post.getGlobalFeeds();
-    if (res.status === 200 && res.body) {
-      setGlobalFeeds(res.body);
-    }
-  };
 
   const getFollowedPosts = async () => {
     const res = await apiClient.user.getFeeds();
@@ -51,7 +39,7 @@ const Home = () => {
       if (!user || "error" in userinfo) {
         // logged out users or error
         setbIsLoggedin(false);
-        getGlobalFeeds();
+        router.replace("/global");
       } else if (user && userinfo.onBoardingCompleted === false) {
         router.replace("/onboarding");
       } else {
@@ -62,17 +50,6 @@ const Home = () => {
 
     wrapper();
   }, [user, router]);
-
-  // useEffect(() => {
-  //     console.log('bIsLoggedin', bIsLoggedin);
-  //     if (!bIsLoggedin) {
-  //         getGlobalFeeds();
-  //     }
-  // }, [bIsLoggedin]);
-
-  useEffect(() => {
-    // console.log(globalFeeds);
-  }, [globalFeeds]);
 
   const [bAddPostDiagVisible, setbAddPostDiagVisible] = useState(false);
   const [postContent, setPostContent] = useState<string>("");
@@ -193,19 +170,18 @@ const Home = () => {
         {/* main content with margin */}
         <div className="flex flex-col w-[60%] space-y-4">
           <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">
-            <p className="text-3xl font-bold">{bIsLoggedin ? "Home" : "All Posts"}</p>
-            {bIsLoggedin && <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />}
+            <div className="flex flex-col h-fit mt-5 !mb-0">
+              <p className="text-3xl font-bold">Home</p>
+              <p className="font-light">All posts from Chads You Follow.</p>
+            </div>
+            <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />
           </div>
-
-          {globalFeeds && globalFeeds.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)}
 
           {followedPosts &&
             followedPosts.length > 0 &&
             followedPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)}
 
-          {((!globalFeeds && !followedPosts) || globalFeeds?.length === 0 || followedPosts?.length === 0) && (
-            <p className="text-xl">No posts to display yet ._.</p>
-          )}
+          {(!followedPosts || followedPosts?.length === 0) && <p className="text-xl">No posts to display yet ._.</p>}
         </div>
       </main>
       {/* main content end */}
