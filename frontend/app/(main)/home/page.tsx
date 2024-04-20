@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, use } from "react";
 import { Image } from "primereact/image";
 import { InputTextarea } from "primereact/inputtextarea";
 import PostBox from "@/components/home/PostBox";
@@ -24,6 +24,7 @@ const Home = () => {
 
   const { user } = useAuthContext();
   const [followedPosts, setFollowedPosts] = useState<FollowedPostsResponse | null>(null);
+  const [globalFeeds, setGlobalFeeds] = useState<FollowedPostsResponse | null>(null);
 
   const [from, setFrom] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -89,20 +90,25 @@ const Home = () => {
     const wrapper = async () => {
       const userinfo = await getUserInfo();
       setUserInfo(userinfo);
-      if (!user || "error" in userinfo) {
+    };
+
+    wrapper();
+  }, [user, router]);
+
+  useEffect(() => {
+    if (userInfo) {
+      if (!user || "error" in userInfo) {
         // logged out users or error
         setbIsLoggedin(false);
         router.replace("/global");
-      } else if (user && userinfo.onBoardingCompleted === false) {
+      } else if (user && userInfo.onBoardingCompleted === false) {
         router.replace("/onboarding");
       } else {
         setbIsLoggedin(true);
         getFollowedPosts();
       }
-    };
-
-    wrapper();
-  }, [user, router]);
+    }
+  }, [userInfo]);
 
   const [bAddPostDiagVisible, setbAddPostDiagVisible] = useState(false);
   const [postContent, setPostContent] = useState<string>("");
@@ -134,7 +140,8 @@ const Home = () => {
     setbIsSummitingPost(false);
 
     // console.log(res);
-    getFollowedPosts();
+    fetchOnCreatePost();
+
 
     if (toast.current) {
       toast.current.show({ severity: "info", summary: "Success", detail: "post added" });
@@ -143,6 +150,18 @@ const Home = () => {
     setPostContent("");
     setbAddPostDiagVisible(false);
   };
+
+  const fetchOnCreatePost = async () => {
+    const res2 = await apiClient.user.getFeeds({ query: { from: 0, limit: 1 } });
+    if (res2.status === 200 && res2.body) {
+      console.log(res2.body);
+      if (followedPosts) {
+        setFollowedPosts([...res2.body, ...followedPosts]);
+      } else {
+        setFollowedPosts(res2.body);
+      }
+    }
+  }
 
   const [mediaPreview, setMediaPreview] = useState<string | undefined>();
   const [videoPreview, setVideoPreview] = useState<string | undefined>();
@@ -268,7 +287,7 @@ const Home = () => {
               scrollableTarget="scrollableMain"
               className="min-w-fit space-y-4">
               {followedPosts.map((post, index) => <PostBox key={index} post={post}
-                currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)}
+                currentUserName={user?.username} onRepostSubmit={fetchOnCreatePost} />)}
             </InfiniteScroll>
           }
           {(!followedPosts || followedPosts?.length === 0) && <p className="text-xl">No posts to display yet ._.</p>}

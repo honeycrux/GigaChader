@@ -58,7 +58,7 @@ const LeftSidebar = () => {
       <aside className="flex flex-col bg-orange2 w-60 px-4 py-2 overflow-y-auto overflow-x-hidden">
         {bIsGuest && (
           <button
-            className="flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg bg-orange1 text-white"
+            className="flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg text-black border-2 border-orange1"
             onClick={() => {
               router.push("/");
             }}
