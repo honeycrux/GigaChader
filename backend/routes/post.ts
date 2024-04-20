@@ -155,8 +155,7 @@ export const postRouter = s.router(apiContract.post, {
         handler: async ({ query: { from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
+                skip: from ? from : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },

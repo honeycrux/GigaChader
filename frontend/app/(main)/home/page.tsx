@@ -12,8 +12,10 @@ import { apiClient } from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { apiContract } from "#/shared/contracts";
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 type FollowedPostsResponse = ClientInferResponseBody<typeof apiContract.user.getFeeds, 200>;
+type UserInfoResponse = ClientInferResponseBody<typeof apiContract.user.getInfo, 200> | { error: string; };
 
 const Home = () => {
   const toast = useRef<Toast>(null);
@@ -23,19 +25,70 @@ const Home = () => {
   const { user } = useAuthContext();
   const [followedPosts, setFollowedPosts] = useState<FollowedPostsResponse | null>(null);
 
-  const getFollowedPosts = async () => {
-    const res = await apiClient.user.getFeeds();
+  const [from, setFrom] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(10);
+
+  const getGlobalFeeds = async () => {
+    const res = await apiClient.post.getGlobalFeeds({ query: { from: from, limit: limit } });
     if (res.status === 200 && res.body) {
-      console.log(res.body);
-      setFollowedPosts(res.body);
+      setGlobalFeeds(res.body);
+      if (res.body.length < limit) {
+        setHasMorePosts(false);
+      }
+      if (globalFeeds) {
+        setGlobalFeeds([...globalFeeds, ...res.body]);
+      } else {
+        setGlobalFeeds(res.body);
+      }
     }
   };
 
+  const getFollowedPosts = async () => {
+    const res = await apiClient.user.getFeeds({ query: { from: from, limit: limit } });
+    if (res.status === 200 && res.body) {
+      console.log(res.body);
+      if (res.body.length < limit) {
+        setHasMorePosts(false);
+      }
+      if (followedPosts) {
+        setFollowedPosts([...followedPosts, ...res.body]);
+      } else {
+        setFollowedPosts(res.body);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (bIsLoggedin) {
+      getFollowedPosts();
+    } else {
+      getGlobalFeeds();
+    }
+  }, [from]);
+
+  const [hasMorePosts, setHasMorePosts] = useState<boolean>(true);
+  const fecthMoreFollowedPosts = () => {
+    setFrom((f) => f + limit);
+    if (followedPosts && followedPosts.length < limit) {
+      setHasMorePosts(false);
+    }
+  }
+
+  const fetchMoreGlobalPosts = () => {
+    setFrom((f) => f + limit);
+    if (globalFeeds && globalFeeds.length < limit) {
+      setHasMorePosts(false);
+    }
+  }
+
+
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
 
   useEffect(() => {
     const wrapper = async () => {
       const userinfo = await getUserInfo();
+      setUserInfo(userinfo);
       if (!user || "error" in userinfo) {
         // logged out users or error
         setbIsLoggedin(false);
@@ -61,7 +114,6 @@ const Home = () => {
       const res = await apiClient.post.postCreate({
         body: {
           content: postContent,
-          // mediaProps: []
         },
       });
     } else if (mediaPreview) {
@@ -166,7 +218,7 @@ const Home = () => {
       </Dialog>
       <Toast ref={toast}></Toast>
       {/* main content start */}
-      <main className="flex w-full justify-center overflow-y-auto">
+      <main id="scrollableMain" className="flex w-full justify-center overflow-y-auto">
         {/* main content with margin */}
         <div className="flex flex-col w-[60%] space-y-4">
           <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">
@@ -176,12 +228,51 @@ const Home = () => {
             </div>
             <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />
           </div>
+          {userInfo && ("error" in userInfo) && !bIsLoggedin && globalFeeds &&
+            <InfiniteScroll dataLength={globalFeeds ? globalFeeds.length : 0}
+              next={fetchMoreGlobalPosts}
+              hasMore={hasMorePosts}
+              loader={
+                <p className="text-center space-x-2">
+                  <i className="pi pi-spin pi-spinner text-sm" />
+                  <b>Loading...</b>
+                </p>
+              }
+              endMessage={
+                <p className="text-center">
+                  <b>That's all posts</b>
+                </p>
+              }
+              scrollableTarget="scrollableMain"
+              className="min-w-fit space-y-4">
+              {globalFeeds.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)}
+            </InfiniteScroll>}
 
-          {followedPosts &&
+
+          {userInfo && !("error" in userInfo) && bIsLoggedin && followedPosts &&
             followedPosts.length > 0 &&
-            followedPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)}
-
+            <InfiniteScroll dataLength={followedPosts ? followedPosts.length : 0}
+              next={fecthMoreFollowedPosts}
+              hasMore={hasMorePosts}
+              loader={
+                <p className="text-center space-x-2">
+                  <i className="pi pi-spin pi-spinner text-sm" />
+                  <b>Loading...</b>
+                </p>
+              }
+              endMessage={
+                <p className="text-center">
+                  <b>That's all posts</b>
+                </p>
+              }
+              scrollableTarget="scrollableMain"
+              className="min-w-fit space-y-4">
+              {followedPosts.map((post, index) => <PostBox key={index} post={post}
+                currentUserName={user?.username} onRepostSubmit={getFollowedPosts} />)}
+            </InfiniteScroll>
+          }
           {(!followedPosts || followedPosts?.length === 0) && <p className="text-xl">No posts to display yet ._.</p>}
+
         </div>
       </main>
       {/* main content end */}
