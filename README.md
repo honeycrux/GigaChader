@@ -1,5 +1,10 @@
 # Gigachader
 
+Gigachader is a social media platform project. Gigachader is a platform for crypto enthusiasts to share their passion and knowledge. This platform includes ways for users to post content, interact with others, and share their crypto investment strategies.
+
+## Features
+TODO
+
 ## Structure
 
 This is a monorepo containing several folders:
@@ -27,7 +32,7 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 - Install dependencies: On the desired terminal, run `npm install`
 - Run web server or backend services: On the desired terminal, run `npm run dev`
 
-## Working with the project
+## Notes for Developers
 
 ### Installing Packages
 **To install or remove packages, please go to the respective folder (frontend/backend) before using `npm install`.**

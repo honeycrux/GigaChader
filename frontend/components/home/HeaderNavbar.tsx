@@ -61,7 +61,7 @@ const HeaderNavbar = (props: Props) => {
         <div className="flex flex-col gap-2">
           {user?.role === "ADMIN" ? (
             bUseAdmin ? (
-              <Button label="Home Page" onClick={() => handleJump("/home")} className="whitespace-nowrap" />
+              <Button label="Leave Admin Panel" onClick={() => handleJump("/home")} className="whitespace-nowrap" />
             ) : (
               <Button label="Admin Panel" onClick={() => handleJump("/admin")} className="whitespace-nowrap" />
             )
@@ -73,7 +73,14 @@ const HeaderNavbar = (props: Props) => {
       <nav className="flex bg-orange2 h-16 items-center space-x-2 justify-between px-4">
         <a className="flex items-center space-x-2" href="/home">
           <Image src="/gigachader_notext.png" alt="gigachad logo" width="50" />
-          <span className="text-xl font-bold">GigaChader</span>
+          {bUseAdmin ? (
+            <div className="space-x-1">
+              <span className="text-xl font-bold">GigaChader</span>
+              <span className="text-xl font-light">Admin</span>
+            </div>
+          ) : (
+            <span className="text-xl font-bold">GigaChader</span>
+          )}
         </a>
 
         {user && (

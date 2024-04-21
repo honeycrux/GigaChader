@@ -8,7 +8,7 @@ export const textualContextSchema = z.object({
     text: z.string(),
 });
 
-export const postInfoSchema = z.object({
+const basePostInfoSchema = z.object({
     id: z.string(),
     content: z.string(),
     createdAt: z.date(),
@@ -32,7 +32,14 @@ export const postInfoSchema = z.object({
     savedByRequester: z.boolean().nullable(),
 });
 
-export type PostInfo = z.infer<typeof postInfoSchema>;
+// this is how you build a recursive type according to documentation
+export type PostInfo = z.infer<typeof basePostInfoSchema> & {
+    repostingPost: PostInfo | null;
+};
+
+export const postInfoSchema: z.ZodType<PostInfo> = basePostInfoSchema.extend({
+    repostingPost: z.lazy(() => postInfoSchema.nullable()),
+});
 
 export const simplePostInfoSchema = z.object({
     id: z.string(),

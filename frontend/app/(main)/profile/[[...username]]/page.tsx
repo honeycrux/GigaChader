@@ -92,21 +92,18 @@ const Profile = ({ params }: { params: { username: string } }) => {
   const [comments, setComments] = useState<PostInfo[] | null>(null);
 
   const getPostsOfUser = async (username: string) => {
-    // console.log("received username: " + username);
-    const res = await apiClient.user.getPosts({ query: { username: username } });
-
-    if (res.status === 200 && res.body) {
-      let posts = res.body;
-      console.log(posts);
-
-      // Filter posts where parentPostId is not empty and store them in comments
-      const comments = posts.filter((post) => post.parentPostId);
-      setComments(comments);
-
-      // Filter posts where parentPostId is empty and store them in posts
-      const mainPosts = posts.filter((post) => !post.parentPostId);
-      setPosts(mainPosts);
-    }
+    apiClient.user.getPosts({ query: { username: username, filter: "post" } }).then((res) => {
+      if (res.status === 200 && res.body) {
+        let posts = res.body;
+        setPosts(posts);
+      }
+    });
+    apiClient.user.getPosts({ query: { username: username, filter: "reply" } }).then((res) => {
+      if (res.status === 200 && res.body) {
+        let posts = res.body;
+        setComments(posts);
+      }
+    });
   };
 
   const divRef = useRef<HTMLDivElement>(null);
@@ -364,7 +361,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
           </div>
         ) : null
       ) : (
-        <p className="text-xl my-4">No posts yet ._.</p>
+        <p className="text-xl my-4 text-center">No posts yet ._.</p>
       )}
     </div>
   );

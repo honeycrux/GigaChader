@@ -11,7 +11,6 @@ import { SimpleUserInfo } from "#/shared/models/user";
 import { PostInfo } from "#/shared/models/post";
 
 const Search = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();

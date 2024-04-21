@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import { Avatar } from "primereact/avatar";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -24,7 +24,6 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
   const {
     id,
     parentPostId,
-    repostingPostId,
     content,
     textualContexts,
     author,
@@ -34,24 +33,13 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
     likedByRequester,
     userMedia,
     savedByRequester,
+    repostingPost,
   } = postInfo;
 
   const toast = useRef<Toast>(null);
   const [heartPath, setHeartPath] = useState("/heart.svg");
   const bisLiked = useRef(likedByRequester);
   const [likeCountInternal, setlikeCountInternal] = useState(likeCount);
-
-  const [parentPost, setParentPost] = useState<PostInfo | null>(null);
-
-  const getParentpostInfo = useCallback(async () => {
-    if (repostingPostId) {
-      const res = await apiClient.post.getPost({ params: { postId: repostingPostId } });
-      // console.log(res.body);
-      if (res.status === 200 && res.body) {
-        setParentPost(res.body);
-      }
-    }
-  }, [repostingPostId]);
 
   const updateLiked = async (liked: boolean, likeCount: number) => {
     // const res = await apiClient.post.getLikes({ query: { postId: id } });
@@ -72,12 +60,6 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
   useEffect(() => {
     updateLiked(!!likedByRequester, likeCount);
   }, [id, likedByRequester, likeCount]);
-
-  useEffect(() => {
-    if (repostingPostId) {
-      getParentpostInfo();
-    }
-  }, [repostingPostId, getParentpostInfo]);
 
   const handleHeartClick = async () => {
     bisLiked.current = !bisLiked.current;
@@ -224,9 +206,9 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
                 ))}
               </div>
             )}
-            {repostingPostId && parentPost && (
+            {repostingPost && (
               <div className="border border-gray-500 rounded-lg m-2">
-                <PostBox post={parentPost} bButtonvisible={true} currentUserName={currentUserName} />
+                <PostBox post={repostingPost} bButtonvisible={true} currentUserName={currentUserName} />
               </div>
             )}
           </div>

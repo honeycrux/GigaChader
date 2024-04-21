@@ -12,10 +12,10 @@ import { apiClient } from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { apiContract } from "#/shared/contracts";
-import InfiniteScroll from 'react-infinite-scroll-component';
+import InfiniteScroll from "react-infinite-scroll-component";
 
 type FollowedPostsResponse = ClientInferResponseBody<typeof apiContract.user.getFeeds, 200>;
-type UserInfoResponse = ClientInferResponseBody<typeof apiContract.user.getInfo, 200> | { error: string; };
+type UserInfoResponse = ClientInferResponseBody<typeof apiContract.user.getInfo, 200> | { error: string };
 
 const Home = () => {
   const toast = useRef<Toast>(null);
@@ -73,15 +73,14 @@ const Home = () => {
     if (followedPosts && followedPosts.length < limit) {
       setHasMorePosts(false);
     }
-  }
+  };
 
   const fetchMoreGlobalPosts = () => {
     setFrom((f) => f + limit);
     if (globalFeeds && globalFeeds.length < limit) {
       setHasMorePosts(false);
     }
-  }
-
+  };
 
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
@@ -100,7 +99,6 @@ const Home = () => {
       if (!user || "error" in userInfo) {
         // logged out users or error
         setbIsLoggedin(false);
-        router.replace("/global");
       } else if (user && userInfo.onBoardingCompleted === false) {
         router.replace("/onboarding");
       } else {
@@ -142,7 +140,6 @@ const Home = () => {
     // console.log(res);
     fetchOnCreatePost();
 
-
     if (toast.current) {
       toast.current.show({ severity: "info", summary: "Success", detail: "post added" });
     }
@@ -161,7 +158,7 @@ const Home = () => {
         setFollowedPosts(res2.body);
       }
     }
-  }
+  };
 
   const [mediaPreview, setMediaPreview] = useState<string | undefined>();
   const [videoPreview, setVideoPreview] = useState<string | undefined>();
@@ -247,8 +244,9 @@ const Home = () => {
             </div>
             <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />
           </div>
-          {userInfo && ("error" in userInfo) && !bIsLoggedin && globalFeeds &&
-            <InfiniteScroll dataLength={globalFeeds ? globalFeeds.length : 0}
+          {userInfo && "error" in userInfo && !bIsLoggedin && globalFeeds && (
+            <InfiniteScroll
+              dataLength={globalFeeds ? globalFeeds.length : 0}
               next={fetchMoreGlobalPosts}
               hasMore={hasMorePosts}
               loader={
@@ -259,18 +257,21 @@ const Home = () => {
               }
               endMessage={
                 <p className="text-center">
-                  <b>That's all posts</b>
+                  <b>{"That's all posts"}</b>
                 </p>
               }
               scrollableTarget="scrollableMain"
-              className="min-w-fit space-y-4">
-              {globalFeeds.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)}
-            </InfiniteScroll>}
+              className="min-w-fit space-y-4"
+            >
+              {globalFeeds.map((post, index) => (
+                <PostBox key={index} post={post} currentUserName={user?.username} />
+              ))}
+            </InfiniteScroll>
+          )}
 
-
-          {userInfo && !("error" in userInfo) && bIsLoggedin && followedPosts &&
-            followedPosts.length > 0 &&
-            <InfiniteScroll dataLength={followedPosts ? followedPosts.length : 0}
+          {userInfo && !("error" in userInfo) && bIsLoggedin && followedPosts && followedPosts.length > 0 && (
+            <InfiniteScroll
+              dataLength={followedPosts ? followedPosts.length : 0}
               next={fecthMoreFollowedPosts}
               hasMore={hasMorePosts}
               loader={
@@ -281,17 +282,18 @@ const Home = () => {
               }
               endMessage={
                 <p className="text-center">
-                  <b>That's all posts</b>
+                  <b>{"That's all posts"}</b>
                 </p>
               }
               scrollableTarget="scrollableMain"
-              className="min-w-fit space-y-4">
-              {followedPosts.map((post, index) => <PostBox key={index} post={post}
-                currentUserName={user?.username} onRepostSubmit={fetchOnCreatePost} />)}
+              className="min-w-fit space-y-4"
+            >
+              {followedPosts.map((post, index) => (
+                <PostBox key={index} post={post} currentUserName={user?.username} onRepostSubmit={fetchOnCreatePost} />
+              ))}
             </InfiniteScroll>
-          }
+          )}
           {(!followedPosts || followedPosts?.length === 0) && <p className="text-xl">No posts to display yet ._.</p>}
-
         </div>
       </main>
       {/* main content end */}
