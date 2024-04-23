@@ -39,6 +39,9 @@ function Crypto({ symbol }: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     // const [bHasAdded, setbHasAdded] = useState<boolean>(false);
     const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
+    const [selectedButton, setSelectedButton] = useState("Bookmark");
+    const [cryptoHolding, setCryptoHolding] = useState<CryptoInfo[] | null>(null);
+ 
 
     function handleButtonClick(result: any, set: boolean) {
         if (set) {
@@ -64,6 +67,7 @@ function Crypto({ symbol }: Props) {
                             nonNull.push(bookmark)
                         }
                     }
+                    
 
                     setCryptoBookmarks(nonNull);
                 }
@@ -95,6 +99,21 @@ function Crypto({ symbol }: Props) {
         handlecryptoSearch("");
     }, []);
 
+    const handlecryptoHandle = useCallback(async (term: string) => {
+        const handleResult = cryptoHolding;
+        setCryptoHolding(handleResult);
+
+        inputRef.current?.focus();
+    }, [setCryptoHolding, apiClient]);
+
+    useEffect(() => {
+        handlecryptoHandle("");
+    }, []);
+
+
+    
+
+
     if (!user) {
         return <div>Go back to login</div>;
     }
@@ -122,60 +141,128 @@ function Crypto({ symbol }: Props) {
                 visible={bEditCryptoDiagVisible}
                 className="w-[50vw] min-h-[80%]"
                 onHide={() => setbEditCryptoDiagVisible(false)}
-            >
-                <div>
-                    <div className="flex flex-col w-full bg-[#e5eeee] relative">
-                        <div className="relative w-full">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 pi pi-search"></span>
-                            <InputText
-                                ref={inputRef}
-                                className="pl-10 pr-10 font-medium center w-full"
-                                placeholder="Search Crypto"
-                                onChange={(e) => {
-                                    handlecryptoSearch(e.target.value);
-                                }}
-                            />
-                        </div>
-                        <div className="flex w-full gap-9">
-                            {cryptoBookmarks && (
-                                <div className='w-full space-y-2'>
-                                    {searchResult && searchResult.map((result, index) => {
-                                        const bHasAdded = addedItems.some(bookmark => bookmark.symbol === result.symbol);
-                                        return (
-                                            <Card key={index} {...result}
-                                                pt={{
-                                                    content: { className: 'p-0' }
-                                                }}>
-                                                <div className='flex justify-between items-center'>
-                                                    <div>
-                                                        <p className='text-lg text-black font-bold'>{result.name}</p>
-                                                        <p className='text-sm text-gray-500'>{result.symbol}</p>
-                                                    </div>
-
-                                                    <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
-                                                    <Button
-                                                        className="`flex items-center py-2 px-7 rounded-lg 
-                                        ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`"
-                                                        label={bHasAdded ? "Added" : "Add"}
-                                                        icon={bHasAdded ? "pi pi-check" : "pi pi-plus"}
-                                                        onClick={() => {
-                                                            if (bHasAdded) {
-                                                                handleButtonClick(result, false);
-                                                            } else {
-                                                                handleButtonClick(result, true);
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                            </Card>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-                    </div>
+        >
+                <div className="flex justify-between w-full">
+                <Button
+                    className={`w-full ${selectedButton === "Bookmark" ? "border-0 !border-b-2 border-orange1" : ""}`}
+                    label="Bookmark"
+                    text
+                    onClick={() => setSelectedButton("Bookmark")}
+                />
+                <Button
+                    className={`w-full ${selectedButton === "Flexfolio" ? "border-0 !border-b-2 border-orange1" : ""}`}
+                    label="Flexfolio"
+                    text
+                    onClick={() => setSelectedButton("Flexfolio")}
+                />
                 </div>
+                {selectedButton === "Bookmark" ?(
+                    <div>
+                        <div className="flex flex-col w-full bg-[#e5eeee] relative">
+                            <div className="relative w-full">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 pi pi-search"></span>
+                                <InputText
+                                    ref={inputRef}
+                                    className="pl-10 pr-10 font-medium center w-full"
+                                    placeholder="Search Crypto"
+                                    onChange={(e) => {
+                                        handlecryptoSearch(e.target.value);
+                                    }}
+                                />
+                            </div>
+                            <div className="flex w-full gap-9">
+                                {cryptoBookmarks && (
+                                    <div className='w-full space-y-2'>
+                                        {searchResult && searchResult.map((result, index) => {
+                                            const bHasAdded = addedItems.some(bookmark => bookmark.symbol === result.symbol);
+                                            return (
+                                                <Card key={index} {...result}
+                                                    pt={{
+                                                        content: { className: 'p-0' }
+                                                    }}>
+                                                    <div className='flex justify-between items-center'>
+                                                        <div>
+                                                            <p className='text-lg text-black font-bold'>{result.name}</p>
+                                                            <p className='text-sm text-gray-500'>{result.symbol}</p>
+                                                        </div>
+
+                                                        <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
+                                                        <Button
+                                                            className="`flex items-center py-2 px-7 rounded-lg 
+                                            ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`"
+                                                            label={bHasAdded ? "Added" : "Add"}
+                                                            icon={bHasAdded ? "pi pi-check" : "pi pi-plus"}
+                                                            onClick={() => {
+                                                                if (bHasAdded) {
+                                                                    handleButtonClick(result, false);
+                                                                } else {
+                                                                    handleButtonClick(result, true);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+                    </div>) 
+                    :selectedButton === "Flexfolio" ?(
+                        <div>
+                        <div className="flex flex-col w-full bg-[#e5eeee] relative">
+                            <div className="relative w-full">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 pi pi-search"></span>
+                                <InputText
+                                    ref={inputRef}
+                                    className="pl-10 pr-10 font-medium center w-full"
+                                    placeholder="Search Crypto"
+                                    onChange={(e) => {
+                                        handlecryptoSearch(e.target.value);
+                                    }}
+                                />
+                            </div>
+                            <div className="flex w-full gap-9">
+                                {cryptoHolding && (
+                                    <div className='w-full space-y-2'>
+                                        {cryptoHolding.map((result, index) => {
+                                            
+                                            return (
+                                                <Card key={index} {...result}
+                                                    pt={{
+                                                        content: { className: 'p-0' }
+                                                    }}>
+                                                    <div className='flex justify-between items-center'>
+                                                        <div>
+                                                            <p className='text-lg text-black font-bold'>{result.name}</p>
+                                                            <p className='text-sm text-gray-500'>{result.symbol}</p>
+                                                        </div>
+
+                                                        <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
+                                                        <InputText
+                                                         ref={inputRef}
+                                                         className=" font-medium center w-11"
+                                                         
+                                                         onChange={(e) => {
+                                                             handlecryptoHandle(e.target.value);
+                                                         }}
+                                                        />
+                                                        
+                                                        
+                                                    </div>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    ): null} 
             </Dialog>
 
 
