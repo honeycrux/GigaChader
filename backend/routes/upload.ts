@@ -1,5 +1,7 @@
 import { apiContract } from "#/shared/contracts";
+import { prismaClient } from "@/lib/data/db";
 import { checkMediaUpload, compressAndUploadMedia, SupportedMediaType } from "@/lib/data/mediaHandler";
+import { createExpirableMediaStash } from "@/lib/helpers/expirables";
 import { protectRoute } from "@/middlewares/auth";
 import { MediaUploadFiles, mediaUploadMiddleware, ProfileUploadFiles, profileUploadMiddleware } from "@/middlewares/mediaUpload";
 import { initServer } from "@ts-rest/express";
@@ -42,6 +44,9 @@ export const uploadRouter = s.router(apiContract.upload, {
                     const responses = await Promise.all(uploadPromises);
                     urls = responses.map((response) => response.url);
                 }
+            }
+            if (urls.length > 0) {
+                createExpirableMediaStash({ urls: urls });
             }
             return {
                 status: 200,
@@ -102,6 +107,16 @@ export const uploadRouter = s.router(apiContract.upload, {
                     });
                     bannerUrl = response.url;
                 }
+            }
+            if (avatarUrl || bannerUrl) {
+                const urls: string[] = [];
+                if (avatarUrl) {
+                    urls.push(avatarUrl);
+                }
+                if (bannerUrl) {
+                    urls.push(bannerUrl);
+                }
+                createExpirableMediaStash({ urls: urls });
             }
             return {
                 status: 200,

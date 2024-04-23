@@ -1,4 +1,4 @@
-// express server
+// This is a backend service that runs an API server
 
 import express from "express";
 import { apiRouter } from "@/routes";

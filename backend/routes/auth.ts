@@ -6,6 +6,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { prismaClient } from "@/lib/data/db";
 import { z } from "zod";
 import { validateUser } from "@/middlewares/auth";
+import { createExpirableNotification } from "@/lib/helpers/expirables";
 
 const s = initServer();
 
@@ -101,13 +102,11 @@ export const authRouter = s.router(apiContract.auth, {
                             cryptoBookmarks: [],
                             cryptoHoldings: [],
                         },
-                        notifications: {
-                            create: {
-                                content: "Welcome to Gigachader!",
-                                expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
-                            },
-                        },
                     },
+                });
+                await createExpirableNotification({
+                    content: "Welcome to Gigachader!",
+                    receiverId: user.id,
                 });
 
                 const session = await lucia.createSession(user.id.toString(), {});

@@ -325,3 +325,11 @@ model SystemMetadata {
   key   String @unique
   value Json
 }
+
+// stores temporarily-uploaded media
+model MediaStash {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  createdAt DateTime @default(now())
+  expiry    DateTime
+}

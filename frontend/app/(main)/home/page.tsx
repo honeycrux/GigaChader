@@ -7,7 +7,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import PostBox from "@/components/home/PostBox";
 import { Dialog } from "primereact/dialog";
 import { useAuthContext } from "@/providers/auth-provider";
-import { getUserInfo } from "@/lib/actions/user";
 import { apiClient } from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import { ClientInferResponseBody } from "@ts-rest/core";
@@ -15,14 +14,13 @@ import { apiContract } from "#/shared/contracts";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 type FollowedPostsResponse = ClientInferResponseBody<typeof apiContract.user.getFeeds, 200>;
-type UserInfoResponse = ClientInferResponseBody<typeof apiContract.user.getInfo, 200> | { error: string };
 
 const Home = () => {
   const toast = useRef<Toast>(null);
 
   const router = useRouter();
 
-  const { user } = useAuthContext();
+  const { user, userInfo } = useAuthContext();
   const [followedPosts, setFollowedPosts] = useState<FollowedPostsResponse | null>(null);
   const [globalFeeds, setGlobalFeeds] = useState<FollowedPostsResponse | null>(null);
 
@@ -83,16 +81,6 @@ const Home = () => {
   };
 
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
-  const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
-
-  useEffect(() => {
-    const wrapper = async () => {
-      const userinfo = await getUserInfo();
-      setUserInfo(userinfo);
-    };
-
-    wrapper();
-  }, [user, router]);
 
   useEffect(() => {
     if (userInfo) {
@@ -242,7 +230,7 @@ const Home = () => {
               <p className="text-3xl font-bold">Home</p>
               <p className="font-light">All posts from Chads You Follow.</p>
             </div>
-            <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />
+            {user && <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />}
           </div>
           {userInfo && "error" in userInfo && !bIsLoggedin && globalFeeds && (
             <InfiniteScroll

@@ -6,6 +6,7 @@ import { postInfoFindManyOrdered, postInfoFindOne } from "@/lib/objects/post";
 import { simpleUserInfoFindManyOrdered } from "@/lib/objects/user";
 import { searchPost } from "@/lib/helpers/search";
 import { analysePostContent } from "@/lib/helpers/textual";
+import { createExpirableNotification } from "@/lib/helpers/expirables";
 
 const s = initServer();
 
@@ -296,33 +297,29 @@ export const postRouter = s.router(apiContract.post, {
             }
             const postinfo = await postInfoFindOne({ postId: data.id, requesterId: res.locals.user?.id });
 
-            // Handle push noitifications
-            if (repostingPostId && repostOriginalAuthorId && res.locals.user!.id !== repostOriginalAuthorId) {
-                await prismaClient.notification.create({
-                    data: {
-                        content: `@${res.locals.user!.username} reposted your post.`,
-                        link: `/post/${data.id}`,
-                        expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
-                        receiver: {
-                            connect: {
-                                id: repostOriginalAuthorId,
-                            },
-                        },
+            // Delete uploaded media from stash
+            if (userMedia) {
+                const uploadedMediaUrls = userMedia.map((media) => media.url);
+                await prismaClient.mediaStash.deleteMany({
+                    where: {
+                        url: { in: uploadedMediaUrls },
                     },
                 });
             }
+
+            // Handle push noitifications
+            if (repostingPostId && repostOriginalAuthorId && res.locals.user!.id !== repostOriginalAuthorId) {
+                await createExpirableNotification({
+                    content: `@${res.locals.user!.username} reposted your post.`,
+                    link: `/post/${data.id}`,
+                    receiverId: repostOriginalAuthorId,
+                });
+            }
             if (parentPostId && commentOriginalAuthorId && res.locals.user!.id !== commentOriginalAuthorId) {
-                await prismaClient.notification.create({
-                    data: {
-                        content: `@${res.locals.user!.username} added a comment to your post.`,
-                        link: `/post/${data.id}`,
-                        expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
-                        receiver: {
-                            connect: {
-                                id: commentOriginalAuthorId,
-                            },
-                        },
-                    },
+                await createExpirableNotification({
+                    content: `@${res.locals.user!.username} added a comment to your post.`,
+                    link: `/post/${data.id}`,
+                    receiverId: commentOriginalAuthorId,
                 });
             }
 
@@ -406,17 +403,10 @@ export const postRouter = s.router(apiContract.post, {
 
             // Handle push notification
             if (set && res.locals.user!.id !== originalPostAuthorId) {
-                await prismaClient.notification.create({
-                    data: {
-                        content: `@${res.locals.user!.username} liked your post.`,
-                        link: `/post/${data.id}`,
-                        expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
-                        receiver: {
-                            connect: {
-                                id: originalPostAuthorId,
-                            },
-                        },
-                    },
+                await createExpirableNotification({
+                    content: `@${res.locals.user!.username} liked your post.`,
+                    link: `/post/${data.id}`,
+                    receiverId: originalPostAuthorId,
                 });
             }
 
