@@ -7,6 +7,7 @@ import { deleteMedia } from "@/lib/data/mediaHandler";
 import { personalUserInfoFindOne, simpleUserInfoFindManyOrdered, userProfileFindOne } from "@/lib/objects/user";
 import { postInfoFindManyOrdered } from "@/lib/objects/post";
 import { searchUser } from "@/lib/helpers/search";
+import { createExpirableNotification } from "@/lib/helpers/expirables";
 
 const s = initServer();
 
@@ -415,12 +416,10 @@ export const userRouter = s.router(apiContract.user, {
                 });
                 if (userdata) {
                     if (userdata.userConfig.avatarUrl && (avatarUrl || deleteAvatar)) {
-                        // asynchronously delete old avatar
-                        deleteMedia({ url: userdata.userConfig.avatarUrl });
+                        await deleteMedia({ url: userdata.userConfig.avatarUrl });
                     }
                     if (userdata.userConfig.bannerUrl && (bannerUrl || deleteBanner)) {
-                        // asynchronously delete old banner
-                        deleteMedia({ url: userdata.userConfig.bannerUrl });
+                        await deleteMedia({ url: userdata.userConfig.bannerUrl });
                     }
                 }
             }
@@ -482,6 +481,16 @@ export const userRouter = s.router(apiContract.user, {
                     body: { error: "Failed to push changes to user config" },
                 };
             }
+
+            // Delete uploaded media from stash
+            if (avatarUrl || bannerUrl) {
+                await prismaClient.mediaStash.deleteMany({
+                    where: {
+                        url: { in: [avatarUrl || "", bannerUrl || ""] },
+                    },
+                });
+            }
+
             const userinfo = await userProfileFindOne({ username: data.username, requesterId: res.locals.user?.id });
             return {
                 status: 200,
@@ -567,17 +576,10 @@ export const userRouter = s.router(apiContract.user, {
 
             // Handle push notification
             if (set) {
-                await prismaClient.notification.create({
-                    data: {
-                        content: `@${res.locals.user!.username} started to follow you.`,
-                        link: `/profile/${res.locals.user!.username}`,
-                        expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 1 month after creation
-                        receiver: {
-                            connect: {
-                                id: userdata.id,
-                            },
-                        },
-                    },
+                await createExpirableNotification({
+                    content: `@${res.locals.user!.username} started to follow you.`,
+                    link: `/profile/${res.locals.user!.username}`,
+                    receiverId: userdata.id,
                 });
             }
 
