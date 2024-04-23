@@ -11,18 +11,18 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { apiClient } from "@/lib/apiClient";
 import { SimpleUserInfo, UserConfigProps, UserProfile } from "#/shared/models/user";
 import { PostInfo } from "#/shared/models/post";
-import { Chart } from "primereact/chart";
-import CryptoEdit from "@/components/crypto/CryptoSearch";
-import { CryptoInfo } from "#/shared/models/crypto";
 import { Card } from "primereact/card";
 import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
 import SimpleUserBox from "@/components/home/SimpleUserBox";
+
+type ButtonTabState = "Posts" | "Comments" | "Flexfolio";
 
 const Profile = ({ params }: { params: { username?: string[] } }) => {
   const { user, userInfo: myInfo, refreshUserInfo: refreshMyInfo } = useAuthContext();
   let profileUsername = params.username?.[0] || user?.username;
   let bIsViewingSelf = !!profileUsername && profileUsername === user?.username;
 
+  const [selectedButton, setSelectedButton] = useState<ButtonTabState>("Posts");
   const [displayedUserInfo, setDisplayedUserInfo] = useState<UserProfile | null>(null);
   const [bEditProfileDiagVisible, setbEditProfileDiagVisible] = useState<boolean>(false);
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
@@ -140,8 +140,6 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
       setMarginTop(divRef.current.clientHeight - 70);
     }
   }, [displayedUserInfo]);
-
-  const [selectedButton, setSelectedButton] = useState("Posts");
 
   const handleSaveProfile = async () => {
     const userConfig: UserConfigProps = {
@@ -515,7 +513,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             </div>
           </div>
         ) : selectedButton === "Flexfolio" ? (
-          <div className="flex items-center justify-center w-full flex-col">
+          <div className="flex items-center justify-center w-full flex-col mt-2">
             <FlexfolioEdit
               bEditFlexfolioDiagVisible={bEditFlexfolioDiagVisible}
               onExit={() => {
