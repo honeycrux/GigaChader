@@ -88,7 +88,7 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
   };
 
   const [visible, setVisible] = useState(false);
-  const [postContent, setPostContent] = useState<string>("");
+  const [repostContent, setRepostContent] = useState<string>("");
   const handleRepostClick = () => {
     setVisible(true);
   };
@@ -97,7 +97,7 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
 
     const res = await apiClient.post.postCreate({
       body: {
-        content: postContent,
+        content: repostContent,
         repostingPostId: id,
       },
     });
@@ -208,7 +208,7 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
             )}
             {repostingPost && (
               <div className="border border-gray-500 rounded-lg m-2">
-                <PostBox post={repostingPost} bButtonvisible={true} currentUserName={currentUserName} />
+                <PostBox post={repostingPost} bButtonvisible={true} currentUserName={currentUserName} onRepostSubmit={onRepostSubmit} />
               </div>
             )}
           </div>
@@ -242,8 +242,17 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
         </div>
       )}
 
-      <Dialog header="Repost" visible={visible} style={{ width: "50vw" }} onHide={() => setVisible(false)} footer={dialogFooter}>
-        <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
+      <Dialog
+        header="Repost"
+        visible={visible}
+        style={{ width: "50vw" }}
+        onHide={() => {
+          setVisible(false);
+          setRepostContent("");
+        }}
+        footer={dialogFooter}
+      >
+        <InputTextarea className="w-full" value={repostContent} onChange={(e) => setRepostContent(e.target.value)} rows={6} autoResize />
 
         <PostBox post={postInfo} bButtonvisible={false} />
       </Dialog>

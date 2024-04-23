@@ -97,8 +97,8 @@ const Home = () => {
   }, [userInfo]);
 
   const [bAddPostDiagVisible, setbAddPostDiagVisible] = useState(false);
-  const [postContent, setPostContent] = useState<string>("");
   const [bIsSummitingPost, setbIsSummitingPost] = useState(false);
+  const [postContent, setPostContent] = useState<string>("");
 
   const handlePostSubmit = async () => {
     // reject empty post
@@ -141,17 +141,19 @@ const Home = () => {
     }
 
     setPostContent("");
+    setMediaPreview(undefined);
+    setVideoPreview(undefined);
     setbAddPostDiagVisible(false);
   };
 
   const fetchOnCreatePost = async () => {
-    const res2 = await apiClient.user.getFeeds({ query: { from: 0, limit: 1 } });
-    if (res2.status === 200 && res2.body) {
-      console.log(res2.body);
+    const res = await apiClient.user.getFeeds({ query: { from: 0, limit: 1 } });
+    if (res.status === 200 && res.body) {
+      console.log(res.body);
       if (followedPosts) {
-        setFollowedPosts([...res2.body, ...followedPosts]);
+        setFollowedPosts([...res.body, ...followedPosts]);
       } else {
-        setFollowedPosts(res2.body);
+        setFollowedPosts(res.body);
       }
     }
   };
@@ -218,7 +220,18 @@ const Home = () => {
 
   return (
     <>
-      <Dialog header="Create Post" footer={footerContent} visible={bAddPostDiagVisible} style={{ width: "50vw" }} onHide={() => setbAddPostDiagVisible(false)}>
+      <Dialog
+        header="Create Post"
+        footer={footerContent}
+        visible={bAddPostDiagVisible}
+        style={{ width: "50vw" }}
+        onHide={() => {
+          setbAddPostDiagVisible(false);
+          setPostContent("");
+          setMediaPreview(undefined);
+          setVideoPreview(undefined);
+        }}
+      >
         <div className="flex flex-col">
           <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
           <Image src="/upload-image.svg" alt="upload image" className="cursor-pointer w-10" onClick={handleMediaUpload} />

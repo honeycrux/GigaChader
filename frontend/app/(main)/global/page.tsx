@@ -5,7 +5,7 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { apiClient } from "@/lib/apiClient";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { apiContract } from "#/shared/contracts";
-import InfiniteScroll from 'react-infinite-scroll-component';
+import InfiniteScroll from "react-infinite-scroll-component";
 
 type GlobalFeedsResponse = ClientInferResponseBody<typeof apiContract.post.getGlobalFeeds, 200>;
 
@@ -16,6 +16,18 @@ const Home = () => {
   const [from, setFrom] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [hasMorePosts, setHasMorePosts] = useState<boolean>(true);
+
+  const fetchOnCreatePost = async () => {
+    const res = await apiClient.post.getGlobalFeeds({ query: { limit: 1 } });
+    if (res.status === 200 && res.body) {
+      console.log(res.body);
+      if (globalFeeds) {
+        setGlobalFeeds([...res.body, ...globalFeeds]);
+      } else {
+        setGlobalFeeds(res.body);
+      }
+    }
+  };
 
   const getGlobalFeeds = async () => {
     const res = await apiClient.post.getGlobalFeeds({ query: { from: from, limit: limit } });
@@ -37,7 +49,7 @@ const Home = () => {
     if (globalFeeds && globalFeeds.length < limit) {
       setHasMorePosts(false);
     }
-  }
+  };
 
   useEffect(() => {
     getGlobalFeeds();
@@ -51,9 +63,6 @@ const Home = () => {
     wrapper();
   }, []);
 
-
-
-
   return (
     <>
       {/* main content start */}
@@ -65,8 +74,9 @@ const Home = () => {
             <p className="font-light">Latest posts from All Chads.</p>
           </div>
 
-          {globalFeeds &&
-            <InfiniteScroll dataLength={globalFeeds ? globalFeeds.length : 0}
+          {globalFeeds && (
+            <InfiniteScroll
+              dataLength={globalFeeds ? globalFeeds.length : 0}
               next={fetchMoreGlobalPosts}
               hasMore={hasMorePosts}
               loader={
@@ -77,13 +87,17 @@ const Home = () => {
               }
               endMessage={
                 <p className="text-center">
-                  <b>That's all posts</b>
+                  <b>{"That's all posts"}</b>
                 </p>
               }
               scrollableTarget="scrollableMain"
-              className="min-w-fit space-y-4">
-              {globalFeeds.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)}
-            </InfiniteScroll>}
+              className="min-w-fit space-y-4"
+            >
+              {globalFeeds.map((post, index) => (
+                <PostBox key={index} post={post} currentUserName={user?.username} onRepostSubmit={fetchOnCreatePost} />
+              ))}
+            </InfiniteScroll>
+          )}
 
           {(!globalFeeds || globalFeeds?.length === 0) && <p className="text-xl">No posts to display yet ._.</p>}
         </div>

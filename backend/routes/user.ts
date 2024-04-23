@@ -415,10 +415,10 @@ export const userRouter = s.router(apiContract.user, {
                     },
                 });
                 if (userdata) {
-                    if (userdata.userConfig.avatarUrl && (avatarUrl || deleteAvatar)) {
+                    if (userdata.userConfig.avatarUrl && (avatarUrl || deleteAvatar) && userdata.userConfig.avatarUrl !== avatarUrl) {
                         await deleteMedia({ url: userdata.userConfig.avatarUrl });
                     }
-                    if (userdata.userConfig.bannerUrl && (bannerUrl || deleteBanner)) {
+                    if (userdata.userConfig.bannerUrl && (bannerUrl || deleteBanner) && userdata.userConfig.bannerUrl !== bannerUrl) {
                         await deleteMedia({ url: userdata.userConfig.bannerUrl });
                     }
                 }

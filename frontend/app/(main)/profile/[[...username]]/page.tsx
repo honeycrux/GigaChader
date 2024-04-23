@@ -14,7 +14,7 @@ import { PersonalUserInfo, UserConfigProps, UserProfile } from "#/shared/models/
 import { apiContract } from "#/shared/contracts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { PostInfo } from "#/shared/models/post";
-import { Chart } from 'primereact/chart';
+import { Chart } from "primereact/chart";
 
 type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
@@ -53,6 +53,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
       if (bIsViewingSelf && myInfo) {
         // viewing own profile
         setDisplayedUserInfo(myInfo);
+        setEditAvatarUrl(myInfo.userConfig.avatarUrl || undefined);
+        setEditBannerUrl(myInfo.userConfig.bannerUrl || undefined);
         setEditDisplayName(myInfo.userConfig.displayName);
         setEditBio(myInfo.userConfig.bio);
       } else if (profileUsername) {
@@ -78,6 +80,20 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
 
   const [posts, setPosts] = useState<PostInfo[] | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
+
+  const fetchOnCreatePost = async () => {
+    if (profileUsername && bIsViewingSelf) {
+      const res = await apiClient.user.getPosts({ query: { username: profileUsername, filter: "post", limit: 1 } });
+      if (res.status === 200 && res.body) {
+        console.log(res.body);
+        if (posts) {
+          setPosts([...res.body, ...posts]);
+        } else {
+          setPosts(res.body);
+        }
+      }
+    }
+  };
 
   const getPostsOfUser = async (username: string) => {
     apiClient.user.getPosts({ query: { username: username, filter: "post" } }).then((res) => {
@@ -111,11 +127,11 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
       bio: editBio,
     };
 
-    if (editAvatarUrl) {
+    if (editAvatarUrl && editAvatarUrl !== myInfo?.userConfig.avatarUrl) {
       userConfig.avatarUrl = editAvatarUrl;
     }
 
-    if (editBannerUrl) {
+    if (editBannerUrl && editBannerUrl !== myInfo?.userConfig.bannerUrl) {
       userConfig.bannerUrl = editBannerUrl;
     }
 
@@ -229,8 +245,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
         className="w-[50vw] min-h-[80%]"
         onHide={() => {
           setbEditProfileDiagVisible(false);
-          setEditAvatarUrl(undefined);
-          setEditBannerUrl(undefined);
+          setEditAvatarUrl(myInfo?.userConfig.avatarUrl || undefined);
+          setEditBannerUrl(myInfo?.userConfig.bannerUrl || undefined);
           setEditDisplayName(myInfo?.userConfig.displayName || "");
           setEditBio(myInfo?.userConfig.bio || "");
         }}
@@ -337,7 +353,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             <Button className="w-36" label="Edit Profile" onClick={() => setbEditProfileDiagVisible(true)} />
           </div>
         ) : (
-          bIsLoggedin && (
+          bIsLoggedin &&
+          displayedUserInfo && (
             <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
               <Button className="w-36" label={bHasFollowed ? "Unfollow" : "Follow"} outlined={bHasFollowed} onClick={() => handleFollow()} />
             </div>
@@ -361,7 +378,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             text
             onClick={() => setSelectedButton("Comments")}
           />
-           <Button
+          <Button
             className={`w-full ${selectedButton === "Flexfolio" ? "border-0 !border-b-2 border-orange1" : ""}`}
             label="Flexfolio"
             text
@@ -378,7 +395,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
               {posts.length > 0 ? (
-                posts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)
+                posts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} onRepostSubmit={fetchOnCreatePost} />)
               ) : (
                 <p className="text-xl my-4 text-center">No post to show.</p>
               )}
@@ -388,25 +405,22 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
               {comments && comments.length > 0 ? (
-                comments.map((comment, index) => <PostBox key={index} post={comment} currentUserName={user?.username} bVisitParentPost={true} />)
+                comments.map((comment, index) => (
+                  <PostBox key={index} post={comment} currentUserName={user?.username} bVisitParentPost={true} onRepostSubmit={fetchOnCreatePost} />
+                ))
               ) : (
                 <p className="text-xl my-4 text-center">No comment to show.</p>
               )}
             </div>
           </div>
-        ) :selectedButton ==="Flexfolio"? (
+        ) : selectedButton === "Flexfolio" ? (
           <div className="flex items-center justify-center w-full flex-col">
-
             <p className="text-3xl font-bold">Flexfolio</p>
             <p className="text-xl">@{myInfo && myInfo.username} is investing in</p>
-            
-
-
           </div>
-
         ) : null
       ) : (
-        <p className="text-xl my-4 text-center">No posts yet ._.</p>
+        <p className="text-xl my-4 text-center">User not loaded yet ._.</p>
       )}
     </div>
   );

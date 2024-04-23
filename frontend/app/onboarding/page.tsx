@@ -8,6 +8,7 @@ import { Button } from "primereact/button";
 import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
+import { UserConfigProps } from "#/shared/models/user";
 
 function Onboarding() {
   const toast = useRef<Toast>(null);
@@ -25,10 +26,11 @@ function Onboarding() {
     // if (toast.current) {
     //   toast.current.show({ severity: "info", summary: "Success", detail: "Go to home" });
     // }
-    const userConfig: { displayName: string; bio: string; avatarUrl?: string; onBoardingCompleted: boolean } = {
+    const userConfig: UserConfigProps = {
       displayName: displayName || "",
       bio: bio || "",
       onBoardingCompleted: true,
+      avatarUrl: profilePicUrl,
     };
 
     const res = await apiClient.user.userConfig({ body: userConfig });
@@ -79,9 +81,6 @@ function Onboarding() {
         if (res.status === 200 && res.body) {
           const avatarUrl = res.body.avatarUrl;
           setProfilePicUrl(avatarUrl);
-          const res2 = await apiClient.user.userConfig({ body: { avatarUrl: avatarUrl } });
-          console.log(res2);
-          await refreshUserInfo();
         }
       }
     });
@@ -98,10 +97,7 @@ function Onboarding() {
             <div className="flex items-center">
               <Image
                 className="mr-5"
-                src={
-                  (userInfo && userInfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userInfo.userConfig.avatarUrl) ||
-                  "placeholder_profilePic_white-bg.jpg"
-                }
+                src={profilePicUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + profilePicUrl : "placeholder_profilePic_white-bg.jpg"}
                 width="100"
                 alt="placeholder profilePic"
                 preview
@@ -112,7 +108,10 @@ function Onboarding() {
               />
               {/* <FileUpload mode="basic" name="profilePic" accept="image/*" chooseLabel="Upload Profile Picture"
               customUpload auto uploadHandler={handleProfilePicUpload} /> */}
-              <Button label="Upload Avatar" onClick={handleUpload} />
+              <div className="flex flex-col">
+                <Button label="Upload Avatar" onClick={handleUpload} />
+                <Button text label="Remove Avatar" onClick={() => setProfilePicUrl(undefined)} />
+              </div>
             </div>
             <div className="[&>*]:my-2">
               <p className="!mt-4 text-xl">
