@@ -2,26 +2,30 @@
 
 import LoginBox from "@/components/authentication/LoginBox";
 import LogoSideBar from "@/components/authentication/LogoSideBar";
-import { getUserInfo } from "@/lib/actions/user";
 import { useAuthContext } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const Login = () => {
-  const { user } = useAuthContext();
+  const { user, userInfo, refreshUserInfo } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
+    // fetch user info on load
+
     const wrapper = async () => {
-      const userinfo = await getUserInfo();
-      if (user && !("error" in userinfo)) {
-        // logged in users
-        router.push("/home");
-      }
+      await refreshUserInfo();
     };
 
     wrapper();
-  }, [user, router]);
+  }, [refreshUserInfo]);
+
+  useEffect(() => {
+    if (user && userInfo) {
+      // logged in users
+      router.push("/home");
+    }
+  }, [user, userInfo, router]);
 
   return (
     <>

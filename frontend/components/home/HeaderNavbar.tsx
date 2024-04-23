@@ -5,8 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRouter } from "next/navigation";
-import { getUserInfo } from "@/lib/actions/user";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthContext } from "@/providers/auth-provider";
 
 interface Props {
@@ -16,7 +15,8 @@ interface Props {
 const HeaderNavbar = (props: Props) => {
   const { bUseAdmin } = props;
 
-  const { user, logout } = useAuthContext();
+  const { user, userInfo, logout, refreshUserInfo } = useAuthContext();
+  const pathname = usePathname();
   const op = useRef(null);
   const toast = useRef<Toast>(null);
   const [displayName, setDisplayName] = useState<string>("");
@@ -24,26 +24,21 @@ const HeaderNavbar = (props: Props) => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>("");
 
   useEffect(() => {
-    const wrapper = async () => {
-      if (!user) {
-        setDisplayName("guest");
-      } else {
-        const userinfo = await getUserInfo();
-        if ("error" in userinfo) {
-          setDisplayName("guest");
-        } else {
-          setDisplayName(userinfo.userConfig.displayName);
-          if (userinfo.userConfig.avatarUrl) {
-            setProfilePicUrl(userinfo.userConfig.avatarUrl);
-          }
-          console.log("from HeaderNavbar");
-          console.log(userinfo);
-        }
+    if (!userInfo) {
+      setDisplayName("guest");
+    } else {
+      setDisplayName(userInfo.userConfig.displayName);
+      if (userInfo.userConfig.avatarUrl) {
+        setProfilePicUrl(userInfo.userConfig.avatarUrl);
       }
-    };
+      console.log("from HeaderNavbar");
+      console.log(userInfo);
+    }
+  }, [userInfo]);
 
-    wrapper();
-  }, [user]);
+  useEffect(() => {
+    refreshUserInfo();
+  }, [pathname, refreshUserInfo]);
 
   const handleLogout = () => {
     logout();

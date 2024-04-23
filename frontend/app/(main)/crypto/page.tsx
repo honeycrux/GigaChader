@@ -13,14 +13,6 @@ import { CryptoInfo } from "#/shared/models/crypto";
 //     symbol: string
 // }
 
-async function getUserInfo() {
-  const { body, status } = await apiClient.user.getInfo({});
-  if (!(status === 200)) {
-    return null;
-  }
-  return body;
-}
-
 async function getCryptoInfo(query: string) {
   const { body, status } = await apiClient.crypto.cryptoSearch({ query: { query: query, limit: 20 } });
   if (!(status === 200)) {
@@ -30,7 +22,7 @@ async function getCryptoInfo(query: string) {
 }
 
 function Crypto() {
-  const { user } = useAuthContext();
+  const { user, userInfo } = useAuthContext();
   const [cryptoBookmarks, setCryptoBookmarks] = useState<CryptoInfo[] | null>(null);
   const [searchResult, setSearchResult] = useState<CryptoInfo[] | null>(null);
   const [bEditCryptoDiagVisible, setbEditCryptoDiagVisible] = useState<boolean>(false);
@@ -71,15 +63,9 @@ function Crypto() {
   }
 
   useEffect(() => {
-    const wrapper = async () => {
-      const response = await getUserInfo();
-      console.log(response);
-      setCryptoBookmarks(response?.userCryptoInfo.cryptoBookmarks || null);
-      setAddedItems(response?.userCryptoInfo.cryptoBookmarks || []);
-    };
-
-    wrapper();
-  }, [user]);
+    setCryptoBookmarks(userInfo?.userCryptoInfo.cryptoBookmarks || null);
+    setAddedItems(userInfo?.userCryptoInfo.cryptoBookmarks || []);
+  }, [userInfo]);
 
   {
     /*   crypto edit display */

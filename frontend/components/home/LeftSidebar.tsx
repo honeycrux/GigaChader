@@ -7,8 +7,6 @@ import { useAuthContext } from "@/providers/auth-provider";
 type TabSelectValue = "Home" | "Search" | "Discover" | "Global" | "Activity" | "Profile" | "Bookmarks" | "Crypto";
 
 const LeftSidebar = () => {
-  const { refreshUserInfo } = useAuthContext();
-
   const [selectedButton, setSelectedButton] = useState<TabSelectValue | "">("");
   const pathname = usePathname();
   const router = useRouter();
@@ -26,11 +24,7 @@ const LeftSidebar = () => {
     };
 
     wrapper();
-  }, [user, refreshUserInfo]);
-
-  useEffect(() => {
-    refreshUserInfo();
-  }, [pathname, refreshUserInfo]);
+  }, [user]);
 
   useEffect(() => {
     if (pathname.includes("home")) {
@@ -81,19 +75,6 @@ const LeftSidebar = () => {
           </button>
         )}
 
-        {!bIsGuest && (
-          <button
-            className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Search" ? "bg-orange1 text-white" : " text-black"}`}
-            onClick={() => {
-              setSelectedButton("Search");
-              router.push("/search");
-            }}
-          >
-            <i className="pi pi-search text-2xl"></i>
-            <span className="ml-3 text-2xl">Search</span>
-          </button>
-        )}
-
         <button
           className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Global" ? "bg-orange1 text-white" : " text-black"}`}
           onClick={() => {
@@ -114,6 +95,17 @@ const LeftSidebar = () => {
         >
           <i className=" pi pi-compass text-2xl"></i>
           <span className="ml-3 text-2xl">Discover</span>
+        </button>
+
+        <button
+          className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Search" ? "bg-orange1 text-white" : " text-black"}`}
+          onClick={() => {
+            setSelectedButton("Search");
+            router.push("/search");
+          }}
+        >
+          <i className="pi pi-search text-2xl"></i>
+          <span className="ml-3 text-2xl">Search</span>
         </button>
 
         {!bIsGuest && (

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import PostBox from "@/components/home/PostBox";
 import { Button } from "primereact/button";
-import { getUserInfo, getProfileInfo } from "@/lib/actions/user";
+import { getProfileInfo } from "@/lib/actions/user";
 import { useAuthContext } from "@/providers/auth-provider";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
@@ -17,11 +17,12 @@ import { PostInfo } from "#/shared/models/post";
 
 type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
-const Profile = ({ params }: { params: { username: string } }) => {
-  const { user } = useAuthContext();
-  let profileUsername = params.username;
+const Profile = ({ params }: { params: { username?: string[] } }) => {
+  const { user, userInfo: myInfo, refreshUserInfo: refreshMyInfo } = useAuthContext();
+  let profileUsername = params.username?.[0] || user?.username;
+  let bIsViewingSelf = !!profileUsername && profileUsername === user?.username;
 
-  const [userinfo, setUserinfo] = useState<PersonalUserInfo | UserProfile | null>(null);
+  const [displayedUserInfo, setDisplayedUserInfo] = useState<PersonalUserInfo | UserProfile | null>(null);
   const [bEditProfileDiagVisible, setbEditProfileDiagVisible] = useState<boolean>(false);
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
   const [followList, setFollowList] = useState<FollowListResponse | null>(null);
@@ -38,55 +39,41 @@ const Profile = ({ params }: { params: { username: string } }) => {
   }, [user]);
 
   useEffect(() => {
-    const wrapper = async () => {
-      const userinfo = await getUserInfo();
-      if (!user && "error" in userinfo) {
-        // logged out users
-        setbIsLoggedin(false);
-      } else {
-        setbIsLoggedin(true);
-      }
-    };
-
-    wrapper();
-  }, [user]);
+    if (!myInfo) {
+      // logged out users
+      setbIsLoggedin(false);
+    } else {
+      setbIsLoggedin(true);
+    }
+  }, [myInfo]);
 
   useEffect(() => {
     const wrapper = async () => {
-      if (!profileUsername) {
-        if (user) {
-          const userinfo_fetched = await getUserInfo();
-          if ("error" in userinfo_fetched) {
-            console.log("Your own profile requested not found");
-          } else {
-            setUserinfo(userinfo_fetched);
-            setEditDisplayName(userinfo_fetched.userConfig.displayName);
-            setEditBio(userinfo_fetched.userConfig.bio);
-          }
-        }
-      } else {
-        const userinfo_fetched = await getProfileInfo({ username: profileUsername });
-        if ("error" in userinfo_fetched) {
+      if (bIsViewingSelf && myInfo) {
+        // viewing own profile
+        setDisplayedUserInfo(myInfo);
+        setEditDisplayName(myInfo.userConfig.displayName);
+        setEditBio(myInfo.userConfig.bio);
+      } else if (profileUsername) {
+        // viewing another person's profile
+        const profileInfoFetched = await getProfileInfo({ username: profileUsername });
+        if ("error" in profileInfoFetched) {
           console.log("Profile " + profileUsername + " requested not found");
         } else {
           // console.log("from profile2");
           // console.log(userinfo_fetched);
-          setUserinfo(userinfo_fetched);
-          setbHasFollowed(!!userinfo_fetched.followedByRequester);
+          setDisplayedUserInfo(profileInfoFetched);
+          setbHasFollowed(!!profileInfoFetched.followedByRequester);
         }
       }
 
-      if (user && !profileUsername) {
-        getPostsOfUser(user.username);
-      }
-
       if (profileUsername) {
-        getPostsOfUser(profileUsername[0]);
+        getPostsOfUser(profileUsername);
       }
     };
 
     wrapper();
-  }, [user, profileUsername]);
+  }, [myInfo, profileUsername, bIsViewingSelf]);
 
   const [posts, setPosts] = useState<PostInfo[] | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
@@ -113,7 +100,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
     if (divRef.current) {
       setMarginTop(divRef.current.clientHeight - 70);
     }
-  }, [userinfo]);
+  }, [displayedUserInfo]);
 
   const [selectedButton, setSelectedButton] = useState("Posts");
 
@@ -133,13 +120,11 @@ const Profile = ({ params }: { params: { username: string } }) => {
 
     const res = await apiClient.user.userConfig({ body: userConfig });
     console.log(res);
-    const userinfo_fetched = await getUserInfo();
-    if ("error" in userinfo_fetched) {
-      console.log("Your own profile requested not found");
-    } else {
-      setUserinfo(userinfo_fetched);
-      setEditDisplayName(userinfo_fetched.userConfig.displayName);
-      setEditBio(userinfo_fetched.userConfig.bio);
+    const newInfo = await refreshMyInfo();
+    if (newInfo) {
+      setDisplayedUserInfo(newInfo);
+      setEditDisplayName(newInfo.userConfig.displayName);
+      setEditBio(newInfo.userConfig.bio);
     }
     setbEditProfileDiagVisible(false);
   };
@@ -204,10 +189,12 @@ const Profile = ({ params }: { params: { username: string } }) => {
   const [bHasFollowed, setbHasFollowed] = useState<boolean>(false);
 
   const handleFollow = async () => {
-    console.log("username: " + profileUsername[0] + " set: " + !bHasFollowed);
-    const res = await apiClient.user.userFollow({ body: { username: profileUsername[0], set: !bHasFollowed } });
-    setbHasFollowed(!bHasFollowed);
-    console.log(res);
+    if (profileUsername) {
+      console.log("username: " + profileUsername + " set: " + !bHasFollowed);
+      const res = await apiClient.user.userFollow({ body: { username: profileUsername, set: !bHasFollowed } });
+      setbHasFollowed(!bHasFollowed);
+      console.log(res);
+    }
   };
 
   return (
@@ -225,7 +212,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
               className="z-0 h-40"
               src={
                 (editBannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl) ||
-                (userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) ||
+                (displayedUserInfo && displayedUserInfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl) ||
                 ""
               }
               alt="profile background pic"
@@ -241,7 +228,9 @@ const Profile = ({ params }: { params: { username: string } }) => {
                 <Image
                   src={
                     (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
-                    (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
+                    (displayedUserInfo &&
+                      displayedUserInfo.userConfig.avatarUrl &&
+                      process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
                     "/placeholder_profilePic_white-bg.jpg"
                   }
                   alt="profile pic"
@@ -268,7 +257,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
               </div>
             </div>
 
-            {!profileUsername && (
+            {bIsViewingSelf && (
               <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
                 {/* <Button className='w-36' label='Edit Flexfolio' onClick={() => setbEditProfileDiagVisible(true)} /> */}
               </div>
@@ -279,7 +268,9 @@ const Profile = ({ params }: { params: { username: string } }) => {
       <div className="flex flex-col w-full bg-[#e5eeee] relative">
         <Image
           className="z-0 h-72"
-          src={(userinfo && userinfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.bannerUrl) || ""}
+          src={
+            (displayedUserInfo && displayedUserInfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl) || ""
+          }
           alt="profile background pic"
           pt={{
             image: { className: "object-cover h-full w-full" },
@@ -291,7 +282,7 @@ const Profile = ({ params }: { params: { username: string } }) => {
           <div className="flex mb-4">
             <Image
               src={
-                (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
+                (displayedUserInfo && displayedUserInfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
                 "/placeholder_profilePic_white-bg.jpg"
               }
               alt="profile pic"
@@ -302,14 +293,14 @@ const Profile = ({ params }: { params: { username: string } }) => {
               preview
             />
             <div className="flex flex-col min-h-full justify-end ml-2">
-              <p className="text-3xl">{userinfo && userinfo.userConfig.displayName}</p>
-              <p className="text-xl text-gray-600">@{userinfo && userinfo.username}</p>
+              <p className="text-3xl">{displayedUserInfo && displayedUserInfo.userConfig.displayName}</p>
+              <p className="text-xl text-gray-600">@{displayedUserInfo && displayedUserInfo.username}</p>
             </div>
           </div>
-          <p className="text-xl whitespace-pre-wrap max-w-96">{userinfo && userinfo.userConfig.bio}</p>
+          <p className="text-xl whitespace-pre-wrap max-w-96">{displayedUserInfo && displayedUserInfo.userConfig.bio}</p>
         </div>
 
-        {user && !profileUsername ? (
+        {user && bIsViewingSelf ? (
           <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
             <Button className="w-36" label="Edit Profile" onClick={() => setbEditProfileDiagVisible(true)} />
           </div>

@@ -1,19 +1,17 @@
 "use client";
 import { Image } from "primereact/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
 import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
-import { getUserInfo } from "@/lib/actions/user";
 import { useRouter } from "next/navigation";
-import { PersonalUserInfo } from "#/shared/models/user";
 
 function Onboarding() {
   const toast = useRef<Toast>(null);
-  const { user } = useAuthContext();
+  const { user, userInfo, refreshUserInfo } = useAuthContext();
   const router = useRouter();
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -22,7 +20,6 @@ function Onboarding() {
   const [userName, setUserName] = useState<string | undefined>();
   const [bio, setBio] = useState<string | undefined>();
   const [profilePicUrl, setProfilePicUrl] = useState<string | undefined>();
-  const [userinfo, setUserInfo] = useState<PersonalUserInfo | null>(null);
 
   const handleContinue = async () => {
     // if (toast.current) {
@@ -40,29 +37,29 @@ function Onboarding() {
   };
 
   useEffect(() => {
+    // fetch user info on load
+
     const wrapper = async () => {
-      if (!user) {
-        setDisplayName("guest");
-      } else {
-        const userinfo = await getUserInfo();
-        if ("error" in userinfo) {
-          setDisplayName("guest");
-        } else {
-          setDisplayName(userinfo.userConfig.displayName);
-          setUserName(userinfo.username);
-          setBio(userinfo.userConfig.bio);
-          setUserInfo(userinfo);
-          if (userinfo.userConfig.avatarUrl) {
-            setProfilePicUrl(userinfo.userConfig.avatarUrl);
-          }
-          console.log("from onboarding");
-          console.log(userinfo);
-        }
-      }
+      await refreshUserInfo();
     };
 
     wrapper();
-  }, [user]);
+  }, [refreshUserInfo]);
+
+  useEffect(() => {
+    if (!userInfo) {
+      setDisplayName("guest");
+    } else {
+      setDisplayName(userInfo.userConfig.displayName);
+      setUserName(userInfo.username);
+      setBio(userInfo.userConfig.bio);
+      if (userInfo.userConfig.avatarUrl) {
+        setProfilePicUrl(userInfo.userConfig.avatarUrl);
+      }
+      console.log("from onboarding");
+      console.log(userInfo);
+    }
+  }, [userInfo]);
 
   const handleUpload = async () => {
     const formData = new FormData();
@@ -84,10 +81,7 @@ function Onboarding() {
           setProfilePicUrl(avatarUrl);
           const res2 = await apiClient.user.userConfig({ body: { avatarUrl: avatarUrl } });
           console.log(res2);
-          const userinfo = await getUserInfo();
-          if (!("error" in userinfo)) {
-            setUserInfo(userinfo);
-          }
+          await refreshUserInfo();
         }
       }
     });
@@ -105,7 +99,7 @@ function Onboarding() {
               <Image
                 className="mr-5"
                 src={
-                  (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
+                  (userInfo && userInfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userInfo.userConfig.avatarUrl) ||
                   "placeholder_profilePic_white-bg.jpg"
                 }
                 width="100"
