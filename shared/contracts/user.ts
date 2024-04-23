@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { notificationInfoSchema, personalUserInfoSchema, simpleUserInfoSchema, userConfigProps, userProfileSchema } from "../models/user";
+import { notificationInfoSchema, personalUserInfoSchema, simpleUserInfoSchema, userConfigPropsSchema, userProfileSchema } from "../models/user";
 import { postInfoSchema } from "../models/post";
 import { z } from "zod";
 
@@ -136,7 +136,7 @@ export const userContract = c.router({
     userConfig: {
         method: "POST",
         path: "/api/user/config",
-        body: userConfigProps,
+        body: userConfigPropsSchema,
         responses: {
             200: userProfileSchema.nullable(),
             400: z.object({

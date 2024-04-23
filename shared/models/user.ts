@@ -80,7 +80,7 @@ export const userSessionSchema = z.object({
 
 export type UserSession = z.infer<typeof userSessionSchema>;
 
-export const userConfigProps = z.object({
+export const userConfigPropsSchema = z.object({
     // UserConfig
     displayName: z.optional(z.string()),
     bio: z.optional(z.string()),
@@ -100,6 +100,8 @@ export const userConfigProps = z.object({
         )
     ),
 });
+
+export type UserConfigProps = z.infer<typeof userConfigPropsSchema>;
 
 export const notificationInfoSchema = z.object({
     content: z.string(),

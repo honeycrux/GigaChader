@@ -101,6 +101,14 @@ const Home = () => {
   const [bIsSummitingPost, setbIsSummitingPost] = useState(false);
 
   const handlePostSubmit = async () => {
+    // reject empty post
+    if (postContent.trim() === "") {
+      if (toast.current) {
+        toast.current.show({ severity: "info", summary: "Cannot post", detail: "Your post must have text content" });
+      }
+      return;
+    }
+
     setbIsSummitingPost(true);
     if (!mediaPreview && !videoPreview) {
       const res = await apiClient.post.postCreate({
@@ -151,8 +159,8 @@ const Home = () => {
   const [mediaPreview, setMediaPreview] = useState<string | undefined>();
   const [videoPreview, setVideoPreview] = useState<string | undefined>();
   const handleMediaUpload = async () => {
-    setMediaPreview(undefined);
-    setVideoPreview(undefined);
+    // setMediaPreview(undefined);
+    // setVideoPreview(undefined);
     const formData = new FormData();
     const input = document.createElement("input");
     input.type = "file";
@@ -188,14 +196,24 @@ const Home = () => {
   };
 
   const footerContent = (
-    <Button
-      label="Post"
-      onClick={() => {
-        // console.log('post content', postContent);
-        handlePostSubmit();
-      }}
-      loading={bIsSummitingPost}
-    />
+    <>
+      <Button
+        text
+        label="Remove Media"
+        onClick={() => {
+          setMediaPreview(undefined);
+          setVideoPreview(undefined);
+        }}
+      />
+      <Button
+        label="Post"
+        onClick={() => {
+          // console.log('post content', postContent);
+          handlePostSubmit();
+        }}
+        loading={bIsSummitingPost}
+      />
+    </>
   );
 
   return (

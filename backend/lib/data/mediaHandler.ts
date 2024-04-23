@@ -9,11 +9,10 @@ const generateFileName = (bytes: number = 20) => crypto.randomBytes(bytes).toStr
 
 /* Define existing containers - these should be containers existing on the storage */
 
-export type ExistingContainerName = "avatar" | "media" | "test";
+export type ExistingContainerName = "media" | "test";
 
 // this should be used when constructing storage programmatically
 export const storage: Record<ExistingContainerName, (blobName: string) => string> = {
-    avatar: (blobName: string) => `avatar/${blobName}`,
     media: (blobName: string) => `media/${blobName}`,
     test: (blobName: string) => `test/${blobName}`,
 };

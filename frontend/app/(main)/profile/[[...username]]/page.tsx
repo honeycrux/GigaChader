@@ -10,7 +10,7 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { apiClient } from "@/lib/apiClient";
-import { PersonalUserInfo, UserProfile } from "#/shared/models/user";
+import { PersonalUserInfo, UserConfigProps, UserProfile } from "#/shared/models/user";
 import { apiContract } from "#/shared/contracts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { PostInfo } from "#/shared/models/post";
@@ -106,7 +106,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   const [selectedButton, setSelectedButton] = useState("Posts");
 
   const handleSaveProfile = async () => {
-    const userConfig: { displayName: string; bio: string; avatarUrl?: string; bannerUrl?: string } = {
+    const userConfig: UserConfigProps = {
       displayName: editDisplayName,
       bio: editBio,
     };
@@ -117,6 +117,14 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
 
     if (editBannerUrl) {
       userConfig.bannerUrl = editBannerUrl;
+    }
+
+    if (!editAvatarUrl && !!myInfo?.userConfig.avatarUrl) {
+      userConfig.deleteAvatar = true;
+    }
+
+    if (!editBannerUrl && !!myInfo?.userConfig.bannerUrl) {
+      userConfig.deleteBanner = true;
     }
 
     const res = await apiClient.user.userConfig({ body: userConfig });
@@ -130,7 +138,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     setbEditProfileDiagVisible(false);
   };
 
-  const [editBannerUrl, setEditBannerUrl] = useState<string>();
+  const [editBannerUrl, setEditBannerUrl] = useState<string | false>(); // "false" indicates banner is to be deleted
   const handleEditBannerClicked = () => {
     const formData = new FormData();
     const input = document.createElement("input");
@@ -154,7 +162,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     });
   };
 
-  const [editAvatarUrl, setEditAvatarUrl] = useState<string>();
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | false>(); // "false" indicates avatar is to be deleted
   const handleEditProfilePicClicked = () => {
     const formData = new FormData();
     const input = document.createElement("input");
@@ -179,9 +187,23 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   };
 
   const footerElement = (
-    <div>
+    <>
+      <Button
+        text
+        label="Remove Avatar"
+        onClick={() => {
+          setEditAvatarUrl(false);
+        }}
+      />
+      <Button
+        text
+        label="Remove Banner"
+        onClick={() => {
+          setEditBannerUrl(false);
+        }}
+      />
       <Button label="Save" icon="pi pi-check" onClick={handleSaveProfile} />
-    </div>
+    </>
   );
   const [editDisplayName, setEditDisplayName] = useState("");
   // const [editUsername, setEditUsername] = useState("");
@@ -205,16 +227,24 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
         footer={footerElement}
         visible={bEditProfileDiagVisible}
         className="w-[50vw] min-h-[80%]"
-        onHide={() => setbEditProfileDiagVisible(false)}
+        onHide={() => {
+          setbEditProfileDiagVisible(false);
+          setEditAvatarUrl(undefined);
+          setEditBannerUrl(undefined);
+          setEditDisplayName(myInfo?.userConfig.displayName || "");
+          setEditBio(myInfo?.userConfig.bio || "");
+        }}
       >
         <div>
           <div className="flex flex-col w-full bg-[#e5eeee] relative">
             <Image
               className="z-0 h-40"
               src={
-                (editBannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl) ||
-                (displayedUserInfo && displayedUserInfo.userConfig.bannerUrl && process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl) ||
-                ""
+                editBannerUrl
+                  ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
+                  : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
+                  ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
+                  : ""
               }
               alt="profile background pic"
               pt={{
@@ -229,7 +259,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                 <Image
                   src={
                     (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
-                    (displayedUserInfo &&
+                    (editAvatarUrl !== false &&
+                      displayedUserInfo &&
                       displayedUserInfo.userConfig.avatarUrl &&
                       process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
                     "/placeholder_profilePic_white-bg.jpg"
@@ -325,10 +356,10 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             // }}
           />
           <Button
-            className={`w-full ${selectedButton === "Replies" ? "border-0 !border-b-2 border-orange1" : ""}`}
-            label="Replies"
+            className={`w-full ${selectedButton === "Comments" ? "border-0 !border-b-2 border-orange1" : ""}`}
+            label="Comments"
             text
-            onClick={() => setSelectedButton("Replies")}
+            onClick={() => setSelectedButton("Comments")}
           />
            <Button
             className={`w-full ${selectedButton === "Flexfolio" ? "border-0 !border-b-2 border-orange1" : ""}`}
@@ -346,15 +377,21 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
         selectedButton === "Posts" ? (
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
-              {posts.map((post, index) => (
-                <PostBox key={index} post={post} currentUserName={user?.username} />
-              ))}
+              {posts.length > 0 ? (
+                posts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)
+              ) : (
+                <p className="text-xl my-4 text-center">No post to show.</p>
+              )}
             </div>
           </div>
-        ) : selectedButton === "Replies" ? (
+        ) : selectedButton === "Comments" ? (
           <div className="flex items-center justify-center w-full">
             <div className="flex flex-col w-[60%] items-center justify-center [&>*]:mt-2">
-              {comments && comments.map((comment, index) => <PostBox key={index} post={comment} currentUserName={user?.username} bVisitParentPost={true} />)}
+              {comments && comments.length > 0 ? (
+                comments.map((comment, index) => <PostBox key={index} post={comment} currentUserName={user?.username} bVisitParentPost={true} />)
+              ) : (
+                <p className="text-xl my-4 text-center">No comment to show.</p>
+              )}
             </div>
           </div>
         ) :selectedButton ==="Flexfolio"? (
