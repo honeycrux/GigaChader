@@ -8,7 +8,7 @@ import { initServer } from "@ts-rest/express";
 const s = initServer();
 
 function getMostFarBackDate() {
-    const mostFarBackDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const mostFarBackDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // get 7 days ago
     return mostFarBackDate;
 }
 

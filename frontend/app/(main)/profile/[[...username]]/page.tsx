@@ -4,21 +4,25 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import PostBox from "@/components/home/PostBox";
 import { Button } from "primereact/button";
-import { getProfileInfo } from "@/lib/actions/user";
 import { useAuthContext } from "@/providers/auth-provider";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { apiClient } from "@/lib/apiClient";
-import { PersonalUserInfo, UserConfigProps, UserProfile } from "#/shared/models/user";
+import { UserConfigProps, UserProfile } from "#/shared/models/user";
 import { apiContract } from "#/shared/contracts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { PostInfo } from "#/shared/models/post";
+<<<<<<< HEAD
 import { Chart } from 'primereact/chart';
 import CryptoEdit from "@/components/crypto/CryptoSearch";
 import { CryptoInfo } from "#/shared/models/crypto";
 import { Card } from "primereact/card";
 import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
+=======
+import { Chart } from "primereact/chart";
+import SimpleUserBox from "@/components/home/SimpleUserBox";
+>>>>>>> baed5ca (Add profile page followers and following)
 
 type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
@@ -27,21 +31,35 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   let profileUsername = params.username?.[0] || user?.username;
   let bIsViewingSelf = !!profileUsername && profileUsername === user?.username;
 
-  const [displayedUserInfo, setDisplayedUserInfo] = useState<PersonalUserInfo | UserProfile | null>(null);
+  const [displayedUserInfo, setDisplayedUserInfo] = useState<UserProfile | null>(null);
   const [bEditProfileDiagVisible, setbEditProfileDiagVisible] = useState<boolean>(false);
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
+  const [bFollowListVisible, setbFollowListVisible] = useState<boolean>(false);
+  const [bFollowerListVisible, setbFollowerListVisible] = useState<boolean>(false);
   const [followList, setFollowList] = useState<FollowListResponse | null>(null);
+  const [followerList, setFollowerList] = useState<FollowListResponse | null>(null);
+  const [bIsSuspended, setbIsSuspended] = useState<boolean>(false);
+  const [bNotFound, setbNotFound] = useState<boolean>(false);
 
   const getFollowList = useCallback(async () => {
-    if (user) {
-      // const res = await apiClient.user.getFollows({ query: { username: user.username }});
-      const res = await apiClient.user.getFollowedUsers({ query: { username: user.username } });
+    if (profileUsername) {
+      const res = await apiClient.user.getFollowedUsers({ query: { username: profileUsername } });
       if (res.status === 200 && res.body) {
         console.log(res.body);
         setFollowList(res.body);
       }
     }
-  }, [user]);
+  }, [profileUsername]);
+
+  const getFollowerList = useCallback(async () => {
+    if (profileUsername) {
+      const res = await apiClient.user.getFollows({ query: { username: profileUsername } });
+      if (res.status === 200 && res.body) {
+        console.log(res.body);
+        setFollowerList(res.body);
+      }
+    }
+  }, [profileUsername]);
 
   useEffect(() => {
     if (!myInfo) {
@@ -52,27 +70,35 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   }, [myInfo]);
 
+  const fetchProfileInfo = useCallback(async () => {
+    if (profileUsername) {
+      const res = await apiClient.user.getProfile({ params: { username: profileUsername } });
+      if (res.status === 200 && res.body) {
+        // console.log("from profile2");
+        // console.log(userinfo_fetched);
+        if (res.body.suspended) {
+          setbIsSuspended(true);
+        } else {
+          setDisplayedUserInfo(res.body);
+        }
+        setbHasFollowed(!!res.body.followedByRequester);
+      } else {
+        setbNotFound(true);
+        console.log("Profile " + profileUsername + " requested not found");
+      }
+    }
+  }, [profileUsername]);
+
   useEffect(() => {
     const wrapper = async () => {
       if (bIsViewingSelf && myInfo) {
         // viewing own profile
-        setDisplayedUserInfo(myInfo);
         setEditAvatarUrl(myInfo.userConfig.avatarUrl || undefined);
         setEditBannerUrl(myInfo.userConfig.bannerUrl || undefined);
         setEditDisplayName(myInfo.userConfig.displayName);
         setEditBio(myInfo.userConfig.bio);
-      } else if (profileUsername) {
-        // viewing another person's profile
-        const profileInfoFetched = await getProfileInfo({ username: profileUsername });
-        if ("error" in profileInfoFetched) {
-          console.log("Profile " + profileUsername + " requested not found");
-        } else {
-          // console.log("from profile2");
-          // console.log(userinfo_fetched);
-          setDisplayedUserInfo(profileInfoFetched);
-          setbHasFollowed(!!profileInfoFetched.followedByRequester);
-        }
       }
+      fetchProfileInfo();
 
       if (profileUsername) {
         getPostsOfUser(profileUsername);
@@ -80,7 +106,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     };
 
     wrapper();
-  }, [myInfo, profileUsername, bIsViewingSelf]);
+  }, [myInfo, profileUsername, bIsViewingSelf, fetchProfileInfo]);
 
   const [posts, setPosts] = useState<PostInfo[] | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
@@ -151,11 +177,11 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     console.log(res);
     const newInfo = await refreshMyInfo();
     if (newInfo) {
-      setDisplayedUserInfo(newInfo);
       setEditDisplayName(newInfo.userConfig.displayName);
       setEditBio(newInfo.userConfig.bio);
     }
     setbEditProfileDiagVisible(false);
+    await fetchProfileInfo();
   };
 
   const [editBannerUrl, setEditBannerUrl] = useState<string | false>(); // "false" indicates banner is to be deleted
@@ -237,6 +263,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
       const res = await apiClient.user.userFollow({ body: { username: profileUsername, set: !bHasFollowed } });
       setbHasFollowed(!bHasFollowed);
       console.log(res);
+      await fetchProfileInfo();
     }
   };
 
@@ -324,9 +351,58 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
         </div>
           
       </Dialog>
+<<<<<<< HEAD
 
       
 
+=======
+      <Dialog
+        header="Followers"
+        visible={bFollowerListVisible}
+        style={{ width: "50vw" }}
+        onHide={() => {
+          setbFollowerListVisible(false);
+          setFollowerList(null);
+        }}
+      >
+        {followerList ? (
+          followerList.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {followerList.map((follower, index) => {
+                return <SimpleUserBox user={follower} key={index} />;
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-md">Wow, such empty!</p>
+          )
+        ) : (
+          <p className="text-center text-md">Not fetched yet ._.</p>
+        )}
+      </Dialog>
+      <Dialog
+        header="Following"
+        visible={bFollowListVisible}
+        style={{ width: "50vw" }}
+        onHide={() => {
+          setbFollowListVisible(false);
+          setFollowList(null);
+        }}
+      >
+        {followList ? (
+          followList.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {followList.map((follower, index) => {
+                return <SimpleUserBox user={follower} key={index} />;
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-md">Wow, such empty!</p>
+          )
+        ) : (
+          <p className="text-center text-md">Not fetched yet ._.</p>
+        )}
+      </Dialog>
+>>>>>>> baed5ca (Add profile page followers and following)
       <div className="flex flex-col w-full bg-[#e5eeee] relative">
         <Image
           className="z-0 h-72"
@@ -354,12 +430,38 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
               }}
               preview
             />
-            <div className="flex flex-col min-h-full justify-end ml-2">
-              <p className="text-3xl">{displayedUserInfo && displayedUserInfo.userConfig.displayName}</p>
-              <p className="text-xl text-gray-600">@{displayedUserInfo && displayedUserInfo.username}</p>
-            </div>
+            {displayedUserInfo && (
+              <div className="flex flex-col min-h-full justify-end ml-2">
+                <p className="text-3xl">{displayedUserInfo && displayedUserInfo.userConfig.displayName}</p>
+                <p className="text-xl text-gray-600">@{displayedUserInfo && displayedUserInfo.username}</p>
+              </div>
+            )}
           </div>
           <p className="text-xl whitespace-pre-wrap max-w-96">{displayedUserInfo && displayedUserInfo.userConfig.bio}</p>
+          {displayedUserInfo && (
+            <div className="flex flex-row gap-2 ml-6 my-1 text-xl">
+              <div
+                className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20 transition duration-300 cursor-pointer"
+                onClick={async () => {
+                  setbFollowerListVisible(true);
+                  getFollowerList();
+                }}
+              >
+                <span className="font-bold mr-2">Followers: </span>
+                {displayedUserInfo.followerCount}
+              </div>
+              <div
+                className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20 transition duration-300 cursor-pointer"
+                onClick={async () => {
+                  setbFollowListVisible(true);
+                  getFollowList();
+                }}
+              >
+                <span className="font-bold mr-2">Following: </span>
+                {displayedUserInfo.followedUserCount}
+              </div>
+            </div>
+          )}
         </div>
 
         {user && bIsViewingSelf ? (
@@ -456,7 +558,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           </div>
         ) : null
       ) : (
-        <p className="text-xl my-4 text-center">User not loaded yet ._.</p>
+        <p className="text-xl my-4 text-center">{bNotFound ? "User not found." : bIsSuspended ? "User is suspended." : "User not loaded yet ._."}</p>
       )}
     </div>
   );

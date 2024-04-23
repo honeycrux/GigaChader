@@ -90,7 +90,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
       <div className="flex flex-col w-[60%]">
         <Toast ref={toast}></Toast>
         <br className="mt-10" />
-        {post && <PostBox post={post} currentUserName={user?.username} />}
+        {post && <PostBox post={post} currentPostPageId={params.id} currentUserName={user?.username} />}
         {bIsLoggedin && (
           <div className="flex flex-col w-full mt-4">
             <p className="text-xl">Make a Comment</p>
@@ -101,7 +101,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
         <p className="text-xl">Comments</p>
         <div className="mt-2 space-y-2">
           {comments && comments.length > 0 ? (
-            comments.map((comment) => <PostBox key={comment.id} post={comment} currentUserName={user?.username} />)
+            comments.map((comment) => <PostBox key={comment.id} post={comment} currentPostPageId={params.id} currentUserName={user?.username} />)
           ) : (
             <p>No comments yet ._.</p>
           )}

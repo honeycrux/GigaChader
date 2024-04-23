@@ -14,13 +14,22 @@ import { PostInfo } from "#/shared/models/post";
 type Props = {
   post: PostInfo;
   currentUserName?: string; // for evaluating whether some actions (like/repost/save) are shown
+  currentPostPageId?: string;
   bVisitParentPost?: boolean;
   bButtonvisible?: boolean;
   bshowBorder?: boolean;
   onRepostSubmit?: Function;
 };
 
-const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvisible = true, bshowBorder = false, onRepostSubmit }: Props) => {
+const PostBox = ({
+  post: postInfo,
+  currentUserName,
+  currentPostPageId,
+  bVisitParentPost,
+  bButtonvisible = true,
+  bshowBorder = false,
+  onRepostSubmit,
+}: Props) => {
   const {
     id,
     parentPostId,
@@ -222,18 +231,24 @@ const PostBox = ({ post: postInfo, currentUserName, bVisitParentPost, bButtonvis
               {currentUserName && <Image src="/retweet-round.svg" width="24" alt="repost" onClick={handleRepostClick} className="cursor-pointer" />}
               {currentUserName && <Image src={bookmarkPath} width="24" alt="bookmark" onClick={handleBookmarkClick} className="cursor-pointer" />}
               <span className="text-gray-600 text-sm">
-                {likeCountInternal} like(s), {commentCount} comment(s)
+                {likeCountInternal} like(s),{" "}
+                <Link href={`/post/${id}`} className="hover:underline">
+                  {commentCount} comment(s)
+                </Link>
               </span>
             </div>
           )}
         </div>
       </div>
       <p className="text-gray-600">{formatDate(createdAt.toString())}</p>
-      {parentPostId && (
-        <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">
-          Go to parent post
-        </Link>
-      )}
+      {parentPostId &&
+        (parentPostId === currentPostPageId ? (
+          <span className="font-bold">Go to parent post</span>
+        ) : (
+          <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">
+            Go to parent post
+          </Link>
+        ))}
       {bShowCommentBox && (
         <div className="flex flex-col w-full">
           <p className="text-xl">Comment</p>

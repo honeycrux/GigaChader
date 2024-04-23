@@ -96,30 +96,30 @@ function DiscoverPage() {
                 trendingPosts.length > 0 ? (
                   trendingPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)
                 ) : (
-                  <p className="text-center">No trending post</p>
+                  <p className="text-center">No trending post this week.</p>
                 )
               ) : (
-                <p className="text-center">Not loaded yet</p>
+                <p className="text-center">Not loaded yet ._.</p>
               )
             ) : selectedButton === "Hashtags" ? (
               trendingHashtags ? (
                 trendingHashtags.length > 0 ? (
                   trendingHashtags.map((hashtag, index) => <HashtagCard key={index} index={index} {...hashtag} />)
                 ) : (
-                  <p className="text-center">No trending hashtags</p>
+                  <p className="text-center">No trending hashtags this week.</p>
                 )
               ) : (
-                <p className="text-center">Not loaded yet</p>
+                <p className="text-center">Not loaded yet ._.</p>
               )
             ) : selectedButton === "Topics" ? (
               trendingTopics ? (
                 trendingTopics.length > 0 ? (
                   trendingTopics.map((data, index) => <CryptoTopicCard key={index} index={index} {...data} />)
                 ) : (
-                  <p className="text-center">No trending topics</p>
+                  <p className="text-center">No trending topics this week.</p>
                 )
               ) : (
-                <p className="text-center">Not loaded yet</p>
+                <p className="text-center">Not loaded yet ._.</p>
               )
             ) : (
               <></>
