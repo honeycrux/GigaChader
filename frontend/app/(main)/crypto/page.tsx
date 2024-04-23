@@ -8,6 +8,8 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 // import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { CryptoInfo } from "#/shared/models/crypto";
+import { PersonalUserInfo } from "#/shared/models/user";
+import CryptoEdit from "@/components/crypto/CryptoEdit";
 
 // type Props = {
 //     symbol: string
@@ -30,15 +32,11 @@ function Crypto() {
   // const [bHasAdded, setbHasAdded] = useState<boolean>(false);
   const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
   const [selectedButton, setSelectedButton] = useState("Bookmark");
-  const [cryptoHolding, setCryptoHolding] = useState<CryptoInfo[] | null>(null);
+  const [cryptoHolding, setCryptoHolding] = useState<PersonalUserInfo["userCryptoInfo"]["cryptoHoldings"] | null>(null);
+  const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
+  const [deletingCrypto, setDeletingCrypto] = useState<CryptoInfo | null>(null);
+  
 
-  function handleButtonClick(result: CryptoInfo, set: boolean) {
-    if (set) {
-      setAddedItems([...addedItems, result]);
-    } else {
-      setAddedItems(addedItems.filter((item) => item.cryptoId !== result.cryptoId));
-    }
-  }
 
   async function handleSave() {
     let updatedCryptoBookmarks = addedItems;
@@ -50,18 +48,43 @@ function Crypto() {
       });
       if (status === 200 && body) {
         if (body.userCryptoInfo.cryptoBookmarks) {
-          const nonNull: CryptoInfo[] = [];
+          const newBookmarks: CryptoInfo[] = [];
           for (const bookmark of body.userCryptoInfo.cryptoBookmarks) {
             if (bookmark) {
-              nonNull.push(bookmark);
+              newBookmarks.push(bookmark);
             }
           }
-
-          setCryptoBookmarks(nonNull);
+          setCryptoBookmarks(newBookmarks);
+          setAddedItems(newBookmarks);
         }
       }
     }
     setbEditCryptoDiagVisible(false);
+  }
+
+  async function handleDeletion() {
+    if (cryptoBookmarks && deletingCrypto) {
+        const newList = cryptoBookmarks.filter((value) => value.cryptoId !== deletingCrypto.cryptoId);
+        const { body, status } = await apiClient.user.userConfig({
+            body: {
+                cryptoBookmarks: newList.map((crypto) => crypto.cryptoId),
+            },
+        });
+        if (status === 200 && body) {
+          if (body.userCryptoInfo.cryptoBookmarks) {
+            const newBookmarks: CryptoInfo[] = [];
+            for (const bookmark of body.userCryptoInfo.cryptoBookmarks) {
+              if (bookmark) {
+                newBookmarks.push(bookmark);
+              }
+            }
+            setCryptoBookmarks(newBookmarks);
+            setAddedItems(newBookmarks);
+          }
+        }
+    }
+    setDeletingCrypto(null);
+    setbDeleteBookmarkDiagVisible(false);
   }
 
   useEffect(() => {
@@ -96,9 +119,16 @@ function Crypto() {
     return <div>Cannot fetch ._.</div>;
   }
 
-  const footerElement = (
+  const footerElementSave = (
     <div className="mt-4">
       <Button label="Save" icon="pi pi-check" onClick={handleSave} />
+    </div>
+  );
+
+  const footerElementDelBookmark = (
+    <div className="mt-4">
+      <Button label="No" icon="pi pi-times" onClick={() => { setbDeleteBookmarkDiagVisible(false); setDeletingCrypto(null) }} className="p-button-text" />
+      <Button label="Yes" icon="pi pi-check" onClick={handleDeletion} autoFocus />
     </div>
   );
 
@@ -106,10 +136,10 @@ function Crypto() {
     <div className="flex w-full overflow-y-auto justify-center min-h-full">
             <Dialog
                 header="Edit Crypto Bookmarks"
-                footer={footerElement}
+                footer={footerElementSave}
                 visible={bEditCryptoDiagVisible}
                 className="w-[50vw] min-h-[80%]"
-                onHide={() => setbEditCryptoDiagVisible(false)}
+                onHide={() => {setbEditCryptoDiagVisible(false); setAddedItems(cryptoBookmarks);}}
         >
                 <div className="flex justify-between w-full">
                 <Button
@@ -126,59 +156,8 @@ function Crypto() {
                 />
                 </div>
                 {selectedButton === "Bookmark" ?(
-                    <div>
-                        <div className="flex flex-col w-full bg-[#e5eeee] relative">
-                            <div className="relative w-full">
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 pi pi-search"></span>
-                                <InputText
-                                    ref={inputRef}
-                                    className="pl-10 pr-10 font-medium center w-full"
-                                    placeholder="Search Crypto"
-                                    onChange={(e) => {
-                                        handlecryptoSearch(e.target.value);
-                                    }}
-                                />
-                            </div>
-                            <div className="flex w-full gap-9">
-                                {cryptoBookmarks && (
-                                    <div className='w-full space-y-2'>
-                                        {searchResult && searchResult.map((result, index) => {
-                                            const bHasAdded = addedItems.some(bookmark => bookmark.symbol === result.symbol);
-                                            return (
-                                                <Card key={index} {...result}
-                                                    pt={{
-                                                        content: { className: 'p-0' }
-                                                    }}>
-                                                    <div className='flex justify-between items-center'>
-                                                        <div>
-                                                            <p className='text-lg text-black font-bold'>{result.name}</p>
-                                                            <p className='text-sm text-gray-500'>{result.symbol}</p>
-                                                        </div>
-
-                                                        <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
-                                                        <Button
-                                                            className="`flex items-center py-2 px-7 rounded-lg 
-                                            ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`"
-                                                            label={bHasAdded ? "Added" : "Add"}
-                                                            icon={bHasAdded ? "pi pi-check" : "pi pi-plus"}
-                                                            onClick={() => {
-                                                                if (bHasAdded) {
-                                                                    handleButtonClick(result, false);
-                                                                } else {
-                                                                    handleButtonClick(result, true);
-                                                                }
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </Card>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-
-                        </div>
-                    </div>) 
+                    <CryptoEdit cryptoBookmarks={cryptoBookmarks} addedItems={addedItems} setAddedItems={setAddedItems} bHasAmount={false} />
+                    ) 
                     :selectedButton === "Flexfolio" ?(
                         <div>
                         <div className="flex flex-col w-full bg-[#e5eeee] relative">
@@ -205,11 +184,11 @@ function Crypto() {
                                                     }}>
                                                     <div className='flex justify-between items-center'>
                                                         <div>
-                                                            <p className='text-lg text-black font-bold'>{result.name}</p>
-                                                            <p className='text-sm text-gray-500'>{result.symbol}</p>
+                                                            <p className='text-lg text-black font-bold'>{result.crypto.name}</p>
+                                                            <p className='text-sm text-gray-500'>{result.crypto.symbol}</p>
                                                         </div>
 
-                                                        <p className='text-lg text-black font-bold'>${result.priceUsd}</p>
+                                                        <p className='text-lg text-black font-bold'>${result.crypto.priceUsd}</p>
                                                         <InputText
                                                          ref={inputRef}
                                                          className=" font-medium center w-11"
@@ -244,6 +223,14 @@ function Crypto() {
         </div>
 
         {/* crypto table */}
+        <Dialog
+                footer={footerElementDelBookmark}
+                visible={bDeleteBookmarkDiagVisible}
+                onHide={() => {setbDeleteBookmarkDiagVisible(false); setAddedItems(cryptoBookmarks);}}
+        >
+            <p className="text-xl "> 
+            Are you sure you want to delete <span className="font-bold">{deletingCrypto?.name} &#40;{deletingCrypto?.symbol}&#41;</span>?</p>
+        </Dialog>
 
         <div className="flex w-full gap-9">
           {cryptoBookmarks && (
@@ -260,8 +247,20 @@ function Crypto() {
                       <p className="text-lg text-black font-bold">{result.name}</p>
                       <p className="text-sm text-gray-500">{result.symbol}</p>
                     </div>
+                    <div className=" flex flex-row items-center">
+                        <p className="text-lg text-black font-bold">${result.priceUsd}</p>
+                        <Button 
+                            className="`flex ml-4 items-center py-2 px-7 rounded-lg 
+                            ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`"
+                            icon ="pi pi-trash"
+                            onClick={() => {
+                                setbDeleteBookmarkDiagVisible(true);
+                                setDeletingCrypto(result);
 
-                    <p className="text-lg text-black font-bold">${result.priceUsd}</p>
+                            }}
+                        />
+
+                    </div>
                   </div>
                 </Card>
               ))}

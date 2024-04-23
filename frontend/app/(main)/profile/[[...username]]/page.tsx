@@ -14,6 +14,7 @@ import { PersonalUserInfo, UserProfile } from "#/shared/models/user";
 import { apiContract } from "#/shared/contracts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { PostInfo } from "#/shared/models/post";
+import { Chart } from 'primereact/chart';
 
 type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
@@ -329,6 +330,12 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             text
             onClick={() => setSelectedButton("Replies")}
           />
+           <Button
+            className={`w-full ${selectedButton === "Flexfolio" ? "border-0 !border-b-2 border-orange1" : ""}`}
+            label="Flexfolio"
+            text
+            onClick={() => setSelectedButton("Flexfolio")}
+          />
         </div>
       </div>
 
@@ -350,6 +357,16 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
               {comments && comments.map((comment, index) => <PostBox key={index} post={comment} currentUserName={user?.username} bVisitParentPost={true} />)}
             </div>
           </div>
+        ) :selectedButton ==="Flexfolio"? (
+          <div className="flex items-center justify-center w-full flex-col">
+
+            <p className="text-3xl font-bold">Flexfolio</p>
+            <p className="text-xl">@{myInfo && myInfo.username} is investing in</p>
+            
+
+
+          </div>
+
         ) : null
       ) : (
         <p className="text-xl my-4 text-center">No posts yet ._.</p>
