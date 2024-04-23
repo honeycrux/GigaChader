@@ -9,7 +9,7 @@ import { InputText } from "primereact/inputtext";
 // import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { CryptoInfo } from "#/shared/models/crypto";
 import { PersonalUserInfo } from "#/shared/models/user";
-import CryptoEdit from "@/components/crypto/CryptoEdit";
+import CryptoEdit from "@/components/crypto/CryptoSearch";
 
 // type Props = {
 //     symbol: string
@@ -30,11 +30,11 @@ function Crypto() {
   const [bEditCryptoDiagVisible, setbEditCryptoDiagVisible] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   // const [bHasAdded, setbHasAdded] = useState<boolean>(false);
-  const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
   const [selectedButton, setSelectedButton] = useState("Bookmark");
   const [cryptoHolding, setCryptoHolding] = useState<PersonalUserInfo["userCryptoInfo"]["cryptoHoldings"] | null>(null);
   const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
   const [deletingCrypto, setDeletingCrypto] = useState<CryptoInfo | null>(null);
+  const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
   
 
 
@@ -156,8 +156,10 @@ function Crypto() {
                 />
                 </div>
                 {selectedButton === "Bookmark" ?(
-                    <CryptoEdit cryptoBookmarks={cryptoBookmarks} addedItems={addedItems} setAddedItems={setAddedItems} bHasAmount={false} />
-                    ) 
+                    <CryptoEdit cryptoList={cryptoBookmarks} onEdit={(newItems) => {
+                        setAddedItems(newItems);
+                    }} />
+                    )
                     :selectedButton === "Flexfolio" ?(
                         <div>
                         <div className="flex flex-col w-full bg-[#e5eeee] relative">

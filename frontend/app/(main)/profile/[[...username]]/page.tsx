@@ -14,7 +14,11 @@ import { PersonalUserInfo, UserConfigProps, UserProfile } from "#/shared/models/
 import { apiContract } from "#/shared/contracts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { PostInfo } from "#/shared/models/post";
-import { Chart } from "primereact/chart";
+import { Chart } from 'primereact/chart';
+import CryptoEdit from "@/components/crypto/CryptoSearch";
+import { CryptoInfo } from "#/shared/models/crypto";
+import { Card } from "primereact/card";
+import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
 
 type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
@@ -202,7 +206,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     });
   };
 
-  const footerElement = (
+  const footerElementProfile = (
     <>
       <Button
         text
@@ -236,11 +240,14 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   };
 
+  const [bEditFlexfolioDiagVisible, setbEditFlexfolioDiagVisible] = useState<boolean>(false);
+
   return (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
+    
       <Dialog
         header="Edit Profile"
-        footer={footerElement}
+        footer={footerElementProfile}
         visible={bEditProfileDiagVisible}
         className="w-[50vw] min-h-[80%]"
         onHide={() => {
@@ -251,68 +258,75 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           setEditBio(myInfo?.userConfig.bio || "");
         }}
       >
-        <div>
-          <div className="flex flex-col w-full bg-[#e5eeee] relative">
-            <Image
-              className="z-0 h-40"
-              src={
-                editBannerUrl
-                  ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
-                  : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
-                  ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
-                  : ""
-              }
-              alt="profile background pic"
-              pt={{
-                root: { className: "cursor-pointer" },
-                image: { className: "object-cover h-full w-full" },
-                previewContainer: { className: "z-20" },
-              }}
-              onClick={handleEditBannerClicked}
-            />
-            <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
-              <div className="flex mb-4 w-fit">
-                <Image
-                  src={
-                    (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
-                    (editAvatarUrl !== false &&
-                      displayedUserInfo &&
-                      displayedUserInfo.userConfig.avatarUrl &&
-                      process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
-                    "/placeholder_profilePic_white-bg.jpg"
-                  }
-                  alt="profile pic"
-                  pt={{
-                    image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
-                    previewContainer: { className: "z-20" },
-                  }}
-                  onClick={handleEditProfilePicClicked}
-                />
-              </div>
-              <div className="[&>div]:mb-4">
-                <p className="text-xl">Display name</p>
-                <div className="flex w-96">
-                  <InputText className="w-full" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} />
-                </div>
-                {/* <p className="text-xl">Username</p>
-                <div className="flex w-96">
-                  <InputText className="w-full" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
-                </div> */}
-                <p className="text-xl">Bio</p>
-                <div className="flex w-96">
-                  <InputTextarea className="w-full" value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
-                </div>
-              </div>
-            </div>
 
-            {bIsViewingSelf && (
-              <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
-                {/* <Button className='w-36' label='Edit Flexfolio' onClick={() => setbEditProfileDiagVisible(true)} /> */}
+        <div>
+
+          
+            <div className="flex flex-col w-full bg-[#e5eeee] relative">
+              <Image
+                className="z-0 h-40"
+                src={
+                  editBannerUrl
+                    ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
+                    : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
+                    ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
+                    : ""
+                }
+                alt="profile background pic"
+                pt={{
+                  root: { className: "cursor-pointer" },
+                  image: { className: "object-cover h-full w-full" },
+                  previewContainer: { className: "z-20" },
+                }}
+                onClick={handleEditBannerClicked}
+              />
+              <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
+                <div className="flex mb-4 w-fit">
+                  <Image
+                    src={
+                      (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
+                      (editAvatarUrl !== false &&
+                        displayedUserInfo &&
+                        displayedUserInfo.userConfig.avatarUrl &&
+                        process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
+                      "/placeholder_profilePic_white-bg.jpg"
+                    }
+                    alt="profile pic"
+                    pt={{
+                      image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
+                      previewContainer: { className: "z-20" },
+                    }}
+                    onClick={handleEditProfilePicClicked}
+                  />
+                </div>
+                <div className="[&>div]:mb-4">
+                  <p className="text-xl">Display name</p>
+                  <div className="flex w-96">
+                    <InputText className="w-full" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} />
+                  </div>
+                  {/* <p className="text-xl">Username</p>
+                  <div className="flex w-96">
+                    <InputText className="w-full" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
+                  </div> */}
+                  <p className="text-xl">Bio</p>
+                  <div className="flex w-96">
+                    <InputTextarea className="w-full" value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+
+              {bIsViewingSelf && (
+                <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
+                  {/* <Button className='w-36' label='Edit Flexfolio' onClick={() => setbEditProfileDiagVisible(true)} /> */}
+                </div>
+              )}
+            </div>
         </div>
+          
       </Dialog>
+
+      
+
       <div className="flex flex-col w-full bg-[#e5eeee] relative">
         <Image
           className="z-0 h-72"
@@ -415,8 +429,30 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           </div>
         ) : selectedButton === "Flexfolio" ? (
           <div className="flex items-center justify-center w-full flex-col">
-            <p className="text-3xl font-bold">Flexfolio</p>
-            <p className="text-xl">@{myInfo && myInfo.username} is investing in</p>
+            <FlexfolioEdit bEditFlexfolioDiagVisible={bEditFlexfolioDiagVisible} onExit={() => {
+              setbEditFlexfolioDiagVisible(false);
+            }} />
+            <Card
+              pt={{
+                    content: { className: "p-0" },
+              }}
+            >
+                <div className="justify-between flex flex-row w-full gap-11">
+                    <p className="text-3xl font-bold justify-start">Flexfolio</p>
+                    <div className="flex  justify-end ml-11">
+                      <Button className="w-36 " label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
+                    </div>
+                </div>
+                <div>
+                  <p className="text-lg">@{myInfo && myInfo.username} is investing in</p>
+                </div>
+                {/* <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" /> */}
+            </Card>
+
+            
+            
+
+
           </div>
         ) : null
       ) : (
