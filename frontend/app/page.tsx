@@ -7,20 +7,21 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const login = () => {
-  const { user, logout } = useAuthContext();
+const Login = () => {
+  const { user } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
     const wrapper = async () => {
-        const userinfo = await getUserInfo();
-        if (user && !("error" in userinfo)) { // logged in users
-          router.push("/home");
-        }
+      const userinfo = await getUserInfo();
+      if (user && !("error" in userinfo)) {
+        // logged in users
+        router.push("/home");
+      }
     };
 
     wrapper();
-}, [user]);
+  }, [user, router]);
 
   return (
     <>
@@ -34,4 +35,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;

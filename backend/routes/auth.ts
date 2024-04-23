@@ -10,6 +10,8 @@ import { validateUser } from "@/middlewares/auth";
 const s = initServer();
 
 export const authRouter = s.router(apiContract.auth, {
+    /* The following code snippet has heavy reference on an external reference on Lucia Auth: */
+    /* https://github.com/lucia-auth/examples/blob/main/express/username-and-password/routes/signup.ts */
     signup: {
         handler: async ({ body, res }) => {
             const username: string | null = body.username ?? null;
@@ -138,6 +140,8 @@ export const authRouter = s.router(apiContract.auth, {
         },
     },
 
+    /* The following code snippet has heavy reference on an external reference on Lucia Auth: */
+    /* https://github.com/lucia-auth/examples/blob/main/express/username-and-password/routes/login.ts */
     login: {
         handler: async ({ body, res }) => {
             const email: string | null = body.email ?? null;
@@ -194,6 +198,8 @@ export const authRouter = s.router(apiContract.auth, {
         },
     },
 
+    /* The following code snippet has heavy reference on an external reference on Lucia Auth: */
+    /* https://github.com/lucia-auth/examples/blob/main/express/username-and-password/routes/logout.ts */
     logout: {
         middleware: [validateUser],
         handler: async ({ res }) => {

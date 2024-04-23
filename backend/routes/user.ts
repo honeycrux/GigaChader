@@ -67,8 +67,7 @@ export const userRouter = s.router(apiContract.user, {
 
             const data = await prismaClient.post.findMany({
                 take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
+                skip: from ? from : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },

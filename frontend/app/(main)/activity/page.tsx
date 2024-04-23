@@ -5,39 +5,41 @@ import { useAuthContext } from "@/providers/auth-provider";
 import Link from "next/link";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ButtonTabState = "Unread" | "Read";
 
 function ActivityPage() {
-  const { user } = useAuthContext();
+  const { user, refreshUserInfo } = useAuthContext();
   const [selectedButton, setSelectedButton] = useState<ButtonTabState>("Unread");
   const [unreadNotif, setUnreadNotif] = useState<NotificationInfo[] | null>(null);
   const [readNotif, setReadNotif] = useState<NotificationInfo[] | null>(null);
 
-  async function getNotifications(mode: "unread" | "read") {
+  const getNotifications = useCallback(async (mode: "unread" | "read") => {
     const res = await apiClient.user.getNotifications({ query: { mode } });
     if (res.status === 200) {
-      setTimeout(() => {
+      const tout = setTimeout(() => {
         apiClient.user.readNotifications({});
+        clearTimeout(tout);
       }, 3000);
       return res.body;
     }
     return null;
-  }
+  }, []);
 
-  async function getReadAndUnreadNotifications() {
+  const getReadAndUnreadNotifications = useCallback(async () => {
     getNotifications("unread").then((data) => {
       setUnreadNotif(data);
     });
     getNotifications("read").then((data) => {
       setReadNotif(data);
     });
-  }
+    refreshUserInfo();
+  }, [getNotifications, refreshUserInfo]);
 
   useEffect(() => {
     getReadAndUnreadNotifications();
-  }, []);
+  }, [getReadAndUnreadNotifications]);
 
   return user ? (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">

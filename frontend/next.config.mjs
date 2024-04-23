@@ -11,6 +11,7 @@ const nextConfig = {
   },
   experimental: {
     externalDir: true,
+    missingSuspenseWithCSRBailout: false,
   },
 };
 

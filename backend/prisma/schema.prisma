@@ -156,6 +156,7 @@ model Post {
   userMedia       UserMedia[]
   textualContexts TextualContext[]
   suspended       Boolean          @default(false)
+  repostChainIds  String[]         @db.ObjectId
 
   authorId          String  @db.ObjectId
   repostingPostId   String? @db.ObjectId

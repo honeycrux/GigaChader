@@ -74,7 +74,7 @@ export const postContract = c.router({
         method: "GET",
         path: "/api/post/global-feeds",
         query: z.object({
-            from: z.optional(z.string()),
+            from: z.optional(z.coerce.number().int().min(0)),
             limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {

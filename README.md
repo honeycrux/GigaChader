@@ -1,5 +1,10 @@
 # Gigachader
 
+Gigachader is a social media platform project. Gigachader is a platform for crypto enthusiasts to share their passion and knowledge. This platform includes ways for users to post content, interact with others, and share their crypto investment strategies.
+
+## Features
+TODO
+
 ## Structure
 
 This is a monorepo containing several folders:
@@ -7,7 +12,6 @@ This is a monorepo containing several folders:
   - `app/`: [Next app router](https://nextjs.org/docs/app/building-your-application/routing)
   - `components/`: Web components
   - `lib/`: Useful functionalities you define
-  - `lib/actions/`: Server actions
 - `backend/`: Backend services
   - `server.ts`: The main file that is run
   - `prisma/`: Database schema and crud operations
@@ -28,7 +32,7 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 - Install dependencies: On the desired terminal, run `npm install`
 - Run web server or backend services: On the desired terminal, run `npm run dev`
 
-## Working with the project
+## Notes for Developers
 
 ### Installing Packages
 **To install or remove packages, please go to the respective folder (frontend/backend) before using `npm install`.**
@@ -47,8 +51,10 @@ For client components (with `"use client";` at top of script):
 - Use validateUser from `@/lib/actions/auth`. Call `const auth = await validateUser();`.
 - Check for absence of a session using the condition `"error" in auth`. Check user information using the `auth.user` object.
 
-### Web Server: Interacting with the Backend (as a server action)
-To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.
+### Web Server: Interacting with the Backend (with client component)
+~~To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.~~
+
+In order to use the browser cookie, the only currently known way is to make API calls under client components (session cookie will fail if you call from server components). Feel free to use server actions `front/lib/actions/` to make those calls if code is reused, though make sure you invoke them from client component. Please see existing examples, for example, `frontend/app/(main)/home/page.tsx`.
 
 If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/apiClient.ts`.
 

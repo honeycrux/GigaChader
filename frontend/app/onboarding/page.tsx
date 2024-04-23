@@ -1,39 +1,36 @@
 "use client";
 import { Image } from "primereact/image";
-import placeholder_profilePic from "@/public/placeholder_profilePic.png";
-import { FileUpload } from "primereact/fileupload";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
-import { apiClient, axiosClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
 import { getUserInfo } from "@/lib/actions/user";
 import { useRouter } from "next/navigation";
+import { PersonalUserInfo } from "#/shared/models/user";
 
 function Onboarding() {
   const toast = useRef<Toast>(null);
-  const { user, logout } = useAuthContext();
+  const { user } = useAuthContext();
   const router = useRouter();
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);
 
-  
-
-  const [displayName, setDisplayName] = useState<any>();
-  const [userName, setUserName] = useState<any>();
-  const [bio, setBio] = useState<any>();
-  const [profilePicUrl, setProfilePicUrl] = useState<any>();
-  const [userinfo, setUserInfo] = useState<any>();
+  const [displayName, setDisplayName] = useState<string | undefined>();
+  const [userName, setUserName] = useState<string | undefined>();
+  const [bio, setBio] = useState<string | undefined>();
+  const [profilePicUrl, setProfilePicUrl] = useState<string | undefined>();
+  const [userinfo, setUserInfo] = useState<PersonalUserInfo | null>(null);
 
   const handleContinue = async () => {
     // if (toast.current) {
     //   toast.current.show({ severity: "info", summary: "Success", detail: "Go to home" });
     // }
     const userConfig: { displayName: string; bio: string; avatarUrl?: string; onBoardingCompleted: boolean } = {
-      displayName: displayName,
-      bio: bio,
+      displayName: displayName || "",
+      bio: bio || "",
       onBoardingCompleted: true,
     };
 
@@ -60,8 +57,6 @@ function Onboarding() {
           }
           console.log("from onboarding");
           console.log(userinfo);
-          const res = await apiClient.user.userConfig({ body: {avatarUrl: profilePicUrl} });
-          console.log(res);
         }
       }
     };
@@ -71,14 +66,14 @@ function Onboarding() {
 
   const handleUpload = async () => {
     const formData = new FormData();
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
     input.click();
-    input.addEventListener('change', async () => {
+    input.addEventListener("change", async () => {
       if (input.files) {
         for (let i = 0; i < input.files.length; i++) {
-          formData.append('avatar', input.files[i]);
+          formData.append("avatar", input.files[i]);
         }
         const res = await apiClient.upload.uploadProfile({
           body: formData,
@@ -87,9 +82,12 @@ function Onboarding() {
         if (res.status === 200 && res.body) {
           const avatarUrl = res.body.avatarUrl;
           setProfilePicUrl(avatarUrl);
-          const res2 = await apiClient.user.userConfig({ body: {avatarUrl: avatarUrl} });
+          const res2 = await apiClient.user.userConfig({ body: { avatarUrl: avatarUrl } });
           console.log(res2);
-          setUserInfo(await getUserInfo());
+          const userinfo = await getUserInfo();
+          if (!("error" in userinfo)) {
+            setUserInfo(userinfo);
+          }
         }
       }
     });
@@ -104,29 +102,33 @@ function Onboarding() {
           <p className="text-xl font-light mb-5">Complete your profile to get started</p>
           <div className="flex flex-col p-12 w-[35rem] h-auto custom-shadow-border rounded-[50px]">
             <div className="flex items-center">
-              <Image className="mr-5"
-              src={(userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl)
-                || "placeholder_profilePic_white-bg.jpg"
-              } 
-              width="100" alt="placeholder profilePic" 
-              preview
-              pt={{
-                image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
-                previewContainer: { className: "z-20" },
-              }} />
+              <Image
+                className="mr-5"
+                src={
+                  (userinfo && userinfo.userConfig.avatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + userinfo.userConfig.avatarUrl) ||
+                  "placeholder_profilePic_white-bg.jpg"
+                }
+                width="100"
+                alt="placeholder profilePic"
+                preview
+                pt={{
+                  image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
+                  previewContainer: { className: "z-20" },
+                }}
+              />
               {/* <FileUpload mode="basic" name="profilePic" accept="image/*" chooseLabel="Upload Profile Picture"
               customUpload auto uploadHandler={handleProfilePicUpload} /> */}
-              <Button label="Upload Avatar"
-                onClick={handleUpload} />
+              <Button label="Upload Avatar" onClick={handleUpload} />
             </div>
             <div className="[&>*]:my-2">
-              <p className="!mt-4 text-xl">Username: &nbsp;
+              <p className="!mt-4 text-xl">
+                Username: &nbsp;
                 <span className="text-gray-600">@{userName}</span>
               </p>
               <p className="text-xl">Display name</p>
-              <InputText className="custom-shadow-border-light w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+              <InputText className="custom-shadow-border-light w-full" value={displayName || ""} onChange={(e) => setDisplayName(e.target.value)} />
               <p className="text-xl">Bio</p>
-              <InputTextarea className="w-full" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} autoResize />
+              <InputTextarea className="w-full" value={bio || ""} onChange={(e) => setBio(e.target.value)} rows={4} autoResize />
               <div className="flex justify-center">
                 <Button onClick={handleContinue} className="px-20" label="Continue" />
               </div>

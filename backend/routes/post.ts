@@ -155,8 +155,7 @@ export const postRouter = s.router(apiContract.post, {
         handler: async ({ query: { from, limit }, res }) => {
             const data = await prismaClient.post.findMany({
                 take: limit,
-                cursor: from ? { id: from } : undefined,
-                skip: from ? 1 : undefined,
+                skip: from ? from : undefined,
                 orderBy: {
                     createdAt: "desc",
                 },
@@ -190,6 +189,7 @@ export const postRouter = s.router(apiContract.post, {
         handler: async ({ res, body: { content, repostingPostId, parentPostId, userMedia } }) => {
             let repostOriginalAuthorId: string | undefined;
             let commentOriginalAuthorId: string | undefined;
+            let repostChainIds: string[] = [];
 
             if (repostingPostId) {
                 const post = await prismaClient.post.findUnique({
@@ -200,6 +200,7 @@ export const postRouter = s.router(apiContract.post, {
                                 id: true,
                             },
                         },
+                        repostChainIds: true,
                     },
                     where: {
                         id: repostingPostId,
@@ -216,6 +217,7 @@ export const postRouter = s.router(apiContract.post, {
                     };
                 }
                 repostOriginalAuthorId = post.author.id;
+                repostChainIds = post.repostChainIds;
             }
             if (parentPostId) {
                 const post = await prismaClient.post.findUnique({
@@ -258,6 +260,7 @@ export const postRouter = s.router(apiContract.post, {
                               connect: { id: repostingPostId },
                           }
                         : undefined,
+                    repostChainIds: repostingPostId ? [repostingPostId].concat(repostChainIds) : undefined,
                     parentPost: parentPostId
                         ? {
                               connect: { id: parentPostId },

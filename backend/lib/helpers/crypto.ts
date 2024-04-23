@@ -31,15 +31,19 @@ async function fetchCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
             break;
         }
         cryptoinfo = cryptoinfo.concat(
-            response.data.data.map((d) => {
-                const { id: cryptoId, symbol, name, priceUsd } = d;
-                return {
-                    cryptoId,
-                    symbol,
-                    name,
-                    priceUsd: Number(priceUsd),
-                };
-            })
+            response.data.data
+                .filter((d) => {
+                    return d.id.trim() !== "" && d.name.trim() !== "" && d.symbol.trim() !== "";
+                })
+                .map((d) => {
+                    const { id: cryptoId, symbol, name, priceUsd } = d;
+                    return {
+                        cryptoId,
+                        symbol,
+                        name,
+                        priceUsd: Number(priceUsd),
+                    };
+                })
         );
         if (cryptoinfo.length !== limit) {
             break;
@@ -49,6 +53,9 @@ async function fetchCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
 }
 
 async function fetchCoincapAsset(id: string): Promise<Omit<CryptoInfo, "updatedAt"> | null> {
+    if (id.trim() === "") {
+        return null;
+    }
     const assetsUrl = "https://api.coincap.io/v2/assets/";
     const response = await axios.get<{ data: CoincapAsset }>(`${assetsUrl}/${id}`);
     if (!("data" in response)) {
@@ -86,29 +93,29 @@ export async function checkExchange() {
     if (!assetsdata) {
         return false;
     }
-    await prismaClient.crypto.deleteMany({
-        where: {
-            cryptoId: { in: assetsdata.map((d) => d.cryptoId) },
-        },
-    });
-    await prismaClient.crypto.createMany({
-        data: assetsdata,
-    });
-    const newsystemdata = await prismaClient.systemMetadata.upsert({
-        select: {
-            value: true,
-        },
-        update: {
-            value: { lastUpdated: Date.now() },
-        },
-        create: {
-            key: "crypto/coincap-fetch-everything",
-            value: { lastUpdated: Date.now() },
-        },
-        where: {
-            key: "crypto/coincap-fetch-everything",
-        },
-    });
+    const [_res0, _res1, newsystemdata] = await prismaClient.$transaction([
+        // clear old data from database
+        prismaClient.crypto.deleteMany({}),
+        // create new data in database
+        prismaClient.crypto.createMany({
+            data: assetsdata,
+        }),
+        prismaClient.systemMetadata.upsert({
+            select: {
+                value: true,
+            },
+            update: {
+                value: { lastUpdated: Date.now() },
+            },
+            create: {
+                key: "crypto/coincap-fetch-everything",
+                value: { lastUpdated: Date.now() },
+            },
+            where: {
+                key: "crypto/coincap-fetch-everything",
+            },
+        }),
+    ]);
     return {
         lastUpdated: readLastUpdatedData(newsystemdata.value),
         expiry: readLastUpdatedData(newsystemdata.value) + expiryPeriod,
@@ -150,16 +157,6 @@ export async function fetchCrypto(cryptoId: string): Promise<CryptoInfo | null> 
     if (!freshdata) {
         return null;
     }
-    const crypto = await prismaClient.crypto.upsert({
-        select: {
-            cryptoId: true,
-        },
-        where: {
-            cryptoId: freshdata.cryptoId,
-        },
-        update: freshdata,
-        create: freshdata,
-    });
     const result = await cryptoInfoFindOne({ cryptoId });
 
     return result;

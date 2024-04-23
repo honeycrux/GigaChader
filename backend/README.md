@@ -1,4 +1,4 @@
-The backend provides a REST API with TypeScript using [Express](https://expressjs.com/) and [Prisma Client](https://www.prisma.io/docs/concepts/components/prisma-client).
+The backend provides a REST API with TypeScript using [Express](https://expressjs.com/) and [Prisma Client](https://www.prisma.io/docs/concepts/components/prisma-client). This is boostrapped with `npx try-prisma@latest --template typescript/rest-express`.
 
 <!--
 ## Getting started
@@ -314,10 +314,11 @@ npm run dev
 
 The server is now running on `http://localhost:3007`. You can now run the API requests.
 
-
+<!--
 ## Next steps
 
 - Check out the [Prisma docs](https://www.prisma.io/docs)
 - Share your feedback in the [`#product-wishlist`](https://prisma.slack.com/messages/CKQTGR6T0/) channel on the [Prisma Slack](https://slack.prisma.io/)
 - Create issues and ask questions on [GitHub](https://github.com/prisma/prisma/)
 - Watch our biweekly "What's new in Prisma" livestreams on [Youtube](https://www.youtube.com/channel/UCptAHlN1gdwD89tFM3ENb6w)
+-->

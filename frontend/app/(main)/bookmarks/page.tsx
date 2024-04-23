@@ -1,13 +1,12 @@
-'use client';
+"use client";
 
-import { apiClient } from '@/lib/apiClient';
+import { apiClient } from "@/lib/apiClient";
 import PostBox from "@/components/home/PostBox";
-import {useEffect, useState } from "react";
-import { PostInfo } from '#/shared/models/post';
+import { useEffect, useState } from "react";
+import { PostInfo } from "#/shared/models/post";
 import { useAuthContext } from "@/providers/auth-provider";
 
-const bookmarkedPost = ({ params }: { params: { id: string } }) => {
-
+const BookmarkedPost = ({ params }: { params: { id: string } }) => {
   const { user } = useAuthContext();
   const [savedPosts, setsavedPosts] = useState<PostInfo[] | null>(null);
 
@@ -19,8 +18,7 @@ const bookmarkedPost = ({ params }: { params: { id: string } }) => {
     if (res.status === 200) {
       setsavedPosts(res.body);
     }
-
-  }
+  };
 
   useEffect(() => {
     if (user) {
@@ -29,17 +27,15 @@ const bookmarkedPost = ({ params }: { params: { id: string } }) => {
   }, [user]);
 
   return (
-    <div className='flex flex-col items-center w-full overflow-y-auto'>
+    <div className="flex flex-col items-center w-full overflow-y-auto">
       <div className="flex flex-col w-[60%] space-y-4">
         <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">
           <p className="text-3xl font-bold">Bookmarks</p>
         </div>
-        {savedPosts && savedPosts.map((post, index) => (
-            <PostBox key={index} {...post} currentUserName={user?.username} />
-          ))}
+        {savedPosts && savedPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default bookmarkedPost;
+export default BookmarkedPost;

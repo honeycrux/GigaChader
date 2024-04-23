@@ -1,22 +1,27 @@
 "use client";
+import { apiContract } from "#/shared/contracts";
 import { CryptoInfo } from "#/shared/models/crypto";
 import { PostInfo } from "#/shared/models/post";
 import PostBox from "@/components/home/PostBox";
 import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
+import { ClientInferResponseBody } from "@ts-rest/core";
 import Link from "next/link";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useEffect, useState } from "react";
 
 type ButtonTabState = "Posts" | "Hashtags" | "Topics";
+type TrendingPostsResponse = ClientInferResponseBody<typeof apiContract.trends.trendingPosts, 200>;
+type TrendingHashtagsResponse = ClientInferResponseBody<typeof apiContract.trends.trendingHashtags, 200>;
+type TrendingTopicsResponse = ClientInferResponseBody<typeof apiContract.trends.trendingTopics, 200>;
 
 function DiscoverPage() {
   const { user } = useAuthContext();
   const [selectedButton, setSelectedButton] = useState<ButtonTabState>("Posts");
-  const [trendingPosts, setTrendingPosts] = useState<PostInfo[] | null>(null);
-  const [trendingHashtags, setTrendingHashtags] = useState<{ tagText: string; postCount: number }[] | null>(null);
-  const [trendingTopics, setTrendingTopics] = useState<{ cryptoInfo: CryptoInfo; postCount: number }[] | null>(null);
+  const [trendingPosts, setTrendingPosts] = useState<TrendingPostsResponse | null>(null);
+  const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtagsResponse | null>(null);
+  const [trendingTopics, setTrendingTopics] = useState<TrendingTopicsResponse | null>(null);
 
   async function getTrendingPosts() {
     const res = await apiClient.trends.trendingPosts();
@@ -59,8 +64,9 @@ function DiscoverPage() {
 
   return (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
-      <div className="mt-5 ml-12">
+      <div className="flex flex-col mt-5 ml-12">
         <p className="text-3xl font-bold">Discover</p>
+        <p className="font-light">{"See what's trending."}</p>
       </div>
       <div className="mt-5">
         <div className="flex justify-between w-full">
@@ -88,7 +94,7 @@ function DiscoverPage() {
             {selectedButton === "Posts" ? (
               trendingPosts ? (
                 trendingPosts.length > 0 ? (
-                  trendingPosts.map((post, index) => <PostBox key={index} {...post} currentUserName={user?.username} />)
+                  trendingPosts.map((post, index) => <PostBox key={index} post={post} currentUserName={user?.username} />)
                 ) : (
                   <p className="text-center">No trending post</p>
                 )

@@ -24,6 +24,7 @@ const postInfoSelectObj = {
         },
     },
     repostingPostId: true,
+    repostChainIds: true,
     parentPostId: true,
     _count: {
         select: {
@@ -35,7 +36,7 @@ const postInfoSelectObj = {
     },
 } satisfies Prisma.PostSelect;
 
-export async function postInfoFindMany(props: { postId: string[]; requesterId: string | undefined }): Promise<PostInfo[]> {
+export async function postInfoFindMany(props: { postId: string[]; requesterId: string | undefined; suppressReposts?: boolean }): Promise<PostInfo[]> {
     const data = await prismaClient.post.findMany({
         select: postInfoSelectObj,
         where: {
@@ -98,10 +99,48 @@ export async function postInfoFindMany(props: { postId: string[]; requesterId: s
         }
     }
 
+    // get repost chain
+    let allRepostChainPosts: Record<string, PostInfo> | null;
+
+    if (!props.suppressReposts) {
+        const allRepostChainPostIds = data
+            .flatMap((d) => d.repostChainIds || []) // list of post IDs from all repost chains
+            .filter((value, index, arr) => arr.indexOf(value) === index); // deduplicate
+        allRepostChainPosts = await postInfoFindManyAsRecord({
+            postId: allRepostChainPostIds,
+            requesterId: props.requesterId,
+            suppressReposts: true,
+        });
+    }
+
     const postInfo: PostInfo[] = data.map((post) => {
-        const { _count, author, postHashtags, postCryptoTopics, ...rest } = post;
+        const { _count, author, postHashtags, postCryptoTopics, repostChainIds, ...rest } = post;
+
+        // construct reposting chain
+        let repostingPost: PostInfo | null = null;
+        if (!props.suppressReposts && allRepostChainPosts) {
+            for (let repostId of repostChainIds.toReversed() /* (scan from oldest in chain) */) {
+                if (repostId in allRepostChainPosts) {
+                    if (repostingPost) {
+                        // attach this to current reposting post
+                        repostingPost = {
+                            ...allRepostChainPosts[repostId],
+                            repostingPost: repostingPost,
+                        };
+                    } else {
+                        // start the chain with this post
+                        repostingPost = allRepostChainPosts[repostId];
+                    }
+                } else {
+                    // the chain is broken for some reason - set null and continue
+                    repostingPost = null;
+                }
+            }
+        }
+
         return {
             ...rest,
+            repostingPost: repostingPost,
             postHashtags: postHashtags.map((tag) => tag.tagText),
             postCryptoTopics: postCryptoTopics.map((topic) => topic.cryptoId),
             author: authordata[author.username],
@@ -117,8 +156,12 @@ export async function postInfoFindMany(props: { postId: string[]; requesterId: s
     return postInfo;
 }
 
-export async function postInfoFindManyAsRecord(props: { postId: string[]; requesterId: string | undefined }): Promise<Record<string, PostInfo>> {
-    const data = await postInfoFindMany({ postId: props.postId, requesterId: props.requesterId });
+export async function postInfoFindManyAsRecord(props: {
+    postId: string[];
+    requesterId: string | undefined;
+    suppressReposts?: boolean;
+}): Promise<Record<string, PostInfo>> {
+    const data = await postInfoFindMany({ postId: props.postId, requesterId: props.requesterId, suppressReposts: props.suppressReposts });
     const result: Record<string, PostInfo> = {};
     for (const d of data) {
         result[d.id] = d;
@@ -126,14 +169,14 @@ export async function postInfoFindManyAsRecord(props: { postId: string[]; reques
     return result;
 }
 
-export async function postInfoFindManyOrdered(props: { postId: string[]; requesterId: string | undefined }): Promise<PostInfo[]> {
-    const data = await postInfoFindManyAsRecord({ postId: props.postId, requesterId: props.requesterId });
+export async function postInfoFindManyOrdered(props: { postId: string[]; requesterId: string | undefined; suppressReposts?: boolean }): Promise<PostInfo[]> {
+    const data = await postInfoFindManyAsRecord({ postId: props.postId, requesterId: props.requesterId, suppressReposts: props.suppressReposts });
     const result = props.postId.filter((id) => !!data[id]).map((id) => data[id]);
     return result;
 }
 
-export async function postInfoFindOne(props: { postId: string; requesterId: string | undefined }): Promise<PostInfo | null> {
-    const data = await postInfoFindMany({ postId: [props.postId], requesterId: props.requesterId });
+export async function postInfoFindOne(props: { postId: string; requesterId: string | undefined; suppressReposts?: boolean }): Promise<PostInfo | null> {
+    const data = await postInfoFindMany({ postId: [props.postId], requesterId: props.requesterId, suppressReposts: props.suppressReposts });
     if (!data[0]) {
         return null;
     }

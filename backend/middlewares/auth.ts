@@ -23,6 +23,8 @@ export async function csrfProtection(req: Request, res: Response, next: NextFunc
 }
 
 /* Route-level middleware - populates user information in res.locals */
+/* The following code snippet has heavy reference on an external reference on Lucia Auth: */
+/* https://lucia-auth.com/guides/validate-session-cookies/ */
 export async function validateUser(req: Pick<Request, "headers">, res: Pick<Response, "locals" | "appendHeader">, next: NextFunction) {
     console.log("[middleware] validateUser");
     const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");

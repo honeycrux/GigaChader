@@ -28,7 +28,7 @@ export const userContract = c.router({
         method: "GET",
         path: "/api/user/feeds",
         query: z.object({
-            from: z.optional(z.string()),
+            from: z.optional(z.coerce.number().int().min(0)),
             limit: z.optional(z.coerce.number().int().min(1)),
         }),
         responses: {
