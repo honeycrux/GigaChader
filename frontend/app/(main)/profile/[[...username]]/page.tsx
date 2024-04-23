@@ -9,22 +9,14 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { apiClient } from "@/lib/apiClient";
-import { UserConfigProps, UserProfile } from "#/shared/models/user";
-import { apiContract } from "#/shared/contracts";
-import { ClientInferResponseBody } from "@ts-rest/core";
+import { SimpleUserInfo, UserConfigProps, UserProfile } from "#/shared/models/user";
 import { PostInfo } from "#/shared/models/post";
-<<<<<<< HEAD
-import { Chart } from 'primereact/chart';
+import { Chart } from "primereact/chart";
 import CryptoEdit from "@/components/crypto/CryptoSearch";
 import { CryptoInfo } from "#/shared/models/crypto";
 import { Card } from "primereact/card";
 import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
-=======
-import { Chart } from "primereact/chart";
 import SimpleUserBox from "@/components/home/SimpleUserBox";
->>>>>>> baed5ca (Add profile page followers and following)
-
-type FollowListResponse = ClientInferResponseBody<typeof apiContract.user.getFollowedUsers, 200>;
 
 const Profile = ({ params }: { params: { username?: string[] } }) => {
   const { user, userInfo: myInfo, refreshUserInfo: refreshMyInfo } = useAuthContext();
@@ -36,8 +28,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
   const [bFollowListVisible, setbFollowListVisible] = useState<boolean>(false);
   const [bFollowerListVisible, setbFollowerListVisible] = useState<boolean>(false);
-  const [followList, setFollowList] = useState<FollowListResponse | null>(null);
-  const [followerList, setFollowerList] = useState<FollowListResponse | null>(null);
+  const [followList, setFollowList] = useState<SimpleUserInfo[] | null>(null);
+  const [followerList, setFollowerList] = useState<SimpleUserInfo[] | null>(null);
   const [bIsSuspended, setbIsSuspended] = useState<boolean>(false);
   const [bNotFound, setbNotFound] = useState<boolean>(false);
 
@@ -271,7 +263,6 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
 
   return (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
-    
       <Dialog
         header="Edit Profile"
         footer={footerElementProfile}
@@ -285,77 +276,69 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           setEditBio(myInfo?.userConfig.bio || "");
         }}
       >
-
         <div>
-
-          
-            <div className="flex flex-col w-full bg-[#e5eeee] relative">
-              <Image
-                className="z-0 h-40"
-                src={
-                  editBannerUrl
-                    ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
-                    : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
-                    ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
-                    : ""
-                }
-                alt="profile background pic"
-                pt={{
-                  root: { className: "cursor-pointer" },
-                  image: { className: "object-cover h-full w-full" },
-                  previewContainer: { className: "z-20" },
-                }}
-                onClick={handleEditBannerClicked}
-              />
-              <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
-                <div className="flex mb-4 w-fit">
-                  <Image
-                    src={
-                      (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
-                      (editAvatarUrl !== false &&
-                        displayedUserInfo &&
-                        displayedUserInfo.userConfig.avatarUrl &&
-                        process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
-                      "/placeholder_profilePic_white-bg.jpg"
-                    }
-                    alt="profile pic"
-                    pt={{
-                      image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
-                      previewContainer: { className: "z-20" },
-                    }}
-                    onClick={handleEditProfilePicClicked}
-                  />
+          <div className="flex flex-col w-full bg-[#e5eeee] relative">
+            <Image
+              className="z-0 h-40"
+              src={
+                editBannerUrl
+                  ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
+                  : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
+                  ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
+                  : ""
+              }
+              alt="profile background pic"
+              pt={{
+                root: { className: "cursor-pointer" },
+                image: { className: "object-cover h-full w-full" },
+                previewContainer: { className: "z-20" },
+              }}
+              onClick={handleEditBannerClicked}
+            />
+            <div className="absolute top-full transform translate-x-10 -translate-y-[4.5rem] z-10 ">
+              <div className="flex mb-4 w-fit">
+                <Image
+                  src={
+                    (editAvatarUrl && process.env.NEXT_PUBLIC_BACKEND_URL + editAvatarUrl) ||
+                    (editAvatarUrl !== false &&
+                      displayedUserInfo &&
+                      displayedUserInfo.userConfig.avatarUrl &&
+                      process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.avatarUrl) ||
+                    "/placeholder_profilePic_white-bg.jpg"
+                  }
+                  alt="profile pic"
+                  pt={{
+                    image: { className: "rounded-full h-36 w-36 object-cover cursor-pointer" },
+                    previewContainer: { className: "z-20" },
+                  }}
+                  onClick={handleEditProfilePicClicked}
+                />
+              </div>
+              <div className="[&>div]:mb-4">
+                <p className="text-xl">Display name</p>
+                <div className="flex w-96">
+                  <InputText className="w-full" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} />
                 </div>
-                <div className="[&>div]:mb-4">
-                  <p className="text-xl">Display name</p>
-                  <div className="flex w-96">
-                    <InputText className="w-full" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} />
-                  </div>
-                  {/* <p className="text-xl">Username</p>
+                {/* <p className="text-xl">Username</p>
                   <div className="flex w-96">
                     <InputText className="w-full" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
                   </div> */}
-                  <p className="text-xl">Bio</p>
-                  <div className="flex w-96">
-                    <InputTextarea className="w-full" value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
-                  </div>
+                <p className="text-xl">Bio</p>
+                <div className="flex w-96">
+                  <InputTextarea className="w-full" value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
                 </div>
               </div>
-
-              {bIsViewingSelf && (
-                <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
-                  {/* <Button className='w-36' label='Edit Flexfolio' onClick={() => setbEditProfileDiagVisible(true)} /> */}
-                </div>
-              )}
             </div>
+
+            {bIsViewingSelf && (
+              <div className="flex w-full absolute top-full z-10 justify-end mt-10 pr-10">
+                {/* <Button className='w-36' label='Edit Flexfolio' onClick={() => setbEditProfileDiagVisible(true)} /> */}
+              </div>
+            )}
+          </div>
         </div>
-          
       </Dialog>
-<<<<<<< HEAD
 
-      
-
-=======
       <Dialog
         header="Followers"
         visible={bFollowerListVisible}
@@ -379,6 +362,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           <p className="text-center text-md">Not fetched yet ._.</p>
         )}
       </Dialog>
+
       <Dialog
         header="Following"
         visible={bFollowListVisible}
@@ -402,7 +386,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           <p className="text-center text-md">Not fetched yet ._.</p>
         )}
       </Dialog>
->>>>>>> baed5ca (Add profile page followers and following)
+
       <div className="flex flex-col w-full bg-[#e5eeee] relative">
         <Image
           className="z-0 h-72"
@@ -439,7 +423,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           </div>
           <p className="text-xl whitespace-pre-wrap max-w-96">{displayedUserInfo && displayedUserInfo.userConfig.bio}</p>
           {displayedUserInfo && (
-            <div className="flex flex-row gap-2 ml-6 my-1 text-xl">
+            <div className="flex flex-row ml-6 my-1 text-xl">
               <div
                 className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20 transition duration-300 cursor-pointer"
                 onClick={async () => {
@@ -477,6 +461,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           )
         )}
       </div>
+
       <div style={{ marginTop: `${marginTop}px` }}>
         <div className="flex justify-between w-full">
           <Button
@@ -531,30 +516,28 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           </div>
         ) : selectedButton === "Flexfolio" ? (
           <div className="flex items-center justify-center w-full flex-col">
-            <FlexfolioEdit bEditFlexfolioDiagVisible={bEditFlexfolioDiagVisible} onExit={() => {
-              setbEditFlexfolioDiagVisible(false);
-            }} />
+            <FlexfolioEdit
+              bEditFlexfolioDiagVisible={bEditFlexfolioDiagVisible}
+              onExit={() => {
+                setbEditFlexfolioDiagVisible(false);
+              }}
+            />
             <Card
               pt={{
-                    content: { className: "p-0" },
+                content: { className: "p-0" },
               }}
             >
-                <div className="justify-between flex flex-row w-full gap-11">
-                    <p className="text-3xl font-bold justify-start">Flexfolio</p>
-                    <div className="flex  justify-end ml-11">
-                      <Button className="w-36 " label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
-                    </div>
+              <div className="justify-between flex flex-row w-full gap-11">
+                <p className="text-3xl font-bold justify-start">Flexfolio</p>
+                <div className="flex  justify-end ml-11">
+                  <Button className="w-36 " label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
                 </div>
-                <div>
-                  <p className="text-lg">@{myInfo && myInfo.username} is investing in</p>
-                </div>
-                {/* <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" /> */}
+              </div>
+              <div>
+                <p className="text-lg">@{myInfo && myInfo.username} is investing in</p>
+              </div>
+              {/* <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" /> */}
             </Card>
-
-            
-            
-
-
           </div>
         ) : null
       ) : (
