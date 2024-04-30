@@ -6,16 +6,20 @@ import { Dialog } from "primereact/dialog";
 import CryptoSearch from "./CryptoSearch";
 import { useAuthContext } from "@/providers/auth-provider";
 import { PersonalUserInfo } from "#/shared/models/user";
+import { DataTable } from "primereact/datatable";
+import { Column, ColumnEditorOptions, ColumnEvent } from "primereact/column";
+import { InputNumber, InputNumberValueChangeEvent } from "primereact/inputnumber";
 
 type Props = {
   bEditFlexfolioDiagVisible: boolean;
   onExit: () => void;
+  onSave?: Function;
 };
 
 type CryptoHoldingList = PersonalUserInfo["userCryptoInfo"]["cryptoHoldings"];
 type ButtonTabState = "Own" | "All";
 
-const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit }: Props) => {
+const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => {
   const { userInfo } = useAuthContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [bAmountDiagVisible, setbAmountDiagVisible] = useState<boolean>(false);
@@ -46,6 +50,9 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit }: Props) => {
         }
         setCryptoHoldings(newCryptoHoldings);
         setAddedItems(newCryptoHoldings);
+        if (onSave) {
+          onSave();
+        }
       }
     }
   };
@@ -56,7 +63,8 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit }: Props) => {
   }, [userInfo]);
 
   const footerElementFlexfolio = (
-    <div className="mt-4">
+    <div className="flex mt-4 space-x-2 items-center justify-end">
+      <span className="text-gray-500">Click on amount to edit</span>
       <Button
         label="Save"
         icon="pi pi-check"
@@ -74,6 +82,46 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit }: Props) => {
   }
 
   const cryptoInHoldings = addedItems.map((holding) => holding.crypto);
+
+  // const isPositiveInteger = (val: any) => {
+  //   let str = String(val);
+
+  //   str = str.trim();
+
+  //   if (!str) {
+  //     return false;
+  //   }
+
+  //   str = str.replace(/^0+/, '') || '0';
+  //   let n = Math.floor(Number(str));
+
+  //   return n !== Infinity && String(n) === str && n >= 0;
+  // };
+
+  const amountCellEditor = (editInput: ColumnEditorOptions) => {
+    return (
+      <div className="max-w-full">
+        <InputNumber
+          value={editInput.value}
+          onValueChange={(e: InputNumberValueChangeEvent) => editInput.editorCallback && editInput.editorCallback(e.value)}
+          onKeyDown={(e) => e.stopPropagation()}
+          min={0}
+          allowEmpty={false}
+          maxFractionDigits={20}
+        />
+      </div>
+    );
+  };
+
+  // const amountCellEditComplete = (e: ColumnEvent) => {
+  //   let { rowData, newValue, field, originalEvent: event } = e;
+  //   if (isPositiveInteger(newValue)) {
+  //     rowData[field] = newValue;
+  //   } else {
+  //     event.preventDefault();
+  //   }
+  //   console.log(addedItems);
+  // };
 
   return (
     <div>
@@ -103,13 +151,21 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit }: Props) => {
           />
         </div>
         {selectedButtonEdit === "Own" ? (
-          addedItems.map((item, index) => (
-            <div key={index}>
-              {item.crypto.name} {"("}
-              {item.crypto.symbol}
-              {")"} x{item.amount}
-            </div>
-          ))
+          // addedItems.map((item, index) => (
+          //   <div key={index}>
+          //     {item.crypto.name} {"("}
+          //     {item.crypto.symbol}
+          //     {")"} x{item.amount}
+          //   </div>
+          // ))
+          <DataTable value={addedItems} className="w-full">
+            <Column field="crypto.name" header="Name"></Column>
+            <Column field="crypto.symbol" header="Symbol"></Column>
+            <Column field="amount" header="Amount"
+              editor={(editInput) => amountCellEditor(editInput)}
+              // onCellEditComplete={amountCellEditComplete}
+            ></Column>
+          </DataTable>
         ) : selectedButtonEdit === "All" ? (
           <CryptoSearch
             cryptoList={cryptoInHoldings}

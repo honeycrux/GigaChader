@@ -8,7 +8,7 @@ interface Props {
 
 const SimpleUserBox = ({ user }: Props) => {
   return (
-    <div className="flex flex-col w-full bg-blue-100 rounded-2xl p-4">
+    <div className="flex flex-col w-full bg-[#e5eeee] rounded-2xl p-4">
       <Link href={`/profile/${user.username}`}>
         <div className="flex items-center">
           <Avatar

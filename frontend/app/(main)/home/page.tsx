@@ -155,6 +155,7 @@ const Home = () => {
       } else {
         setFollowedPosts(res.body);
       }
+      setFrom(from + 1);
     }
   };
 

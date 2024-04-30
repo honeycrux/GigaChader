@@ -14,6 +14,7 @@ import { PostInfo } from "#/shared/models/post";
 import { Card } from "primereact/card";
 import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
 import SimpleUserBox from "@/components/home/SimpleUserBox";
+import Chart from 'react-apexcharts';
 
 type ButtonTabState = "Posts" | "Comments" | "Flexfolio";
 
@@ -282,8 +283,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                 editBannerUrl
                   ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
                   : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
-                  ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
-                  : ""
+                    ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
+                    : ""
               }
               alt="profile background pic"
               pt={{
@@ -421,9 +422,10 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           </div>
           <p className="text-xl whitespace-pre-wrap max-w-96">{displayedUserInfo && displayedUserInfo.userConfig.bio}</p>
           {displayedUserInfo && (
-            <div className="flex flex-row ml-6 my-1 text-xl">
+            <div className="flex flex-row my-1 text-xl space-x-2 rounded-md border border-orange1">
               <div
-                className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20 transition duration-300 cursor-pointer"
+                className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20
+                transition duration-300 cursor-pointer"
                 onClick={async () => {
                   setbFollowerListVisible(true);
                   getFollowerList();
@@ -433,7 +435,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                 {displayedUserInfo.followerCount}
               </div>
               <div
-                className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20 transition duration-300 cursor-pointer"
+                className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20
+                transition duration-300 cursor-pointer"
                 onClick={async () => {
                   setbFollowListVisible(true);
                   getFollowList();
@@ -467,9 +470,9 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             label="Posts"
             text
             onClick={() => setSelectedButton("Posts")}
-            // pt={{
-            //   root: {className: "!border-0"},
-            // }}
+          // pt={{
+          //   root: {className: "!border-0"},
+          // }}
           />
           <Button
             className={`w-full ${selectedButton === "Comments" ? "border-0 !border-b-2 border-orange1" : ""}`}
@@ -485,9 +488,6 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           />
         </div>
       </div>
-
-      {/* <div className="bg-slate-500 h-96 w-10"></div> */}
-      {/* {dummyPost.map((post, index) => <PostBox key={index} post={post} />)} */}
 
       {posts && posts.length > 0 ? (
         selectedButton === "Posts" ? (
@@ -519,22 +519,47 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
               onExit={() => {
                 setbEditFlexfolioDiagVisible(false);
               }}
+              onSave={async () => { await fetchProfileInfo(); }}
             />
             <Card
               pt={{
                 content: { className: "p-0" },
               }}
             >
-              <div className="justify-between flex flex-row w-full gap-11">
+              <div className="justify-between flex flex-row gap-11 min-w-fit w-[40vw]">
                 <p className="text-3xl font-bold justify-start">Flexfolio</p>
-                <div className="flex  justify-end ml-11">
-                  <Button className="w-36 " label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
-                </div>
+                {bIsViewingSelf && (
+                  <div className="flex justify-end ml-11">
+                    <Button className="w-36 " label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
+                  </div>
+                )}
               </div>
               <div>
-                <p className="text-lg">@{myInfo && myInfo.username} is investing in</p>
+                <p className="text-lg">@{displayedUserInfo && displayedUserInfo.username}
+                {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 ? 
+                (<span> is investing in</span>) :
+                (<span> has not shared their investment</span>)}</p>
               </div>
               {/* <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" /> */}
+              {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 &&
+                (<div className="w-full flex justify-center">
+                  <Chart options={{
+                    labels:
+                      displayedUserInfo.userCryptoInfo.cryptoHoldings
+                        .map((cryptoObject) =>
+                          cryptoObject.crypto ? `${cryptoObject.crypto.name} (${cryptoObject.crypto.symbol})
+                          <br/>
+                          ${cryptoObject.amount} = $${(cryptoObject.crypto.priceUsd * cryptoObject.amount).toFixed(4)}` : '')
+                        .filter(label => label !== '')
+                  }} series={
+                    displayedUserInfo.userCryptoInfo.cryptoHoldings
+                      .map((cryptoObject) =>
+                        cryptoObject.crypto ? (cryptoObject.crypto.priceUsd * cryptoObject.amount) : null)
+                      .filter(amount => amount !== null)
+                      .map(amount => amount as number)}
+                    type="pie" width={380} />
+                </div>)
+              }
             </Card>
           </div>
         ) : null
