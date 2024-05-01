@@ -279,9 +279,7 @@ const PostBox = ({
       </div>
       <p className="text-gray-600">{formatDate(createdAt.toString())}</p>
       {parentPostId &&
-        (parentPostId === currentPostPageId ? (
-          <span className="font-bold">Go to parent post</span>
-        ) : (
+        (parentPostId !== currentPostPageId && (
           <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">
             Go to parent post
           </Link>
