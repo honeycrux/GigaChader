@@ -66,7 +66,7 @@ function DiscoverPage() {
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
       <div className="flex flex-col mt-5 ml-12">
         <p className="text-3xl font-bold">Discover</p>
-        <p className="font-light">{"See what's trending."}</p>
+        <p className="font-light">{"See what's trending this week."}</p>
       </div>
       <div className="mt-5">
         <div className="flex justify-between w-full">

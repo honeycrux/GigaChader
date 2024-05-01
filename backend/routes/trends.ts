@@ -28,19 +28,16 @@ export const trendsRouter = s.router(apiContract.trends, {
                             postId: "desc",
                         },
                     },
-                    {
-                        postId: "asc",
-                    },
                 ],
                 where: {
                     post: {
                         suspended: false,
                         author: { suspended: false },
+                        createdAt: { gte: mostFarBackDate },
                     },
                     user: {
                         suspended: false,
                     },
-                    createdAt: { gte: mostFarBackDate },
                 },
             });
             if (!data) {
@@ -60,6 +57,19 @@ export const trendsRouter = s.router(apiContract.trends, {
             }
             const postlist = data.map((post) => post.postId);
             const postinfo = await postInfoFindManyOrdered({ postId: postlist, requesterId: res.locals.user?.id });
+            const likeCountsRecord: Record<string, number> = {};
+            for (const post of data) {
+                likeCountsRecord[post.postId] = post._count.postId;
+            }
+            postinfo.sort((post1, post2) => {
+                if (likeCountsRecord[post1.id] > likeCountsRecord[post2.id]) {
+                    return -1;
+                }
+                if (likeCountsRecord[post1.id] < likeCountsRecord[post2.id]) {
+                    return 1;
+                }
+                return post1.createdAt > post2.createdAt ? -1 : post1.createdAt < post2.createdAt ? 1 : 0;
+            });
             return {
                 status: 200,
                 body: postinfo,

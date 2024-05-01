@@ -22,25 +22,9 @@ const Home = () => {
 
   const { user, userInfo } = useAuthContext();
   const [followedPosts, setFollowedPosts] = useState<FollowedPostsResponse | null>(null);
-  const [globalFeeds, setGlobalFeeds] = useState<FollowedPostsResponse | null>(null);
 
   const [from, setFrom] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-
-  const getGlobalFeeds = async () => {
-    const res = await apiClient.post.getGlobalFeeds({ query: { from: from, limit: limit } });
-    if (res.status === 200 && res.body) {
-      setGlobalFeeds(res.body);
-      if (res.body.length < limit) {
-        setHasMorePosts(false);
-      }
-      if (globalFeeds) {
-        setGlobalFeeds([...globalFeeds, ...res.body]);
-      } else {
-        setGlobalFeeds(res.body);
-      }
-    }
-  };
 
   const getFollowedPosts = async () => {
     const res = await apiClient.user.getFeeds({ query: { from: from, limit: limit } });
@@ -60,8 +44,6 @@ const Home = () => {
   useEffect(() => {
     if (bIsLoggedin) {
       getFollowedPosts();
-    } else {
-      getGlobalFeeds();
     }
   }, [from]);
 
@@ -69,13 +51,6 @@ const Home = () => {
   const fecthMoreFollowedPosts = () => {
     setFrom((f) => f + limit);
     if (followedPosts && followedPosts.length < limit) {
-      setHasMorePosts(false);
-    }
-  };
-
-  const fetchMoreGlobalPosts = () => {
-    setFrom((f) => f + limit);
-    if (globalFeeds && globalFeeds.length < limit) {
       setHasMorePosts(false);
     }
   };
@@ -264,30 +239,6 @@ const Home = () => {
             </div>
             {user && <Button label="Create Post" onClick={() => setbAddPostDiagVisible(true)} />}
           </div>
-          {userInfo && "error" in userInfo && !bIsLoggedin && globalFeeds && (
-            <InfiniteScroll
-              dataLength={globalFeeds ? globalFeeds.length : 0}
-              next={fetchMoreGlobalPosts}
-              hasMore={hasMorePosts}
-              loader={
-                <p className="text-center space-x-2">
-                  <i className="pi pi-spin pi-spinner text-sm" />
-                  <b>Loading...</b>
-                </p>
-              }
-              endMessage={
-                <p className="text-center">
-                  <b>{"That's all posts"}</b>
-                </p>
-              }
-              scrollableTarget="scrollableMain"
-              className="min-w-fit space-y-4"
-            >
-              {globalFeeds.map((post, index) => (
-                <PostBox key={index} post={post} currentUserName={user?.username} />
-              ))}
-            </InfiniteScroll>
-          )}
 
           {userInfo && !("error" in userInfo) && bIsLoggedin && followedPosts && followedPosts.length > 0 && (
             <InfiniteScroll

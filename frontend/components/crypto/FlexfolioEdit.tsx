@@ -17,12 +17,14 @@ type Props = {
 };
 
 type CryptoHoldingList = PersonalUserInfo["userCryptoInfo"]["cryptoHoldings"];
+type CryptoHolding = CryptoHoldingList[number];
 type ButtonTabState = "Own" | "All";
 
 const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => {
   const { userInfo } = useAuthContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [bAmountDiagVisible, setbAmountDiagVisible] = useState<boolean>(false);
+  const [deletingCrypto, setDeletingCrypto] = useState<CryptoHolding | null>(null);
+  const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
   const [selectedButtonEdit, setSelectedButtonEdit] = useState<ButtonTabState>("Own");
   const [cryptoHoldings, setCryptoHoldings] = useState<CryptoHoldingList | null>(null);
   const [addedItems, setAddedItems] = useState<CryptoHoldingList>([]);
@@ -61,6 +63,13 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
     setCryptoHoldings(userInfo?.userCryptoInfo.cryptoHoldings || null);
     setAddedItems(userInfo?.userCryptoInfo.cryptoHoldings || []);
   }, [userInfo]);
+
+  const handleDeletion = () => {
+    const newItems = addedItems.filter((item) => item.crypto.cryptoId !== deletingCrypto?.crypto.cryptoId);
+    setAddedItems(newItems);
+    setDeletingCrypto(null);
+    setbDeleteBookmarkDiagVisible(false);
+  };
 
   const footerElementFlexfolio = (
     <div className="flex mt-4 space-x-2 items-center justify-end">
@@ -113,15 +122,16 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
     );
   };
 
-  // const amountCellEditComplete = (e: ColumnEvent) => {
-  //   let { rowData, newValue, field, originalEvent: event } = e;
-  //   if (isPositiveInteger(newValue)) {
-  //     rowData[field] = newValue;
-  //   } else {
-  //     event.preventDefault();
-  //   }
-  //   console.log(addedItems);
-  // };
+  const amountCellEditComplete = (e: ColumnEvent) => {
+    let { rowData, newValue, field, originalEvent: event } = e;
+    rowData[field] = newValue;
+    // if (isPositiveInteger(newValue)) {
+    //   rowData[field] = newValue;
+    // } else {
+    //   event.preventDefault();
+    // }
+    console.log(addedItems);
+  };
 
   return (
     <div>
@@ -134,6 +144,7 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
           setAddedItems(cryptoHoldings);
           onExit();
           setSelectedButtonEdit("Own");
+          setDeletingCrypto(null);
         }}
       >
         <div className="flex justify-between w-full">
@@ -151,21 +162,57 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
           />
         </div>
         {selectedButtonEdit === "Own" ? (
-          // addedItems.map((item, index) => (
-          //   <div key={index}>
-          //     {item.crypto.name} {"("}
-          //     {item.crypto.symbol}
-          //     {")"} x{item.amount}
-          //   </div>
-          // ))
-          <DataTable value={addedItems} className="w-full">
-            <Column field="crypto.name" header="Name"></Column>
-            <Column field="crypto.symbol" header="Symbol"></Column>
-            <Column field="amount" header="Amount"
-              editor={(editInput) => amountCellEditor(editInput)}
-              // onCellEditComplete={amountCellEditComplete}
-            ></Column>
-          </DataTable>
+          <>
+            <Dialog
+              footer={
+                <div className="mt-4">
+                  <Button
+                    label="No"
+                    icon="pi pi-times"
+                    onClick={() => {
+                      setbDeleteBookmarkDiagVisible(false);
+                      setDeletingCrypto(null);
+                    }}
+                    className="p-button-text"
+                  />
+                  <Button label="Yes" icon="pi pi-check" onClick={handleDeletion} autoFocus />
+                </div>
+              }
+              visible={bDeleteBookmarkDiagVisible}
+              onHide={() => {
+                setbDeleteBookmarkDiagVisible(false);
+                setDeletingCrypto(null);
+              }}
+            >
+              <p className="text-xl ">
+                Are you sure you want to delete{" "}
+                <span className="font-bold">
+                  {deletingCrypto?.crypto.name} &#40;{deletingCrypto?.crypto.symbol}&#41;
+                </span>
+                ?
+              </p>
+            </Dialog>
+            <DataTable value={addedItems} editMode="cell" className="w-full">
+              <Column field="crypto.name" header="Name"></Column>
+              <Column field="crypto.symbol" header="Symbol"></Column>
+              <Column field="amount" header="Amount" editor={(editInput) => amountCellEditor(editInput)} onCellEditComplete={amountCellEditComplete}></Column>
+              <Column
+                body={(data: CryptoHolding) => {
+                  return (
+                    <Button
+                      text
+                      className="`flex items-center py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-black"
+                      icon="pi pi-trash"
+                      onClick={() => {
+                        setbDeleteBookmarkDiagVisible(true);
+                        setDeletingCrypto(data);
+                      }}
+                    />
+                  );
+                }}
+              ></Column>
+            </DataTable>
+          </>
         ) : selectedButtonEdit === "All" ? (
           <CryptoSearch
             cryptoList={cryptoInHoldings}

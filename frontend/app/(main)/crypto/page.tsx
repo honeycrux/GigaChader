@@ -27,10 +27,8 @@ function Crypto() {
   const { user, userInfo } = useAuthContext();
   const [cryptoBookmarks, setCryptoBookmarks] = useState<CryptoInfo[] | null>(null);
   const [bEditCryptoDiagVisible, setbEditCryptoDiagVisible] = useState<boolean>(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  // const [bHasAdded, setbHasAdded] = useState<boolean>(false);
-  const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
   const [deletingCrypto, setDeletingCrypto] = useState<CryptoInfo | null>(null);
+  const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
   const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
 
   async function handleSave() {
@@ -151,6 +149,7 @@ function Crypto() {
           visible={bDeleteBookmarkDiagVisible}
           onHide={() => {
             setbDeleteBookmarkDiagVisible(false);
+            setDeletingCrypto(null);
             setAddedItems(cryptoBookmarks);
           }}
         >
@@ -181,8 +180,8 @@ function Crypto() {
                     <div className=" flex flex-row items-center">
                       <p className="text-lg text-black font-bold">${result.priceUsd}</p>
                       <Button
-                        className="`flex ml-4 items-center py-2 px-7 rounded-lg 
-                            ${selectedButton === 'User management' ? 'bg-orange1 text-white' : ' text-black'}`"
+                        text
+                        className="`flex ml-4 items-center py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-black"
                         icon="pi pi-trash"
                         onClick={() => {
                           setbDeleteBookmarkDiagVisible(true);
