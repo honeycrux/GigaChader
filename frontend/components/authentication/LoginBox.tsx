@@ -78,7 +78,7 @@ const LoginBox = ({ bUseAdmin }: { bUseAdmin?: boolean }) => {
 
             {!bUseAdmin && (
               <div className="font-light">
-                No account?&nbsp;
+                No account?&ensp;
                 <Link href="/signup" className="text-orange1 hover:underline">
                   Sign up
                 </Link>
@@ -86,9 +86,9 @@ const LoginBox = ({ bUseAdmin }: { bUseAdmin?: boolean }) => {
             )}
 
             {!bUseAdmin && (
-              <Link href="/global" className="text-orange1 flex items-center">
-                <span>Visit as guest instead</span>
-                <i className="pi ml-2 pi-angle-double-right text-base"></i>
+              <Link href="/global" className="text-orange1 flex items-center hover:underline">
+                <span>Visit as guest instead&ensp;</span>
+                <i className="pi pi-angle-double-right"></i>
               </Link>
             )}
           </form>

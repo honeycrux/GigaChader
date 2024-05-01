@@ -30,6 +30,7 @@ function Crypto() {
   const [deletingCrypto, setDeletingCrypto] = useState<CryptoInfo | null>(null);
   const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
   const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
+  const [cryptoUpdatedTime, setCryptoUpdatedTime] = useState<string>("");
 
   async function handleSave() {
     let updatedCryptoBookmarks = addedItems;
@@ -83,6 +84,13 @@ function Crypto() {
   useEffect(() => {
     setCryptoBookmarks(userInfo?.userCryptoInfo.cryptoBookmarks || null);
     setAddedItems(userInfo?.userCryptoInfo.cryptoBookmarks || []);
+    if (userInfo && userInfo.userCryptoInfo.cryptoBookmarks.length > 0) {
+      const updatedAt = userInfo.userCryptoInfo.cryptoBookmarks[0].updatedAt;
+      const cryptoUpdatedTimeString = updatedAt ? new Date(updatedAt).toLocaleString(undefined, {
+        dateStyle: 'short', timeStyle: 'short', hour12: false
+      }) : "";
+      setCryptoUpdatedTime(cryptoUpdatedTimeString);
+    }
   }, [userInfo]);
 
   if (!user) {
@@ -139,7 +147,14 @@ function Crypto() {
           <p className="text-3xl font-bold">Bookmarked Cryptos</p>
         </div>
 
-        <div className="flex w-full h-fit justify-end mt-5 items-center !mb-0">
+        <div className="flex w-full h-fit justify-between mt-5 items-center !mb-0">
+          <div>
+            {cryptoUpdatedTime && (<p className="text-gray-500 text-sm">Prices updated at: {cryptoUpdatedTime}</p>)}
+            <p className="text-gray-500 text-sm">Data source:&nbsp;
+              <a href="https://coincap.io/" target="_blank" rel="noreferrer"
+                className="text-gray-500 hover:underline text-sm">coincap.io</a>
+            </p>
+          </div>
           <Button className="w-36" label="Edit List" onClick={() => setbEditCryptoDiagVisible(true)} />
         </div>
 

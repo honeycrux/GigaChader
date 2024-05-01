@@ -33,6 +33,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   const [followerList, setFollowerList] = useState<SimpleUserInfo[] | null>(null);
   const [bIsSuspended, setbIsSuspended] = useState<boolean>(false);
   const [bNotFound, setbNotFound] = useState<boolean>(false);
+  const [cryptoUpdatedTime, setCryptoUpdatedTime] = useState<string>("");
 
   const getFollowList = useCallback(async () => {
     if (profileUsername) {
@@ -73,6 +74,13 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           setbIsSuspended(true);
         } else {
           setDisplayedUserInfo(res.body);
+          if (res.body.userCryptoInfo.cryptoHoldings.length > 0) {
+            const updatedAt = res.body.userCryptoInfo.cryptoHoldings[0].crypto?.updatedAt;
+            const cryptoUpdatedTimeString = updatedAt ? new Date(updatedAt).toLocaleString(undefined, {
+              dateStyle: 'short', timeStyle: 'short', hour12: false
+            }) : "";
+            setCryptoUpdatedTime(cryptoUpdatedTimeString);
+          }
         }
         setbHasFollowed(!!res.body.followedByRequester);
       } else {
@@ -526,38 +534,45 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                 content: { className: "p-0" },
               }}
             >
-              <div className="justify-between flex flex-row gap-11 min-w-fit w-[40vw]">
+              <div className="justify-between flex flex-row gap-11 min-w-fit w-[40vw] min-h-fit">
                 <p className="text-3xl font-bold justify-start">Flexfolio</p>
                 {bIsViewingSelf && (
                   <div className="flex justify-end ml-11">
-                    <Button className="w-36 " label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
+                    <Button className="w-36" label="Edit Flexfolio" onClick={() => setbEditFlexfolioDiagVisible(true)} />
                   </div>
                 )}
               </div>
               <div>
                 <p className="text-lg">@{displayedUserInfo && displayedUserInfo.username}
-                {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 ? 
-                (<span> is investing in</span>) :
-                (<span> has not shared their investment</span>)}</p>
+                  {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 ?
+                    (<span> is investing in</span>) :
+                    (<span> has not shared their investment</span>)}</p>
               </div>
               {/* <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" /> */}
               {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 &&
-                (<div className="w-full flex justify-center">
-                  <Chart options={{
-                    labels:
+                (<div className="w-full flex flex-col items-end">
+                  <div className="w-full flex justify-center">
+                    <Chart options={{
+                      labels:
+                        displayedUserInfo.userCryptoInfo.cryptoHoldings
+                          .map((cryptoObject) =>
+                            cryptoObject.crypto ? `${cryptoObject.crypto.name} (${cryptoObject.crypto.symbol})
+                            <br/>
+                            ${cryptoObject.amount} = $${(cryptoObject.crypto.priceUsd * cryptoObject.amount).toFixed(4)}` : '')
+                          .filter(label => label !== '')
+                    }} series={
                       displayedUserInfo.userCryptoInfo.cryptoHoldings
                         .map((cryptoObject) =>
-                          cryptoObject.crypto ? `${cryptoObject.crypto.name} (${cryptoObject.crypto.symbol})
-                          <br/>
-                          ${cryptoObject.amount} = $${(cryptoObject.crypto.priceUsd * cryptoObject.amount).toFixed(4)}` : '')
-                        .filter(label => label !== '')
-                  }} series={
-                    displayedUserInfo.userCryptoInfo.cryptoHoldings
-                      .map((cryptoObject) =>
-                        cryptoObject.crypto ? (cryptoObject.crypto.priceUsd * cryptoObject.amount) : null)
-                      .filter(amount => amount !== null)
-                      .map(amount => amount as number)}
-                    type="pie" width={380} />
+                          cryptoObject.crypto ? (cryptoObject.crypto.priceUsd * cryptoObject.amount) : null)
+                        .filter(amount => amount !== null)
+                        .map(amount => amount as number)}
+                      type="pie" width={450} />
+                  </div>
+                  <p className="text-gray-500 text-sm">Prices updated at: {cryptoUpdatedTime}</p>
+                  <p className="text-gray-500 text-sm">Data source:&nbsp;  
+                    <a href="https://coincap.io/" target="_blank" rel="noreferrer" 
+                    className="text-gray-500 hover:underline text-sm">coincap.io</a>
+                  </p>
                 </div>)
               }
             </Card>
