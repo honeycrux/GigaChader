@@ -5,8 +5,16 @@ import "./theme/theme.css";
 import "./theme/custom-styles.css";
 import { Source_Sans_3 } from "next/font/google";
 import { AuthContextProvider } from "@/providers/auth-provider";
+import { Metadata } from "next";
 
 const sourceSans3 = Source_Sans_3({ subsets: ["latin"] });
+
+export const metadata = {
+  title: "GigaChader",
+  icons: {
+    icon: "/gigachader_notext.png"
+  },
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
