@@ -37,25 +37,20 @@ model User {
   createdAt              DateTime       @default(now()) @db.Date
   accountInfoLastUpdated DateTime
   role                   Role           @default(USER)
-  digitalBalance         Float          @default(0)
   userConfig             UserConfig
   userCryptoInfo         UserCryptoInfo
   suspended              Boolean        @default(false)
   onBoardingCompleted    Boolean        @default(false)
 
-  followers              UserFollow[]         @relation(name: "UserFollowTarget")
-  followedUsers          UserFollow[]         @relation(name: "UserFollow")
-  sessions               Session[]            @relation(name: "UserSession")
-  posts                  Post[]               @relation(name: "UserPost")
-  digitalTransactions    DigitalTransaction[] @relation(name: "UserDigitalTransaction")
-  sentDirectMessages     DirectMessage[]      @relation(name: "DirectMessageSender")
-  receivedDirectMessages DirectMessage[]      @relation(name: "DirectMessageReceiver")
-  moderationRecords      ModerationRecord[]   @relation(name: "UserModerationRecord")
-  moderationHits         ModerationRecord[]   @relation(name: "UserModerationHit")
-  pollVotes              PollVote[]           @relation(name: "UserPollVote")
-  postLikes              PostLike[]           @relation(name: "UserPostLike")
-  postSaves              PostSave[]           @relation(name: "UserPostSave")
-  notifications          Notification[]       @relation(name: "UserNotification")
+  followers         UserFollow[]       @relation(name: "UserFollowTarget")
+  followedUsers     UserFollow[]       @relation(name: "UserFollow")
+  sessions          Session[]          @relation(name: "UserSession")
+  posts             Post[]             @relation(name: "UserPost")
+  moderationRecords ModerationRecord[] @relation(name: "UserModerationRecord")
+  moderationHits    ModerationRecord[] @relation(name: "UserModerationHit")
+  postLikes         PostLike[]         @relation(name: "UserPostLike")
+  postSaves         PostSave[]         @relation(name: "UserPostSave")
+  notifications     Notification[]     @relation(name: "UserNotification")
 }
 
 enum Role {
@@ -73,7 +68,6 @@ type UserConfig {
 }
 
 type UserCryptoInfo {
-  walletAddress   String?
   cryptoBookmarks String[] // remark: list of cryptoIds
   cryptoHoldings  CryptoHolding[]
   lastUpdated     DateTime        @default(now()) @db.Date
@@ -108,29 +102,6 @@ model UserFollow {
   @@unique([initiatorId, targetId])
 }
 
-model DigitalTransaction {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  item      String
-  amount    Float
-  createdAt DateTime @default(now())
-
-  initiatorId String @db.ObjectId
-
-  initiator User @relation(name: "UserDigitalTransaction", references: [id], fields: [initiatorId], onDelete: Cascade)
-}
-
-model DirectMessage {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  content   String
-  createdAt DateTime @default(now())
-
-  senderId   String @db.ObjectId
-  receiverId String @db.ObjectId
-
-  sender   User @relation(name: "DirectMessageSender", references: [id], fields: [senderId], onDelete: Cascade)
-  receiver User @relation(name: "DirectMessageReceiver", references: [id], fields: [receiverId], onDelete: NoAction)
-}
-
 model Notification {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
@@ -152,16 +123,14 @@ model Post {
   id              String           @id @default(auto()) @map("_id") @db.ObjectId
   content         String
   createdAt       DateTime         @default(now())
-  pollOptions     PollOption[]
   userMedia       UserMedia[]
   textualContexts TextualContext[]
   suspended       Boolean          @default(false)
   repostChainIds  String[]         @db.ObjectId
 
-  authorId          String  @db.ObjectId
-  repostingPostId   String? @db.ObjectId
-  parentPostId      String? @db.ObjectId
-  parentCommunityId String? @db.ObjectId
+  authorId        String  @db.ObjectId
+  repostingPostId String? @db.ObjectId
+  parentPostId    String? @db.ObjectId
 
   postHashtags     PostHashtag[]      @relation(name: "PostHashtag")
   postCryptoTopics PostCryptoTopic[]  @relation(name: "PostCryptoTopic")
@@ -170,15 +139,9 @@ model Post {
   repostedOnPosts  Post[]             @relation(name: "Repost")
   parentPost       Post?              @relation(name: "PostTree", references: [id], fields: [parentPostId], onDelete: NoAction, onUpdate: NoAction)
   childPosts       Post[]             @relation(name: "PostTree")
-  parentCommunity  Community?         @relation(name: "CommunityPost", references: [id], fields: [parentCommunityId], onDelete: NoAction)
   moderationHits   ModerationRecord[] @relation(name: "PostModerationHit")
-  pollVotes        PollVote[]         @relation(name: "PostPollVote")
   postLikes        PostLike[]         @relation(name: "PostPostLike")
   postSaves        PostSave[]         @relation(name: "PostPostSave")
-}
-
-type PollOption {
-  description String
 }
 
 type UserMedia {
@@ -223,19 +186,6 @@ model PostSave {
   @@unique([postId, userId])
 }
 
-model PollVote {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  optionNumber Int
-
-  parentPostId String @db.ObjectId
-  voterId      String @db.ObjectId
-
-  parentPost Post @relation(name: "PostPollVote", references: [id], fields: [parentPostId], onDelete: Cascade)
-  voter      User @relation(name: "UserPollVote", references: [id], fields: [voterId], onDelete: Cascade)
-
-  @@unique([parentPostId, voterId])
-}
-
 model PostHashtag {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   tagText   String
@@ -262,22 +212,6 @@ model PostCryptoTopic {
   @@index([cryptoId])
 }
 
-model Community {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  handle        String   @unique
-  displayedName String
-  avatarUrl     String?
-  bannerUrl     String?
-  description   String   @default("")
-  isExclusive   Boolean
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  suspended     Boolean  @default(false)
-
-  posts          Post[]             @relation(name: "CommunityPost")
-  moderationHits ModerationRecord[] @relation(name: "CommunityModerationHit")
-}
-
 //////////////////////
 // Group C: Moderation
 //////////////////////
@@ -290,21 +224,18 @@ model ModerationRecord {
   details    Json[] // Mock-up: [{ table: { field: { field: { from: "", to: "" | null } } } }]
   createdAt  DateTime               @default(now())
 
-  initiatorId       String  @db.ObjectId
-  targetUserId      String? @db.ObjectId
-  targetPostId      String? @db.ObjectId
-  targetCommunityId String? @db.ObjectId
+  initiatorId  String  @db.ObjectId
+  targetUserId String? @db.ObjectId
+  targetPostId String? @db.ObjectId
 
-  initiator       User       @relation(name: "UserModerationRecord", references: [id], fields: [initiatorId], onDelete: NoAction)
-  targetUser      User?      @relation(name: "UserModerationHit", references: [id], fields: [targetUserId], onDelete: NoAction)
-  targetPost      Post?      @relation(name: "PostModerationHit", references: [id], fields: [targetPostId], onDelete: NoAction)
-  targetCommunity Community? @relation(name: "CommunityModerationHit", references: [id], fields: [targetCommunityId], onDelete: NoAction)
+  initiator  User  @relation(name: "UserModerationRecord", references: [id], fields: [initiatorId], onDelete: NoAction)
+  targetUser User? @relation(name: "UserModerationHit", references: [id], fields: [targetUserId], onDelete: NoAction)
+  targetPost Post? @relation(name: "PostModerationHit", references: [id], fields: [targetPostId], onDelete: NoAction)
 }
 
 enum ModerationTargetType {
   USER
   POST
-  COMMUNITY
 }
 
 //////////////////////
