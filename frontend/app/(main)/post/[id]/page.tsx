@@ -10,7 +10,6 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { PostInfo } from "#/shared/models/post";
 
 const PostDetails = ({ params }: { params: { id: string } }) => {
-  // const post = fakeFetchPost(params.id);
   const [post, setPost] = useState<PostInfo | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
 
@@ -37,12 +36,9 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     wrapper();
   }, [params.id, getComments, getPost]);
 
-  // if (!params.id || !post) return null;
-
   const toast = useRef<Toast>(null);
 
   const [commentContent, setCommentContent] = useState("");
-  // const [bShowCommentBox, setBShowCommentBox] = useState(false);
 
   const handleCommentSubmit = async () => {
     if (!post) {
@@ -60,6 +56,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     if (res.status === 200 && res.body) {
       getPost();
       getComments();
+      setCommentContent("");
 
       if (toast.current) {
         toast.current.show({ severity: "info", summary: "Success", detail: "submit comment" });
