@@ -31,8 +31,8 @@ const HeaderNavbar = (props: Props) => {
       if (userInfo.userConfig.avatarUrl) {
         setProfilePicUrl(userInfo.userConfig.avatarUrl);
       }
-      console.log("from HeaderNavbar");
-      console.log(userInfo);
+      // console.log("from HeaderNavbar");
+      // console.log(userInfo);
     }
   }, [userInfo]);
 
@@ -40,8 +40,9 @@ const HeaderNavbar = (props: Props) => {
     refreshUserInfo();
   }, [pathname, refreshUserInfo]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
+    await refreshUserInfo();
     router.replace("/");
   };
 
