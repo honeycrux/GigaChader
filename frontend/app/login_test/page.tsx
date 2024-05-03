@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { logout } from "@/lib/actions/auth";
 import { useAuthContext } from "@/providers/auth-provider";
 
+// display login status, unused
 function LoginTest() {
   const { user } = useAuthContext();
 

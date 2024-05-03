@@ -9,10 +9,12 @@ import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
 import { PostInfo } from "#/shared/models/post";
 
+// get post id from the url
 const PostDetails = ({ params }: { params: { id: string } }) => {
   const [post, setPost] = useState<PostInfo | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
 
+  // get post details by id
   const getPost = useCallback(async () => {
     const res = await apiClient.post.getPost({ params: { postId: params.id } });
     if (res.status === 200 && res.body) {
@@ -20,6 +22,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     }
   }, [params.id]);
 
+  // get comments of the post
   const getComments = useCallback(async () => {
     const res = await apiClient.post.getComments({ query: { postId: params.id } });
     if (res.status === 200 && res.body) {
@@ -27,6 +30,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     }
   }, [params.id]);
 
+  // get post and comments on page load
   useEffect(() => {
     const wrapper = async () => {
       getPost();
@@ -40,6 +44,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
 
   const [commentContent, setCommentContent] = useState("");
 
+  // submit a comment to backend
   const handleCommentSubmit = async () => {
     if (!post) {
       return;
@@ -68,6 +73,7 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
     }
   };
 
+  // check if the user is logged in
   const { user } = useAuthContext();
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
   useEffect(() => {

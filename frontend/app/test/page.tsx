@@ -6,6 +6,7 @@ import { useState, useRef } from "react";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 
+// dummy page for testing primereact components
 export default function Home() {
   const [date, setDate] = useState(new Date());
   const [visible, setVisible] = useState(false);

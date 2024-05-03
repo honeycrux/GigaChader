@@ -8,6 +8,7 @@ import { Password } from "primereact/password";
 import { useState } from "react";
 import z from "zod";
 
+// signup form component for signup page
 const SignupBox = () => {
   const [userName, setUserName] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -22,6 +23,7 @@ const SignupBox = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  // submit signup request to backend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

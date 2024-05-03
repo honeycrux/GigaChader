@@ -35,6 +35,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   const [bNotFound, setbNotFound] = useState<boolean>(false);
   const [cryptoUpdatedTime, setCryptoUpdatedTime] = useState<string>("");
 
+  // get follow list of the user from the backend
   const getFollowList = useCallback(async () => {
     if (profileUsername) {
       const res = await apiClient.user.getFollowedUsers({ query: { username: profileUsername } });
@@ -45,6 +46,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   }, [profileUsername]);
 
+  // get follower list of the user from the backend
   const getFollowerList = useCallback(async () => {
     if (profileUsername) {
       const res = await apiClient.user.getFollows({ query: { username: profileUsername } });
@@ -55,6 +57,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   }, [profileUsername]);
 
+  // check if the user is logged in
   useEffect(() => {
     if (!myInfo) {
       // logged out users
@@ -64,6 +67,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   }, [myInfo]);
 
+  // fetch user profile info from the backend
   const fetchProfileInfo = useCallback(async () => {
     if (profileUsername) {
       const res = await apiClient.user.getProfile({ params: { username: profileUsername } });
@@ -74,6 +78,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           setbIsSuspended(true);
         } else {
           setDisplayedUserInfo(res.body);
+          // use the first crypto holding's updated time as the updated time for the chart
           if (res.body.userCryptoInfo.cryptoHoldings.length > 0) {
             const updatedAt = res.body.userCryptoInfo.cryptoHoldings[0].crypto?.updatedAt;
             const cryptoUpdatedTimeString = updatedAt ? new Date(updatedAt).toLocaleString(undefined, {
@@ -90,6 +95,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   }, [profileUsername]);
 
+  // fetch user profile info on page load
   useEffect(() => {
     const wrapper = async () => {
       if (bIsViewingSelf && myInfo) {
@@ -112,6 +118,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
   const [posts, setPosts] = useState<PostInfo[] | null>(null);
   const [comments, setComments] = useState<PostInfo[] | null>(null);
 
+  // fetch post if a new post is created, possibly a repost
   const fetchOnCreatePost = async () => {
     if (profileUsername && bIsViewingSelf) {
       const res = await apiClient.user.getPosts({ query: { username: profileUsername, filter: "post", limit: 1 } });
@@ -126,6 +133,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   };
 
+  // get posts of the user from the backend, filter by post or reply
   const getPostsOfUser = async (username: string) => {
     apiClient.user.getPosts({ query: { username: username, filter: "post" } }).then((res) => {
       if (res.status === 200 && res.body) {
@@ -141,6 +149,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     });
   };
 
+  // magic for determining the bottom margin of bio section
   const divRef = useRef<HTMLDivElement>(null);
   const [marginTop, setMarginTop] = useState(0);
 
@@ -150,6 +159,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     }
   }, [displayedUserInfo]);
 
+  // save the edited profile info to the backend
   const handleSaveProfile = async () => {
     const userConfig: UserConfigProps = {
       displayName: editDisplayName,
@@ -183,6 +193,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     await fetchProfileInfo();
   };
 
+  // on banner click, open file dialog to upload a new banner
   const [editBannerUrl, setEditBannerUrl] = useState<string | false>(); // "false" indicates banner is to be deleted
   const handleEditBannerClicked = () => {
     const formData = new FormData();
@@ -207,6 +218,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
     });
   };
 
+  // on avatar click, open file dialog to upload a new avatar
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | false>(); // "false" indicates avatar is to be deleted
   const handleEditProfilePicClicked = () => {
     const formData = new FormData();
@@ -250,12 +262,13 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
       <Button label="Save" icon="pi pi-check" onClick={handleSaveProfile} />
     </>
   );
+
   const [editDisplayName, setEditDisplayName] = useState("");
-  // const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
 
   const [bHasFollowed, setbHasFollowed] = useState<boolean>(false);
 
+  // on follow button click, follow or unfollow the user
   const handleFollow = async () => {
     if (profileUsername) {
       console.log("username: " + profileUsername + " set: " + !bHasFollowed);

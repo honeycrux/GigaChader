@@ -7,7 +7,6 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthContext } from "@/providers/auth-provider";
-
 interface Props {
   bUseAdmin?: boolean;
 }
@@ -23,6 +22,7 @@ const HeaderNavbar = (props: Props) => {
   const router = useRouter();
   const [profilePicUrl, setProfilePicUrl] = useState<string>("");
 
+  // set display name and profile pic url on page load
   useEffect(() => {
     if (!userInfo) {
       setDisplayName("guest");
@@ -36,12 +36,15 @@ const HeaderNavbar = (props: Props) => {
     }
   }, [userInfo]);
 
+  // refresh user info on page change
   useEffect(() => {
     refreshUserInfo();
   }, [pathname, refreshUserInfo]);
 
+  // logout user and redirect to login page
   const handleLogout = async () => {
     logout();
+    // Ensure logout redirects to login page
     await refreshUserInfo();
     router.replace("/");
   };
@@ -86,6 +89,8 @@ const HeaderNavbar = (props: Props) => {
           rounded-md p-2"
             onClick={(e) => (op.current as OverlayPanel | null)?.toggle(e)}
           >
+            {/* if profilePicUrl exist, display the user's profile pic
+            else display a placeholder profile pic */}
             <Image
               src={(profilePicUrl && process.env.NEXT_PUBLIC_BACKEND_URL + profilePicUrl) || "/placeholder_profilePic_white-bg.jpg"}
               alt="user profile pic"

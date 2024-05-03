@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import gigachader from "@/public/gigachader.png"
 
+// the big logo on the left side of the login page
 const LogoSideBar = () => {
   return (
     <>

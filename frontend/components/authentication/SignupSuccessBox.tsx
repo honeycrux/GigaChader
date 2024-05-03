@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "primereact/button"
 // import { useRouter } from 'next/navigation';
 
+// show signup success message
 const SignupSuccessBox = () => {
     // const router = useRouter();
     return (

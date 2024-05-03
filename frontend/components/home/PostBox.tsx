@@ -80,12 +80,15 @@ const PostBox = ({
     }
   };
 
+  // update like status on load or like button click
   useEffect(() => {
     updateLiked(!!likedByRequester, likeCount);
   }, [id, likedByRequester, likeCount]);
 
+  // on like button click, update like status and send request to backend
   const handleHeartClick = async () => {
     bisLiked.current = !bisLiked.current;
+    // show red heart if liked
     if (bisLiked.current) {
       setHeartPath("/heart_red.svg");
     } else {
@@ -186,6 +189,7 @@ const PostBox = ({
       <div className="flex">
         <div className="flex flex-col items-center">
           <Link href={`/profile/${author.username}`}>
+            {/* if author has avatar, display it, else display placeholder */}
             <Avatar
               className="mr-2"
               image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
@@ -206,6 +210,7 @@ const PostBox = ({
             <p>
               {textualContexts
                 ? textualContexts.map((context, index) => {
+                  // if context is a link, display it as a link
                   if (context.href) {
                     return (
                       <Link key={index} href={context.href} className="text-orange1 hover:underline">
@@ -218,7 +223,7 @@ const PostBox = ({
                 })
                 : content}
             </p>
-            {/* retrieve image */}
+            {/* show image or video if any */}
             {userMedia && userMedia.length > 0 && (
               <div className="flex flex-wrap">
                 {userMedia.map((media: { url: string; type: string }, index: number) => (
@@ -235,18 +240,22 @@ const PostBox = ({
                     ) : (
                       <video controls>
                         <source src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} type="video/mp4" />
+                        {/* if browser does not support video tag, display this message */}
+                        <span>Your browser does not support the video tag.</span>
                       </video>
                     )}
                   </div>
                 ))}
               </div>
             )}
+            {/* if is reposting, display the reposted post */}
             {repostingPost && (
               <div className="border border-gray-500 rounded-lg m-2">
                 <PostBox post={repostingPost} bButtonvisible={true} currentUserName={currentUserName} onRepostSubmit={onRepostSubmit} />
               </div>
             )}
           </div>
+          {/* if is logged in, display like, comment, repost, bookmark buttons */}
           {bButtonvisible && (
             <div className="inline-flex [&>*]:mr-2 items-end">
               {currentUserName && <Image src={heartPath} width="24" alt="heart" onClick={handleHeartClick} className="cursor-pointer" />}

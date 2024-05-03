@@ -10,6 +10,7 @@ interface ActionOption {
   code: string;
 }
 
+// dummy page and unused
 const PostMangement = () => {
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
   const actions: ActionOption[] = [

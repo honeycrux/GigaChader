@@ -6,6 +6,7 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+// root page is login page
 const Login = () => {
   const { user, userInfo, refreshUserInfo } = useAuthContext();
   const router = useRouter();
@@ -22,7 +23,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user && userInfo) {
-      // logged in users
+      // logged in users are redirected to home page
       router.push("/home");
     }
   }, [user, userInfo, router]);

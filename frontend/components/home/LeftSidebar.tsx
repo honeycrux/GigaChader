@@ -14,6 +14,7 @@ const LeftSidebar = () => {
   const { user, userInfo } = useAuthContext();
   const [bIsGuest, setbIsGuest] = useState(true);
 
+  // check if user is logged in
   useEffect(() => {
     const wrapper = async () => {
       if (!user) {

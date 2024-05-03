@@ -9,14 +9,17 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 type GlobalFeedsResponse = ClientInferResponseBody<typeof apiContract.post.getGlobalFeeds, 200>;
 
+// show all posts from all users for logged out users
 const Home = () => {
   const { user } = useAuthContext();
   const [globalFeeds, setGlobalFeeds] = useState<GlobalFeedsResponse | null>(null);
 
+  // limit the number of posts to be fetched, for lazy loading on infinite scroll
   const [from, setFrom] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [hasMorePosts, setHasMorePosts] = useState<boolean>(true);
 
+  // fetch posts when a new post is created, supposedly unused
   const fetchOnCreatePost = async () => {
     const res = await apiClient.post.getGlobalFeeds({ query: { limit: 1 } });
     if (res.status === 200 && res.body) {
@@ -29,6 +32,7 @@ const Home = () => {
     }
   };
 
+  // get all global feeds from the backend
   const getGlobalFeeds = async () => {
     const res = await apiClient.post.getGlobalFeeds({ query: { from: from, limit: limit } });
     if (res.status === 200 && res.body) {
@@ -44,6 +48,7 @@ const Home = () => {
     }
   };
 
+  // trigger fetching more global posts on scroll by increasing the 'from' value
   const fetchMoreGlobalPosts = () => {
     setFrom((f) => f + limit);
     if (globalFeeds && globalFeeds.length < limit) {
@@ -51,10 +56,12 @@ const Home = () => {
     }
   };
 
+  // get global feeds on scroll when 'from' value changes
   useEffect(() => {
     getGlobalFeeds();
   }, [from]);
 
+  // get global feeds when the page is loaded
   useEffect(() => {
     const wrapper = async () => {
       await getGlobalFeeds();

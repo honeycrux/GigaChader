@@ -23,6 +23,7 @@ function DiscoverPage() {
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtagsResponse | null>(null);
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopicsResponse | null>(null);
 
+  // get trending posts from backend, i.e. posts with the most likes this week
   async function getTrendingPosts() {
     const res = await apiClient.trends.trendingPosts();
     if (res.status === 200) {
@@ -31,6 +32,7 @@ function DiscoverPage() {
     return null;
   }
 
+  // get trending hashtags from backend, i.e. hashtags with the most posts this week
   async function getTrendingHashtags() {
     const res = await apiClient.trends.trendingHashtags();
     if (res.status === 200) {
@@ -39,6 +41,7 @@ function DiscoverPage() {
     return null;
   }
 
+  // get trending topics from backend, i.e. crypto related keywords with the most posts this week
   async function getTrendingTopics() {
     const res = await apiClient.trends.trendingTopics();
     if (res.status === 200) {
@@ -47,6 +50,7 @@ function DiscoverPage() {
     return null;
   }
 
+  // get trending posts, hashtags, and topics when the page is loaded
   useEffect(() => {
     async function wrapper() {
       getTrendingPosts().then((data) => {

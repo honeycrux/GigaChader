@@ -15,6 +15,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 type FollowedPostsResponse = ClientInferResponseBody<typeof apiContract.user.getFeeds, 200>;
 
+// show all posts from users that the logged in user follows
 const Home = () => {
   const toast = useRef<Toast>(null);
 
@@ -23,9 +24,11 @@ const Home = () => {
   const { user, userInfo } = useAuthContext();
   const [followedPosts, setFollowedPosts] = useState<FollowedPostsResponse | null>(null);
 
+  // limit the number of posts to be fetched, for lazy loading on infinite scroll
   const [from, setFrom] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
 
+  // fetch posts from backend
   const getFollowedPosts = async () => {
     const res = await apiClient.user.getFeeds({ query: { from: from, limit: limit } });
     if (res.status === 200 && res.body) {
@@ -41,12 +44,14 @@ const Home = () => {
     }
   };
 
+  // get followed posts on scroll when 'from' value changes
   useEffect(() => {
     if (bIsLoggedin) {
       getFollowedPosts();
     }
   }, [from]);
 
+  // trigger fetching more followed posts on scroll by increasing the 'from' value
   const [hasMorePosts, setHasMorePosts] = useState<boolean>(true);
   const fecthMoreFollowedPosts = () => {
     setFrom((f) => f + limit);
@@ -57,6 +62,9 @@ const Home = () => {
 
   const [bIsLoggedin, setbIsLoggedin] = useState<boolean>(false);
 
+  // check if user is logged in and has completed onboarding
+  // if not, redirect to onboarding page
+  // if logged in, get followed posts
   useEffect(() => {
     if (userInfo) {
       if (!user || "error" in userInfo) {
@@ -75,6 +83,15 @@ const Home = () => {
   const [bIsSummitingPost, setbIsSummitingPost] = useState(false);
   const [postContent, setPostContent] = useState<string>("");
 
+  // This function handles the submission of a post.
+  // It first checks if the post content is empty. If it is, it shows a toast notification and returns.
+  // If the post content is not empty, submit post to the backend.
+  // bisSummitingPost is set to true to show a loading spinner on the post button.
+  // If there are images or videos attached to the post, add them to the post body and send a request to the backend to create the post.
+  // If the post is successfully created, show a success toast notification.
+  // If there is an error, show an error toast notification.
+  // Fetch the newly created post and add it to the followed posts list too.
+  // Finally, clear the post content, media preview, video preview, and close the dialog.
   const handlePostSubmit = async () => {
     // reject empty post
     if (postContent.trim() === "") {
@@ -129,6 +146,7 @@ const Home = () => {
     setbAddPostDiagVisible(false);
   };
 
+  // fetch the one newly created post and add it to the followed posts list
   const fetchOnCreatePost = async () => {
     const res = await apiClient.user.getFeeds({ query: { from: 0, limit: 1 } });
     if (res.status === 200 && res.body) {
@@ -142,11 +160,11 @@ const Home = () => {
     }
   };
 
+  // create media upload dialog
+  // then upload media to the backend
   const [mediaPreview, setMediaPreview] = useState<string | undefined>();
   const [videoPreview, setVideoPreview] = useState<string | undefined>();
   const handleMediaUpload = async () => {
-    // setMediaPreview(undefined);
-    // setVideoPreview(undefined);
     const formData = new FormData();
     const input = document.createElement("input");
     input.type = "file";
@@ -171,6 +189,8 @@ const Home = () => {
           //         setMediaPreview(reader.result);
           //     }
           // });
+
+          // only allow one media upload
           if (res.body[0].type === "IMAGE") {
             setMediaPreview(mediaUrls[0]);
           } else {

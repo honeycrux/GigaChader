@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { CryptoInfo } from "#/shared/models/crypto";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+// fetch crypto info from backend
 async function getCryptoInfo(query: string) {
   const { body, status } = await apiClient.crypto.cryptoSearch({ query: { query: query, limit: 20 } });
   if (!(status === 200)) {
@@ -19,12 +20,14 @@ type Props = {
   onEdit: (cryptoList: CryptoInfo[]) => void;
 };
 
+// crypto search component for adding/removing crypto bookmarks or flexfolio
 const CryptoSearch = ({ cryptoList, onEdit }: Props) => {
   const [searchResult, setSearchResult] = useState<CryptoInfo[] | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [bAmountDiagVisible, setbAmountDiagVisible] = useState<boolean>(false);
   const [addedItems, setAddedItems] = useState<CryptoInfo[]>(cryptoList || []);
 
+  // add or remove crypto bookmark on add/remove button click
   function handleButtonClick(result: CryptoInfo, set: boolean) {
     const newItems = set ? [...addedItems, result] : addedItems.filter((item) => item.cryptoId !== result.cryptoId);
     setAddedItems(newItems);
@@ -33,6 +36,7 @@ const CryptoSearch = ({ cryptoList, onEdit }: Props) => {
     }
   }
 
+  // submit search request to backend
   const handlecryptoSearch = useCallback(
     async (term: string) => {
       const searchResult = await getCryptoInfo(term);
@@ -43,6 +47,7 @@ const CryptoSearch = ({ cryptoList, onEdit }: Props) => {
     [setSearchResult]
   );
 
+  // abuse search function to fetch all cryptos on first render
   useEffect(() => {
     handlecryptoSearch("");
   }, [handlecryptoSearch]);

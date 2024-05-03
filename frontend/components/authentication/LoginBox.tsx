@@ -6,19 +6,18 @@ import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/providers/auth-provider";
 import { Password } from "primereact/password";
 
+// login box component for login page, used for both standard user and admin login
 const LoginBox = ({ bUseAdmin }: { bUseAdmin?: boolean }) => {
   const { login } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // useEffect(() => {
-  //   console.log("email: " + email);
-  //   console.log("password: " + password);
-  // }, [email, password])
   const [error, setError] = useState("");
   const [bIsLoginLoading, setBIsLoginLoading] = useState(false);
   const router = useRouter();
 
+  // submit login request to backend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    // form is used to also handle enter key press
     e.preventDefault();
     try {
       setBIsLoginLoading((prevBIsLoading) => true);

@@ -10,6 +10,7 @@ import { useAuthContext } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { UserConfigProps } from "#/shared/models/user";
 
+// onboarding page for new users, setting up display name, bio, and profile picture
 function Onboarding() {
   const toast = useRef<Toast>(null);
   const { user, userInfo, refreshUserInfo } = useAuthContext();
@@ -22,6 +23,7 @@ function Onboarding() {
   const [bio, setBio] = useState<string | undefined>();
   const [profilePicUrl, setProfilePicUrl] = useState<string | undefined>();
 
+  // on continue button click, update user info on backend and redirect to home page
   const handleContinue = async () => {
     // if (toast.current) {
     //   toast.current.show({ severity: "info", summary: "Success", detail: "Go to home" });
@@ -48,6 +50,7 @@ function Onboarding() {
     wrapper();
   }, [refreshUserInfo]);
 
+  // fetch user info on load, maybe because user left onboarding in the middle during previous visit
   useEffect(() => {
     if (!userInfo) {
       setDisplayName("guest");
@@ -63,6 +66,7 @@ function Onboarding() {
     }
   }, [userInfo]);
 
+  // upload profile picture to backend
   const handleUpload = async () => {
     const formData = new FormData();
     const input = document.createElement("input");

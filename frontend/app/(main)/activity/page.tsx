@@ -15,6 +15,7 @@ function ActivityPage() {
   const [unreadNotif, setUnreadNotif] = useState<NotificationInfo[] | null>(null);
   const [readNotif, setReadNotif] = useState<NotificationInfo[] | null>(null);
 
+  // get notifications from backend
   const getNotifications = useCallback(async (mode: "unread" | "read") => {
     const res = await apiClient.user.getNotifications({ query: { mode } });
     if (res.status === 200) {
@@ -27,6 +28,7 @@ function ActivityPage() {
     return null;
   }, []);
 
+  // filter read and unread notifications
   const getReadAndUnreadNotifications = useCallback(async () => {
     getNotifications("unread").then((data) => {
       setUnreadNotif(data);
@@ -41,6 +43,7 @@ function ActivityPage() {
     getReadAndUnreadNotifications();
   }, [getReadAndUnreadNotifications]);
 
+  // if user is logged in, show notifications
   return user ? (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
       <div className="mt-5 mx-12 flex justify-between">

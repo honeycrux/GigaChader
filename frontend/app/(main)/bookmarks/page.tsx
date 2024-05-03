@@ -10,6 +10,7 @@ const BookmarkedPost = () => {
   const { user } = useAuthContext();
   const [savedPosts, setsavedPosts] = useState<PostInfo[] | null>(null);
 
+  // Get saved posts from the backend
   const getSavedPosts = async () => {
     const res = await apiClient.user.getSavedPosts(
       { query: {} } // Add the 'postId' property to the 'query' object
@@ -20,6 +21,7 @@ const BookmarkedPost = () => {
     }
   };
 
+  // Get saved posts when the user is logged in
   useEffect(() => {
     if (user) {
       getSavedPosts();

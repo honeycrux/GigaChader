@@ -5,6 +5,7 @@ import "@/app/theme/custom-styles.css";
 import HeaderNavbar from "@/components/home/HeaderNavbar";
 import LeftSidebar from "@/components/home/LeftSidebar";
 
+// define general layout with HeaderNavbar on top, LeftSidebar on left, and main content in the middle
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="w-screen h-screen">

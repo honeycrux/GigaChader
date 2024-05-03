@@ -6,22 +6,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-// import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { CryptoInfo } from "#/shared/models/crypto";
 import { PersonalUserInfo } from "#/shared/models/user";
 import CryptoSearch from "@/components/crypto/CryptoSearch";
 
-// type Props = {
-//     symbol: string
+// async function getCryptoInfo(query: string) {
+//   const { body, status } = await apiClient.crypto.cryptoSearch({ query: { query: query, limit: 20 } });
+//   if (!(status === 200)) {
+//     return null;
+//   }
+//   return body;
 // }
-
-async function getCryptoInfo(query: string) {
-  const { body, status } = await apiClient.crypto.cryptoSearch({ query: { query: query, limit: 20 } });
-  if (!(status === 200)) {
-    return null;
-  }
-  return body;
-}
 
 function Crypto() {
   const { user, userInfo } = useAuthContext();
@@ -32,6 +27,7 @@ function Crypto() {
   const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
   const [cryptoUpdatedTime, setCryptoUpdatedTime] = useState<string>("");
 
+  // save the updated crypto bookmarks to the backend
   async function handleSave() {
     let updatedCryptoBookmarks = addedItems;
     if (updatedCryptoBookmarks) {
@@ -56,6 +52,7 @@ function Crypto() {
     setbEditCryptoDiagVisible(false);
   }
 
+  // delete the selected crypto bookmark on the backend
   async function handleDeletion() {
     if (cryptoBookmarks && deletingCrypto) {
       const newList = cryptoBookmarks.filter((value) => value.cryptoId !== deletingCrypto.cryptoId);
@@ -81,6 +78,7 @@ function Crypto() {
     setbDeleteBookmarkDiagVisible(false);
   }
 
+  // update the crypto bookmarks and the updated time when the user info is fetched
   useEffect(() => {
     setCryptoBookmarks(userInfo?.userCryptoInfo.cryptoBookmarks || null);
     setAddedItems(userInfo?.userCryptoInfo.cryptoBookmarks || []);

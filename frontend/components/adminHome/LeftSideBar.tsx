@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+// sidebar for admin home page
 const LeftSideBar = () => {
   const [selectedButton, setSelectedButton] = useState("");
   const pathname = usePathname();

@@ -7,6 +7,7 @@ import { Button } from "primereact/button";
 import { apiClient } from "@/lib/apiClient";
 import { SimpleUserInfo } from "#/shared/models/user";
 
+// page for suspending users
 const UserManagement = () => {
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showUnsuspendDialog, setShowUnsuspendDialog] = useState(false);
@@ -17,10 +18,10 @@ const UserManagement = () => {
 
   useEffect(() => {
     // abuse search function to list all users
-    handleSearch(".");
     handleSearch("");
   }, []);
 
+  // submit search query to backend
   const handleSearch = async (searchParams: string) => {
     setSearchText(searchParams);
     const searchResult = await apiClient.user.userSearch({ query: { query: searchParams } });
@@ -48,35 +49,34 @@ const UserManagement = () => {
     );
   };
 
+  // show confirm dialog when suspending a user
   const handleSuspendClick = (user: SimpleUserInfo) => {
     setSelectedUser(user);
     setShowSuspendDialog(true);
   };
 
+  // show confirm dialog when unsuspending a user
   const handleUnsuspendClick = (user: SimpleUserInfo) => {
     setSelectedUser(user);
     setShowUnsuspendDialog(true);
   };
 
   const handleSuspendUser = async () => {
-    // Add logic here to Suspend the user
-    // console.log("(fake) user " + selectedUser.username + " suspended");
     const res = await apiClient.admin.suspendUser({ body: { username: selectedUser.username, set: true } });
     console.log(res);
     setShowSuspendDialog(false);
   };
 
   const handleUnsuspendUser = async () => {
-    // Add logic here to Unsuspend the user
-    // console.log("(fake) user " + selectedUser.username + " unsuspended");
     const res = await apiClient.admin.suspendUser({ body: { username: selectedUser.username, set: false } });
     console.log(res);
     setShowUnsuspendDialog(false);
   };
 
   const [selectedUser, setSelectedUser] = useState({ username: "", displayName: "" });
+
+  // edit user is unused
   const handleEditClick = (user: SimpleUserInfo) => {
-    // Add this function
     setSelectedUser(user);
     setShowEditDialog(true);
   };
@@ -92,6 +92,7 @@ const UserManagement = () => {
     );
   };
 
+  // show confirm dialog when suspending a user
   const renderSuspendDialog = () => {
     // if (!selectedUser) return null;
     return (
@@ -104,6 +105,7 @@ const UserManagement = () => {
     );
   };
 
+  // show confirm dialog when unsuspending a user
   const renderUnsuspendDialog = () => {
     // if (!selectedUser) return null;
     return (

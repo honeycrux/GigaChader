@@ -11,6 +11,7 @@ import { SimpleUserInfo } from "#/shared/models/user";
 import { PostInfo } from "#/shared/models/post";
 
 const Search = () => {
+  // initialize next js's search feature
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -19,15 +20,19 @@ const Search = () => {
 
   useEffect(() => {
     // This will run after every render
+    // keeps input field focused after every input
     inputRef.current?.focus();
   });
 
   const [userSearchResult, setSearchResult] = useState<SimpleUserInfo[] | null>(null);
   const [postSearchResult, setPostSearchResult] = useState<PostInfo[] | null>(null);
 
+  // submit search query to backend
   const handleSearch = useCallback(
     async (term: string | undefined) => {
       const params = new URLSearchParams(searchParams);
+      
+      // set query parameter in the url
       if (term) {
         params.set("query", term);
       } else {
@@ -54,6 +59,8 @@ const Search = () => {
     [replace, searchParams, setSearchResult, pathname]
   );
 
+  // get search results on page load
+  // if there is a query parameter in the url, search for it
   useEffect(() => {
     if (searchParams.get("query")) {
       handleSearch(searchParams.get("query")?.toString());

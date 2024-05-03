@@ -5,7 +5,7 @@ import { Avatar } from "primereact/avatar";
 interface Props {
   user: SimpleUserInfo;
 }
-
+// display a list of users based on input props
 const SimpleUserBox = ({ user }: Props) => {
   return (
     <div className="flex flex-col w-full bg-[#e5eeee] rounded-2xl p-4">

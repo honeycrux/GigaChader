@@ -20,6 +20,7 @@ type CryptoHoldingList = PersonalUserInfo["userCryptoInfo"]["cryptoHoldings"];
 type CryptoHolding = CryptoHoldingList[number];
 type ButtonTabState = "Own" | "All";
 
+// that pie chart on the profile page
 const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => {
   const { userInfo } = useAuthContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -29,6 +30,7 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
   const [cryptoHoldings, setCryptoHoldings] = useState<CryptoHoldingList | null>(null);
   const [addedItems, setAddedItems] = useState<CryptoHoldingList>([]);
 
+  // save crypto holdings to backend
   const saveCryptoHoldings = async () => {
     const res = await apiClient.user.userConfig({
       body: {
@@ -59,11 +61,13 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
     }
   };
 
+  // fetch crypto holdings on load
   useEffect(() => {
     setCryptoHoldings(userInfo?.userCryptoInfo.cryptoHoldings || null);
     setAddedItems(userInfo?.userCryptoInfo.cryptoHoldings || []);
   }, [userInfo]);
 
+  // handle deletion of crypto holding
   const handleDeletion = () => {
     const newItems = addedItems.filter((item) => item.crypto.cryptoId !== deletingCrypto?.crypto.cryptoId);
     setAddedItems(newItems);
@@ -107,6 +111,7 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
   //   return n !== Infinity && String(n) === str && n >= 0;
   // };
 
+  // edit crypto amount's cell using primereact's DataTable features
   const amountCellEditor = (editInput: ColumnEditorOptions) => {
     return (
       <div className="max-w-full">
@@ -122,6 +127,7 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
     );
   };
 
+  // supposedly check if the input is a positive integer on cell edit complete, but didn't work
   const amountCellEditComplete = (e: ColumnEvent) => {
     let { rowData, newValue, field, originalEvent: event } = e;
     rowData[field] = newValue;
@@ -234,16 +240,6 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
           />
         ) : null}
       </Dialog>
-      {/* pop-up amount input */}
-      {/* <Dialog 
-                header="Edit Crypto Bookmarks"
-                footer={footerElementAmount}
-                visible={bAmountDiagVisible}
-                onHide={() => setbAmountDiagVisible(false)}
-            >
-
-            </Dialog> */}
-      {/* end */}
     </div>
   );
 };
