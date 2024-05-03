@@ -3,7 +3,32 @@
 Gigachader is a social media platform project. Gigachader is a platform for crypto enthusiasts to share their passion and knowledge. This platform includes ways for users to post content, interact with others, and share their crypto investment strategies.
 
 ## Features
-TODO
+See your feeds on Home. Find out the latest posts from everyone on Global.  
+![alt text](/images/feature-home.png) ![alt text](/images/feature-global.png)
+
+Like, post, repost, and save posts to bookmark. Share your thoughts in the comments.  
+![alt text](/images/feature-commenting.png) ![alt text](/images/feature-bookmarks.png)
+
+Find people, posts, hashtags, and topics on Search.  
+![alt text](/images/feature-search.png) ![alt text](/images/feature-search-topics.png) ![alt text](/images/feature-search-tags.png)
+
+Discover trending posts, hashtags, and topics.  
+![alt text](/images/feature-discover-posts.png) ![alt text](/images/feature-discover-tags.png) ![alt text](/images/feature-discover-topics.png)
+
+Check your notifications. Never miss out on interactions.  
+![alt text](/images/feature-notifications.png)
+
+Bookmark your favourite crypto currencies. Follow their latest prices.  
+![alt text](/images/feature-cryptobm.png) ![alt text](/images/feature-cryptobm-edit.png)
+
+Connect with and follow other people.  
+![alt text](/images/feature-profile.png) ![alt text](/images/feature-followuser.png)
+
+Customize your profile. Build a Flexfolio and share your investment strategies.  
+![alt text](/images/feature-flexfolio.png) ![alt text](/images/feature-flexfolio-edit.png)
+
+Be an admin and moderate users and posts. (Post management is not completed.)  
+![alt text](/images/feature-manageuser.png) ![alt text](/images/feature-managepost.png)
 
 ## Structure
 
@@ -13,26 +38,38 @@ This is a monorepo containing several folders:
   - `components/`: Web components
   - `lib/`: Useful functionalities you define
 - `backend/`: Backend services
-  - `server.ts`: The main file that is run
-  - `prisma/`: Database schema and crud operations
+  - `server.ts`: The main file to run the express server
+  - `jobs.ts`: The main file to schedule cron jobs
+  - `prisma/`: Database schema
   - `routes/`: Routes and functionalities of the API
   - `lib/`: Useful functionalities you define
 - `shared/`: Resources shared between `frontend/` and `backend/`
   - `contracts/`: [TS-REST contracts](https://ts-rest.com/docs/core/) to provide typings for API communications
   - `models/`: Zod schemas and typescript models for some standardized request/response types used in contracts
+- `images/`: (Images used in README files)
 
-## Installation
+## Installation, Starting
+Installing dependencies:
+- At the project root folder, run `npm install`. This will run:
+  - installation on the project root folder, which runs afterwards, in parallel:
+    - `install:frontend`, equivallent to `npm install` on the frontend folder; and
+    - `install:backend`, equivallent to `npm install` on the backend folder, which runs afterwards:
+      - `npm run prisma:gen` to re-generate the prisma client.
 
-In order to run this app on your device for the first time, follow the steps below:
-- Install dependencies: At the project root folder, run `npm install`
-- Run web server and backend services: At the project root folder, run `npm run dev`
+Running:
+- At the project root folder, run `npm run dev`. This will run, in parallel:
+  - `frontend:dev`, equivallent to `npm run dev` on the frontend, starting the server;
+  - `backend:dev`, equivallent to `npm run dev` on the backend, running in parallel:
+    - `dev:server`, which runs the `server.ts` file; and
+    - `dev: jobs`, which runs the `jobs.ts` file.
+- To run for production, replace "dev" with "start".
 
-If you do not wish to run in parallel, use the alternative method to install separately:
-Use 3 terminals, with one at the project root, one in `frontend/`, one in `backend/`
-- Install dependencies: On the desired terminal, run `npm install`
-- Run web server or backend services: On the desired terminal, run `npm run dev`
+Building:
+- Frontend requires `npm run build`
+- Backend requires no building step
 
-## Notes for Developers
+## Developer Notes
+These are technical details for developers.
 
 ### Installing Packages
 **To install or remove packages, please go to the respective folder (frontend/backend) before using `npm install`.**
@@ -41,19 +78,11 @@ Use 3 terminals, with one at the project root, one in `frontend/`, one in `backe
 Use the [next app router](https://nextjs.org/docs/app/building-your-application/routing) to build pages. The UI Library [PrimeReact](https://primereact.org/) the CSS Library [Tailwind CSS](https://tailwindcss.com/) are used.
 
 ### Web Server: User Information / Protecting Routes
-Use validateUser from `@/lib/actions/auth`.
-
-For client components (with `"use client";` at top of script):
+On client components (with `"use client";` at top of script):
 - Use useAuthContext from `@/providers/auth-provider`. Call `const { user } = useAuthContext();`.
 - Check for absence of a session using the condition `!user`. If user is not null, user exists.
 
-[UNTESTED; NOT REALLY RECOMMENDED] For server components:
-- Use validateUser from `@/lib/actions/auth`. Call `const auth = await validateUser();`.
-- Check for absence of a session using the condition `"error" in auth`. Check user information using the `auth.user` object.
-
 ### Web Server: Interacting with the Backend (with client component)
-~~To interact with the API provided by the backend or do something complicated, please create an action in `frontend/lib/actions/` and use it to tailor the result for the webpage.~~
-
 In order to use the browser cookie, the only currently known way is to make API calls under client components (session cookie will fail if you call from server components). Feel free to use server actions `front/lib/actions/` to make those calls if code is reused, though make sure you invoke them from client component. Please see existing examples, for example, `frontend/app/(main)/home/page.tsx`.
 
 If you interact with the API, please use the [ts-rest client](https://ts-rest.com/docs/core/fetch) from `frontend/lib/apiClient.ts`.
@@ -89,8 +118,6 @@ About middleware:
 - The middlewares are defined in `backend/middlewares/auth.ts`.
 
 ### Backend: Media Upload
-> Media upload is hard.
-
 Media are uploaded to Azure Blob Storage.
 
 When using storage programmatically from routes, please use defined functions on `backend/lib/data/mediaHandler.ts`. Please avoid directly calling the underlying `backend/lib/data/storage.ts`.
@@ -101,6 +128,9 @@ See `backend/routes/(example-of-media-upload).ts` as an example for defining a r
 To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`, and update the database schema by running `npx prisma db push`.
 
 [Other tips for working with Prisma+MongoDB](https://www.prisma.io/docs/orm/overview/databases/mongodb/)
+
+The ER diagram shall be kept up-to-date with respect to the development of application:  
+![Entity relation diagram](/images/entity-relation-diagram.jpg)
 
 ### Changes to Environment Variables
 Environment variables are modifiable values that will affect how the process behave. The env file can contain sensitive information such as credentials.

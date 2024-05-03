@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { classNames } from "primereact/utils";
 import { useState } from "react";
+import z from "zod";
 
 const SignupBox = () => {
   const [userName, setUserName] = useState("");
@@ -14,7 +14,7 @@ const SignupBox = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [bIsSignupLoading, setbIsSignupLoading] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState("");
   // useEffect(() => {
   //   console.log("email: " + email);
   //   console.log("password: " + password);
@@ -26,18 +26,35 @@ const SignupBox = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
+      return;
+    }
+    if (!userName || !displayName || !email || !password) {
+      setError("All fields are necessary");
       return;
     }
 
-    // TODO: replace with zod later
-    if (!userName || !displayName || !email || !password) {
-      setError("All fields are neccessary.");
+    // frontend guards
+    if (!userName || userName.length < 3 || userName.length > 31 || !/^[a-z0-9_-]+$/.test(userName)) {
+      setError("Invalid username");
+      return;
+    }
+    if (!displayName) {
+      setError("Invalid display name");
+      return;
+    }
+    const zodEmail = z.string().email();
+    if (!email || !zodEmail.safeParse(email).success) {
+      setError("Invalid email");
+      return;
+    }
+    if (!password || password.length < 6 || password.length > 255) {
+      setError("Invalid password");
       return;
     }
 
     try {
-      setbIsSignupLoading(prevbIsSignupLoading => true);
+      setbIsSignupLoading((prevbIsSignupLoading) => true);
       const res = await signup({
         username: userName,
         displayName,
@@ -51,12 +68,12 @@ const SignupBox = () => {
         console.log("Registration successful.");
         router.push("/signup/success");
       } else {
-      setbIsSignupLoading(prevbIsSignupLoading => false);
+        setbIsSignupLoading((prevbIsSignupLoading) => false);
         console.log("Registration failed.");
         setError(res.error);
       }
     } catch (error) {
-      setbIsSignupLoading(prevbIsSignupLoading => false);
+      setbIsSignupLoading((prevbIsSignupLoading) => false);
       console.log("Error during registration: ", error);
     }
   };
@@ -77,15 +94,24 @@ const SignupBox = () => {
             {/* <br className='my-2' /> */}
             <p className="text-2xl !mb-0">Password</p>
             <p className="!m-0">Use &gt;= 6 characters</p>
-            <Password className="custom-shadow-border-light w-full" toggleMask value={password} onChange={(e) => setPassword(e.target.value)} 
+            <Password
+              className="custom-shadow-border-light w-full"
+              toggleMask
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               pt={{
-                input: {className: "w-full"}
+                input: { className: "w-full" },
               }}
             />
             <p className="text-2xl !mb-0">Confirm Password</p>
-            <Password className="custom-shadow-border-light w-full" toggleMask feedback={false} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
+            <Password
+              className="custom-shadow-border-light w-full"
+              toggleMask
+              feedback={false}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               pt={{
-                input: {className: "w-full"}
+                input: { className: "w-full" },
               }}
             />
             {error ? <div className="text-red-600">{error}</div> : <br className="!my-5" />}
