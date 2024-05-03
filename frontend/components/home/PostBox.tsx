@@ -70,11 +70,6 @@ const PostBox = ({
   const [likeCountInternal, setlikeCountInternal] = useState(likeCount);
 
   const updateLiked = async (liked: boolean, likeCount: number) => {
-    // const res = await apiClient.post.getLikes({ query: { postId: id } });
-    // bisLiked.current = res.body;
-    //console.log("post content:");
-    //console.log(content);
-    // console.log(res.body);
     bisLiked.current = liked;
     setlikeCountInternal(likeCount);
 
@@ -107,11 +102,13 @@ const PostBox = ({
    * Commenting
    */
   const [commentContent, setCommentContent] = useState("");
+  // abandoned comment box design
   const [bShowCommentBox, setBShowCommentBox] = useState(false);
   const handleCommentClick = () => {
     setBShowCommentBox((prevbShowCommentBox) => !prevbShowCommentBox);
   };
 
+  // abandoned comment box design
   const handleCommentSubmit = () => {
     if (toast.current) {
       toast.current.show({ severity: "info", summary: "Success", detail: "Fake submit comment" });
@@ -145,7 +142,8 @@ const PostBox = ({
     setVisible(false);
   };
   const dialogFooter = (
-    <div className="p-d-flex p-jc-end">
+    <div className="flex justify-between w-full items-center">
+      <p>Text length: {repostContent.length}/1000</p>
       <Button label="Submit" className="w-fit" onClick={handleRepostSubmit} />
     </div>
   );
@@ -208,16 +206,16 @@ const PostBox = ({
             <p>
               {textualContexts
                 ? textualContexts.map((context, index) => {
-                    if (context.href) {
-                      return (
-                        <Link key={index} href={context.href} className="text-orange1 hover:underline">
-                          {context.text}
-                        </Link>
-                      );
-                    } else {
-                      return <span key={index}>{context.text}</span>;
-                    }
-                  })
+                  if (context.href) {
+                    return (
+                      <Link key={index} href={context.href} className="text-orange1 hover:underline">
+                        {context.text}
+                      </Link>
+                    );
+                  } else {
+                    return <span key={index}>{context.text}</span>;
+                  }
+                })
                 : content}
             </p>
             {/* retrieve image */}
@@ -284,6 +282,8 @@ const PostBox = ({
             Go to parent post
           </Link>
         ))}
+
+        {/* abandoned comment box design */}
       {bShowCommentBox && (
         <div className="flex flex-col w-full">
           <p className="text-xl">Comment</p>
@@ -302,7 +302,8 @@ const PostBox = ({
         }}
         footer={dialogFooter}
       >
-        <InputTextarea className="w-full" value={repostContent} onChange={(e) => setRepostContent(e.target.value)} rows={6} autoResize />
+        <InputTextarea className="w-full" value={repostContent} maxLength={1000}
+          onChange={(e) => setRepostContent(e.target.value)} rows={6} autoResize />
 
         <PostBox post={postInfo} bButtonvisible={false} />
       </Dialog>

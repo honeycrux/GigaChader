@@ -174,24 +174,27 @@ const Home = () => {
   };
 
   const footerContent = (
-    <>
-      <Button
-        text
-        label="Remove Media"
-        onClick={() => {
-          setMediaPreview(undefined);
-          setVideoPreview(undefined);
-        }}
-      />
-      <Button
-        label="Post"
-        onClick={() => {
-          // console.log('post content', postContent);
-          handlePostSubmit();
-        }}
-        loading={bIsSummitingPost}
-      />
-    </>
+    <div className="flex justify-between w-full items-center">
+      <p>Text length: {postContent.length}/1000</p>
+      <div>
+        <Button
+          text
+          label="Remove Media"
+          onClick={() => {
+            setMediaPreview(undefined);
+            setVideoPreview(undefined);
+          }}
+        />
+        <Button
+          label="Post"
+          onClick={() => {
+            // console.log('post content', postContent);
+            handlePostSubmit();
+          }}
+          loading={bIsSummitingPost}
+        />
+      </div>
+    </div>
   );
 
   return (
@@ -209,7 +212,8 @@ const Home = () => {
         }}
       >
         <div className="flex flex-col">
-          <InputTextarea className="w-full" value={postContent} onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
+          <InputTextarea className="w-full" value={postContent} maxLength={1000}
+          onChange={(e) => setPostContent(e.target.value)} rows={6} autoResize />
           <Image src="/upload-image.svg" alt="upload image" className="cursor-pointer w-10" onClick={handleMediaUpload} />
           {mediaPreview && (
             <div>

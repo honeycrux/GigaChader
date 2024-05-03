@@ -91,7 +91,9 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
         {bIsLoggedin && (
           <div className="flex flex-col w-full mt-4">
             <p className="text-xl">Make a Comment</p>
-            <InputTextarea value={commentContent} onChange={(e) => setCommentContent(e.target.value)} rows={4} cols={30} autoResize className="mb-2" />
+            <InputTextarea value={commentContent} maxLength={1000}
+            onChange={(e) => setCommentContent(e.target.value)} rows={4} cols={30} autoResize className="mb-2" />
+            <p>Text length: {commentContent.length}/1000</p>
             <Button label="Submit" className="w-fit" onClick={handleCommentSubmit} />
           </div>
         )}
