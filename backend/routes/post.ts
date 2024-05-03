@@ -192,6 +192,13 @@ export const postRouter = s.router(apiContract.post, {
             let commentOriginalAuthorId: string | undefined;
             let repostChainIds: string[] = [];
 
+            if (content.trim() === "") {
+                return {
+                    status: 400,
+                    body: { error: `Post has no text content` },
+                };
+            }
+
             if (repostingPostId) {
                 const post = await prismaClient.post.findUnique({
                     select: {

@@ -1,3 +1,8 @@
+/**
+ * This file uses code from the lucia-auth guide: https://lucia-auth.com/
+ * These are explicitly stated before the pieces of code
+ */
+
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { lucia } from "@/lib/helpers/auth";

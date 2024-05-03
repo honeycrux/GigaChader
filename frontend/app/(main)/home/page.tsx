@@ -85,21 +85,23 @@ const Home = () => {
     }
 
     setbIsSummitingPost(true);
+
+    let res;
     if (!mediaPreview && !videoPreview) {
-      const res = await apiClient.post.postCreate({
+      res = await apiClient.post.postCreate({
         body: {
           content: postContent,
         },
       });
     } else if (mediaPreview) {
-      const res = await apiClient.post.postCreate({
+      res = await apiClient.post.postCreate({
         body: {
           content: postContent,
           userMedia: [{ url: mediaPreview, type: "IMAGE" }],
         },
       });
     } else if (videoPreview) {
-      const res = await apiClient.post.postCreate({
+      res = await apiClient.post.postCreate({
         body: {
           content: postContent,
           userMedia: [{ url: videoPreview, type: "VIDEO" }],
@@ -112,7 +114,13 @@ const Home = () => {
     fetchOnCreatePost();
 
     if (toast.current) {
-      toast.current.show({ severity: "info", summary: "Success", detail: "post added" });
+      if (res && res.status === 200) {
+        toast.current.show({ severity: "info", summary: "Success", detail: "post added" });
+      } else if (res && res.status === 400 && "error" in (res.body as any)) {
+        toast.current.show({ severity: "error", summary: "Error", detail: (res.body as { error: string }).error });
+      } else {
+        toast.current.show({ severity: "error", summary: "Error", detail: `Some unknown error occured (${res?.status})` });
+      }
     }
 
     setPostContent("");

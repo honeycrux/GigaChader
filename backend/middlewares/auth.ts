@@ -1,3 +1,8 @@
+/**
+ * This file uses code from the lucia-auth guide: https://lucia-auth.com/
+ * These are explicitly stated before the pieces of code
+ */
+
 // src/middleware.ts
 import { Request, Response, NextFunction } from "express";
 import { lucia } from "@/lib/helpers/auth";
@@ -5,7 +10,6 @@ import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
 import { Role } from "@prisma/client";
-import { prismaClient } from "@/lib/data/db";
 
 /* App-level middleware */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {
