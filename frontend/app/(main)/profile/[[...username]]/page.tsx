@@ -15,10 +15,12 @@ import { Card } from "primereact/card";
 import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
 import SimpleUserBox from "@/components/home/SimpleUserBox";
 import Chart from "react-apexcharts";
+import { Toast } from "primereact/toast";
 
 type ButtonTabState = "Posts" | "Comments" | "Flexfolio";
 
 const Profile = ({ params }: { params: { username?: string[] } }) => {
+  const toast = useRef<Toast>(null);
   const { user, userInfo: myInfo, refreshUserInfo: refreshMyInfo } = useAuthContext();
   let profileUsername = params.username?.[0] || user?.username;
   let bIsViewingSelf = !!profileUsername && profileUsername === user?.username;
@@ -217,6 +219,10 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
         if (res.status === 200 && res.body) {
           const bannerUrl = res.body.bannerUrl;
           setEditBannerUrl(bannerUrl);
+        } else if (res.status === 500) {
+          if (toast.current) {
+            toast.current.show({ severity: "error", summary: "Error", detail: "File type not supported" });
+          }
         }
       }
     });
@@ -242,6 +248,10 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
         if (res.status === 200 && res.body) {
           const avatarUrl = res.body.avatarUrl;
           setEditAvatarUrl(avatarUrl);
+        } else if (res.status === 500) {
+          if (toast.current) {
+            toast.current.show({ severity: "error", summary: "Error", detail: "File type not supported" });
+          }
         }
       }
     });
@@ -287,6 +297,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
 
   return (
     <div className="flex w-full h-full flex-col overflow-y-auto overflow-x-clip">
+      <Toast ref={toast}></Toast>
       <Dialog
         header="Edit Profile"
         footer={footerElementProfile}

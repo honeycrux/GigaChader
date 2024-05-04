@@ -196,6 +196,10 @@ const Home = () => {
           } else {
             setVideoPreview(mediaUrls[0]);
           }
+        } else if (res.status === 500) {
+          if (toast.current) {
+            toast.current.show({ severity: "error", summary: "Error", detail: "File type not supported" });
+          }
         }
       }
     });

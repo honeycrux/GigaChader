@@ -85,6 +85,10 @@ function Onboarding() {
         if (res.status === 200 && res.body) {
           const avatarUrl = res.body.avatarUrl;
           setProfilePicUrl(avatarUrl);
+        } else if (res.status === 500) {
+          if (toast.current) {
+            toast.current.show({ severity: "error", summary: "Error", detail: "File type not supported" });
+          }
         }
       }
     });
