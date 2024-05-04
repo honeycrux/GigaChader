@@ -63,9 +63,9 @@ export async function fetchSelectedCoincapAssets(ids: string[]): Promise<Record<
     if (ids.length < 1) {
         return {};
     }
-    const assetsUrl = "https://api.coincap.io/v2/assets/";
+    const assetsUrl = "https://api.coincap.io/v2/assets";
     const response = await axios.get<{ data: CoincapAsset[] }>(`${assetsUrl}`, {
-        params: { ids: ids },
+        params: { ids: ids.join(",") },
     });
     if (!("data" in response)) {
         return null;

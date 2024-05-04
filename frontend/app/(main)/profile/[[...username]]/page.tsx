@@ -14,7 +14,7 @@ import { PostInfo } from "#/shared/models/post";
 import { Card } from "primereact/card";
 import FlexfolioEdit from "@/components/crypto/FlexfolioEdit";
 import SimpleUserBox from "@/components/home/SimpleUserBox";
-import Chart from 'react-apexcharts';
+import Chart from "react-apexcharts";
 
 type ButtonTabState = "Posts" | "Comments" | "Flexfolio";
 
@@ -81,9 +81,13 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           // use the first crypto holding's updated time as the updated time for the chart
           if (res.body.userCryptoInfo.cryptoHoldings.length > 0) {
             const updatedAt = res.body.userCryptoInfo.cryptoHoldings[0].crypto?.updatedAt;
-            const cryptoUpdatedTimeString = updatedAt ? new Date(updatedAt).toLocaleString(undefined, {
-              dateStyle: 'short', timeStyle: 'short', hour12: false
-            }) : "";
+            const cryptoUpdatedTimeString = updatedAt
+              ? new Date(updatedAt).toLocaleString(undefined, {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                  hour12: false,
+                })
+              : "";
             setCryptoUpdatedTime(cryptoUpdatedTimeString);
           }
         }
@@ -304,8 +308,8 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                 editBannerUrl
                   ? process.env.NEXT_PUBLIC_BACKEND_URL + editBannerUrl
                   : editBannerUrl !== false && displayedUserInfo && displayedUserInfo.userConfig.bannerUrl
-                    ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
-                    : ""
+                  ? process.env.NEXT_PUBLIC_BACKEND_URL + displayedUserInfo.userConfig.bannerUrl
+                  : ""
               }
               alt="profile background pic"
               pt={{
@@ -493,9 +497,9 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
             label="Posts"
             text
             onClick={() => setSelectedButton("Posts")}
-          // pt={{
-          //   root: {className: "!border-0"},
-          // }}
+            // pt={{
+            //   root: {className: "!border-0"},
+            // }}
           />
           <Button
             className={`w-full ${selectedButton === "Comments" ? "border-0 !border-b-2 border-orange1" : ""}`}
@@ -542,7 +546,9 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
               onExit={() => {
                 setbEditFlexfolioDiagVisible(false);
               }}
-              onSave={async () => { await fetchProfileInfo(); }}
+              onSave={async () => {
+                await fetchProfileInfo();
+              }}
             />
             <Card
               pt={{
@@ -558,43 +564,55 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                 )}
               </div>
               <div>
-                <p className="text-lg">@{displayedUserInfo && displayedUserInfo.username}
-                  {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 ?
-                    (<span> is investing in</span>) :
-                    (<span> has not shared their investment</span>)}</p>
+                <p className="text-lg">
+                  @{displayedUserInfo && displayedUserInfo.username}
+                  {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 ? (
+                    <span> is investing in</span>
+                  ) : (
+                    <span> has not shared their investment</span>
+                  )}
+                </p>
               </div>
               {/* <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" /> */}
-              {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 &&
-                (<div className="w-full flex flex-col items-end">
+              {displayedUserInfo && displayedUserInfo.userCryptoInfo.cryptoHoldings.length > 0 && (
+                <div className="w-full flex flex-col items-end">
                   <div className="w-full flex justify-center">
-                    <Chart options={{
-                      labels:
-                        displayedUserInfo.userCryptoInfo.cryptoHoldings
+                    <Chart
+                      options={{
+                        labels: displayedUserInfo.userCryptoInfo.cryptoHoldings
                           .map((cryptoObject) =>
-                            cryptoObject.crypto ? `${cryptoObject.crypto.name} (${cryptoObject.crypto.symbol})
+                            cryptoObject.crypto
+                              ? `${cryptoObject.crypto.name} (${cryptoObject.crypto.symbol})
                             <br/>
-                            ${cryptoObject.amount} = $${(cryptoObject.crypto.priceUsd * cryptoObject.amount).toFixed(4)}` : '')
-                          .filter(label => label !== '')
-                    }} series={
-                      displayedUserInfo.userCryptoInfo.cryptoHoldings
-                        .map((cryptoObject) =>
-                          cryptoObject.crypto ? (cryptoObject.crypto.priceUsd * cryptoObject.amount) : null)
-                        .filter(amount => amount !== null)
-                        .map(amount => amount as number)}
-                      type="pie" width={450} />
+                            ${cryptoObject.amount} = $${(cryptoObject.crypto.priceUsd * cryptoObject.amount).toFixed(4)}`
+                              : ""
+                          )
+                          .filter((label) => label !== ""),
+                      }}
+                      series={displayedUserInfo.userCryptoInfo.cryptoHoldings
+                        .map((cryptoObject) => (cryptoObject.crypto ? cryptoObject.crypto.priceUsd * cryptoObject.amount : null))
+                        .filter((amount) => amount !== null)
+                        .map((amount) => amount as number)}
+                      type="pie"
+                      width={450}
+                    />
                   </div>
                   <p className="text-gray-500 text-sm">Prices updated at: {cryptoUpdatedTime}</p>
-                  <p className="text-gray-500 text-sm">Data source:&nbsp;  
-                    <a href="https://coincap.io/" target="_blank" rel="noreferrer" 
-                    className="text-gray-500 hover:underline text-sm">coincap.io</a>
+                  <p className="text-gray-500 text-sm">
+                    Data source:&nbsp;
+                    <a href="https://coincap.io/" target="_blank" rel="noreferrer" className="text-gray-500 hover:underline text-sm">
+                      coincap.io
+                    </a>
                   </p>
-                </div>)
-              }
+                </div>
+              )}
             </Card>
           </div>
         ) : null
       ) : (
-        <p className="text-xl my-4 text-center">{bNotFound ? "User not found." : bIsSuspended ? "User is suspended." : "User not loaded yet ._."}</p>
+        <p className="text-xl my-4 text-center">
+          {bNotFound ? "User not found." : bIsSuspended ? "User is suspended." : user ? "User not loaded yet ._." : "Log in to see your own profile"}
+        </p>
       )}
     </div>
   );

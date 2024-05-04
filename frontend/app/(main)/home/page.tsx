@@ -225,6 +225,10 @@ const Home = () => {
     </div>
   );
 
+  if (!user) {
+    return <p>Log in to see feeds</p>;
+  }
+
   return (
     <>
       <Dialog

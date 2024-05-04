@@ -32,7 +32,7 @@ const LoginBox = ({ bUseAdmin }: { bUseAdmin?: boolean }) => {
       if (!bUseAdmin) {
         router.replace("/home");
       } else {
-        router.replace("/admin/userManagement");
+        router.replace("/admin/manage-user");
       }
     } catch (error) {
       console.error("Error: " + error);

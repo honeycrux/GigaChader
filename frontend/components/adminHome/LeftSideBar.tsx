@@ -4,16 +4,18 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 // sidebar for admin home page
+type TabSelectValue = "User Management" | "Post Management";
+
 const LeftSideBar = () => {
-  const [selectedButton, setSelectedButton] = useState("");
+  const [selectedButton, setSelectedButton] = useState<TabSelectValue>();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    if (pathname.includes("userManagement")) {
-      setSelectedButton("User management");
-    } else if (pathname.includes("postManagement")) {
-      setSelectedButton("Post management");
+    if (pathname.includes("manage-user")) {
+      setSelectedButton("User Management");
+    } else if (pathname.includes("manage-post")) {
+      setSelectedButton("Post Management");
     }
   }, [pathname]); // Re-run the effect when `pathname` changes
 
@@ -23,11 +25,11 @@ const LeftSideBar = () => {
       <aside className="flex flex-col bg-orange2 w-60 px-4 py-2 overflow-y-auto">
         <button
           className={`flex items-center my-2 w-full py-2 h-16 pl-5 rounded-lg ${
-            selectedButton === "User management" ? "bg-orange1 text-white" : " text-black"
+            selectedButton === "User Management" ? "bg-orange1 text-white" : " text-black"
           }`}
           onClick={() => {
-            setSelectedButton("User management");
-            router.push("/admin/userManagement");
+            setSelectedButton("User Management");
+            router.push("/admin/manage-user");
           }}
         >
           <i className="pi pi-user-edit text-2xl"></i>
@@ -35,11 +37,11 @@ const LeftSideBar = () => {
         </button>
         <button
           className={`flex items-center my-4 w-full py-2 h-16 pl-5 rounded-lg ${
-            selectedButton === "Post management" ? "bg-orange1 text-white" : " text-black"
+            selectedButton === "Post Management" ? "bg-orange1 text-white" : " text-black"
           }`}
           onClick={() => {
-            setSelectedButton("Post management");
-            router.push("/admin/postManagement");
+            setSelectedButton("Post Management");
+            router.push("/admin/manage-post");
           }}
         >
           <i className="pi pi-comments text-2xl"></i>

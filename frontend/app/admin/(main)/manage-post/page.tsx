@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import { useAuthContext } from "@/providers/auth-provider";
 interface ActionOption {
   name: string;
   code: string;
@@ -12,6 +13,7 @@ interface ActionOption {
 
 // dummy page and unused
 const PostMangement = () => {
+  const { user } = useAuthContext();
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
   const actions: ActionOption[] = [
     { name: "Edit", code: "ED" },
@@ -57,6 +59,11 @@ const PostMangement = () => {
       </div>
     );
   };
+
+  if (user?.role !== "ADMIN") {
+    return <p>User is not logged in as an admin</p>;
+  }
+
   return (
     <>
       {/* main content start */}

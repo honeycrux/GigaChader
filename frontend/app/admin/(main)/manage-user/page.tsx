@@ -6,13 +6,14 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { apiClient } from "@/lib/apiClient";
 import { SimpleUserInfo } from "#/shared/models/user";
+import { useAuthContext } from "@/providers/auth-provider";
 
 // page for suspending users
 const UserManagement = () => {
+  const { user } = useAuthContext();
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showUnsuspendDialog, setShowUnsuspendDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [searchResult, setSearchResult] = useState<SimpleUserInfo[] | null>(null);
 
@@ -124,6 +125,11 @@ const UserManagement = () => {
       </Dialog>
     );
   };
+
+  if (user?.role !== "ADMIN") {
+    return <p>User is not logged in as an admin</p>;
+  }
+
   return (
     <>
       {/* main content start */}

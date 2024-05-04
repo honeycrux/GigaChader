@@ -70,7 +70,7 @@ const HeaderNavbar = (props: Props) => {
       </OverlayPanel>
       {/* header start */}
       <nav className="flex bg-orange2 h-16 items-center space-x-2 justify-between px-4">
-        <a className="flex items-center space-x-2" href="/home">
+        <a className="flex items-center space-x-2" href={bUseAdmin ? "/admin/manage-user" : "/home"}>
           <Image src="/gigachader_notext.png" alt="gigachad logo" width="50" />
           {bUseAdmin ? (
             <div className="space-x-1">

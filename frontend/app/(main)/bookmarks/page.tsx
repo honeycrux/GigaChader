@@ -28,6 +28,10 @@ const BookmarkedPost = () => {
     }
   }, [user]);
 
+  if (!user) {
+    return <p>Go back to login</p>;
+  }
+
   return (
     <div className="flex flex-col items-center w-full overflow-y-auto">
       <div className="flex flex-col w-[60%] space-y-4">
