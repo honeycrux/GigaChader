@@ -12,10 +12,10 @@ type IndexRange = [number, number]; // the indices [m, n] indicates a substring 
 function identifyHashtags(content: string) {
     let hashtags: string[] = [];
     let hashtagIndices: IndexRange[] = [];
-    const hashtagex = /#([^ !"#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]*)/g;
+    const hashtagex = /#([^ !"#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~\s]*)/g;
     let match;
     while ((match = hashtagex.exec(content)) !== null) {
-        hashtags.push(match[1]); // add first matched group (the tag text without #) to array
+        hashtags.push(match[1].trim()); // add first matched group (the tag text without #) to array
         hashtagIndices.push([match.index, match.index + match[0].length - 1]);
     }
     // remove duplicate tags
