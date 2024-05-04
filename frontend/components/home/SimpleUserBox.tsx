@@ -16,6 +16,7 @@ const SimpleUserBox = ({ user }: Props) => {
             image={user.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + user.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
             shape="circle"
             size="large"
+            pt={{ image: { className: "object-cover" } }}
           />
           <div className="whitespace-pre-wrap">
             <div>

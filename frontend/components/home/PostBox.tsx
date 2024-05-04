@@ -195,6 +195,7 @@ const PostBox = ({
               image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
               shape="circle"
               size="large"
+              pt={{ image: { className: "object-cover" } }}
             />
           </Link>
           <div className="relative mt-2 grow w-0.5 rounded-full bg-gray-600" />
