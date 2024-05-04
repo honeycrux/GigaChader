@@ -449,7 +449,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
           </div>
           <p className="text-xl whitespace-pre-wrap max-w-96">{displayedUserInfo && displayedUserInfo.userConfig.bio}</p>
           {displayedUserInfo && (
-            <div className="flex flex-row my-1 text-xl space-x-2 rounded-md border border-orange1">
+            <div className="flex flex-row my-1 text-xl space-x-2 rounded-md border border-orange1 w-fit">
               <div
                 className="px-6 py-2 rounded-md bg-transparent hover:bg-gray-600 hover:bg-opacity-20
                 transition duration-300 cursor-pointer"
@@ -469,7 +469,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                   getFollowList();
                 }}
               >
-                <span className="font-bold mr-2">Following: </span>
+                <span className="font-bold">Following: </span>
                 {displayedUserInfo.followedUserCount}
               </div>
             </div>
