@@ -1,4 +1,7 @@
-// import all contracts and merge them into one big contract
+/**
+ * Name: Contracts (Main)
+ * Description: Import all TS-REST subcontracts and merge them into one big TS-REST contract
+ */
 
 import { initContract } from "@ts-rest/core";
 import { authContract } from "./auth";

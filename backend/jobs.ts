@@ -1,4 +1,7 @@
-// This is a backend service that schedules jobs with cron
+/**
+ * Name: Jobs (Main)
+ * Description: This is a backend service that schedules jobs with cron
+ */
 
 import cron from "node-cron";
 import { checkExchange } from "./lib/helpers/crypto";

@@ -1,6 +1,8 @@
 /**
- * This whole file largely referenced the lucia-auth guide
- * Reference: https://lucia-auth.com/database/prisma
+ * Name: Auth Utilities
+ * Description: Create lucia auth object
+ * Attribution: This whole file largely referenced the lucia-auth guide
+ *              https://lucia-auth.com/database/prisma
  */
 
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";

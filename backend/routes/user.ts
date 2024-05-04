@@ -1,3 +1,8 @@
+/**
+ * Name: User Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (User Contract)
+ */
+
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { protectRoute, validateUser } from "@/middlewares/auth";

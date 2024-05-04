@@ -1,3 +1,8 @@
+/**
+ * Name: Post Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (Post Contract)
+ */
+
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
@@ -196,6 +201,13 @@ export const postRouter = s.router(apiContract.post, {
                 return {
                     status: 400,
                     body: { error: `Post has no text content` },
+                };
+            }
+
+            if (content.length > 1000) {
+                return {
+                    status: 400,
+                    body: { error: `Post exceeded character limit (${content.length}/1000)` },
                 };
             }
 

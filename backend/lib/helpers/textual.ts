@@ -1,15 +1,17 @@
-// stored crypto in memory
+/**
+ * Name: Textual Analysis Utilities
+ * Description: Provide utility functions for performing textual analysis
+ */
 
 import { getFullCryptoList } from "./crypto";
 
-type FindTextualContextProps = {
-    content: string;
-};
-export async function analysePostContent({ content }: FindTextualContextProps) {
-    // 1. Identify hashtags
-    console.log("[post/create analysis] identify hashtags");
+type IndexRange = [number, number]; // the indices [m, n] indicates a substring range (m, n) inclusive
+
+/* Helper functions to identify hashtags, crypto topics, and textual contexts */
+
+function identifyHashtags(content: string) {
     let hashtags: string[] = [];
-    let hashtagIndices: [number, number][] = []; // the indices [m, n] indicates a substring range (m, n) inclusive
+    let hashtagIndices: IndexRange[] = [];
     const hashtagex = /#([^ !"#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]*)/g;
     let match;
     while ((match = hashtagex.exec(content)) !== null) {
@@ -18,9 +20,10 @@ export async function analysePostContent({ content }: FindTextualContextProps) {
     }
     // remove duplicate tags
     hashtags = hashtags.filter((tag, i) => hashtags?.indexOf(tag) === i);
+    return { hashtags, hashtagIndices };
+}
 
-    // 2. Identify crypto topics
-    console.log("[post/create analysis] identify crypto topics");
+async function identifyCryptoTopics(content: string) {
     const cryptoTopics: string[] = [];
     const nonwordgex = /[!"#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]/g;
     const words = content.toLowerCase().replace(nonwordgex, "").split(" ");
@@ -32,9 +35,10 @@ export async function analysePostContent({ content }: FindTextualContextProps) {
             }
         }
     }
+    return cryptoTopics;
+}
 
-    // 3. Break down text into list of textual context
-    console.log("[post/create analysis] form textual context");
+function formTextualContexts(content: string, hashtagIndices: IndexRange[]) {
     let pos = 0;
     let hashtagIndex = 0;
     let textualContexts: { href?: string; text: string }[] = [];
@@ -66,6 +70,26 @@ export async function analysePostContent({ content }: FindTextualContextProps) {
             pos = nextIndex;
         }
     }
+    return textualContexts;
+}
+
+/* Exported function to analyse post content */
+
+type FindTextualContextProps = {
+    content: string;
+};
+export async function analysePostContent({ content }: FindTextualContextProps) {
+    // 1. Identify hashtags
+    console.log("[post/create analysis] identify hashtags");
+    const { hashtags, hashtagIndices } = identifyHashtags(content);
+
+    // 2. Identify crypto topics
+    console.log("[post/create analysis] identify crypto topics");
+    const cryptoTopics = await identifyCryptoTopics(content);
+
+    // 3. Break down text into list of textual context
+    console.log("[post/create analysis] form textual context");
+    const textualContexts = formTextualContexts(content, hashtagIndices);
 
     return {
         hashtags,

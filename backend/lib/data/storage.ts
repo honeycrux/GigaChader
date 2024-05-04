@@ -1,9 +1,14 @@
-/* Implements (server-agnostic) storage */
+/**
+ * Name: Storage Utilities
+ * Description: Implements server-agnostic storage utility functions
+ *              It is not recommended to use this file directly
+ *              Instead, use Media Handlers which has higher level functions
+ */
 
 import { BlobServiceClient } from "@azure/storage-blob";
 import { Readable } from "stream";
 
-// initialize blob service client
+/* Initialize blob service client */
 
 let blobServiceClient: BlobServiceClient;
 
@@ -15,13 +20,15 @@ try {
     console.warn("App running without blobServiceClient, image storage/retrieval will fail");
 }
 
-// define blob storage functions
+/* Blob storage functions */
 
 function storagePathResolver(path: string): [string, string] {
     const [containerName, ...rest] = path.split("/");
     const blobName = rest.join("/");
     return [containerName, blobName];
 }
+
+/* Upload media using storage path */
 
 export async function uploadBlob(storagePath: string, filebuf: Buffer) {
     const [containerName, blobName] = storagePathResolver(storagePath);
@@ -46,6 +53,8 @@ export async function uploadBlob(storagePath: string, filebuf: Buffer) {
     return uploadBlobResponse;
 }
 
+/* Download media using storage path */
+
 export async function downloadBlob(storagePath: string) {
     const [containerName, blobName] = storagePathResolver(storagePath);
 
@@ -66,6 +75,8 @@ export async function downloadBlob(storagePath: string) {
     console.log(`Blob was downloaded successfully. requestId: ${downloadedBlockBlobResponse.requestId}`);
     return downloadedBlockBlobResponse;
 }
+
+/* Delete media using storage path */
 
 export async function deleteBlob(storagePath: string) {
     const [containerName, blobName] = storagePathResolver(storagePath);

@@ -1,3 +1,8 @@
+/**
+ * Name: Post Contract
+ * Description: Create TS-REST subcontract that defines API routes and types
+ */
+
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { simpleUserInfoSchema } from "../models/user";

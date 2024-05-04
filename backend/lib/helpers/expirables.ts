@@ -1,7 +1,12 @@
-// Handles information expiry
+/**
+ * Name: Expirables Utilities
+ * Description: Provide utility functions for creation and cleaning of expirable information on the database
+ */
 
 import { prismaClient } from "../data/db";
 import { deleteMedia } from "../data/mediaHandler";
+
+/* Notification handlers */
 
 export async function createExpirableNotification(props: { content: string; link?: string; receiverId: string }) {
     return await prismaClient.notification.create({
@@ -51,6 +56,8 @@ export async function expireOldNotifications() {
     }
     return null;
 }
+
+/* Media stash handlers */
 
 export async function createExpirableMediaStash(props: { urls: string[] }) {
     return await prismaClient.mediaStash.createMany({

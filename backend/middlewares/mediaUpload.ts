@@ -1,3 +1,8 @@
+/**
+ * Name: Media Upload Middlewares
+ * Description: Provide middlewares to handle file uploads using multer and to perform other media upload-related actions
+ */
+
 import { ErrorRequestHandler } from "express";
 import multer from "multer";
 
@@ -56,33 +61,6 @@ export type MediaUploadFiles =
           media?: Express.Multer.File[];
       }
     | undefined;
-
-/* Route-level middlewares for test upload */
-
-const testUploadMulter = multer({
-    storage: storage,
-    limits: {
-        fileSize: tobyte(64),
-    },
-    fileFilter: (req, file, callback) => {
-        const mimetype = file.mimetype.split("/");
-        if (mimetype[0] === "image" || mimetype[0] === "video") {
-            callback(null, true);
-        } else {
-            callback(new multer.MulterError("LIMIT_UNEXPECTED_FILE"));
-        }
-    },
-});
-
-export const testUploadMiddleware = testUploadMulter.fields([{ name: "media", maxCount: 10 }]);
-export type TestUploadFiles =
-    | {
-          media?: Express.Multer.File[];
-      }
-    | undefined;
-
-// export const testUploadMiddleware = testUploadMulter.array("media", 10);
-// export type TestUploadFiles = Express.Multer.File[];
 
 /* App-level error-handling middleware */
 

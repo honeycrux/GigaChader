@@ -1,3 +1,8 @@
+/**
+ * Name: User Contract
+ * Description: Create TS-REST subcontract that defines API routes and types
+ */
+
 import { initContract } from "@ts-rest/core";
 import { notificationInfoSchema, personalUserInfoSchema, simpleUserInfoSchema, userConfigPropsSchema, userProfileSchema } from "../models/user";
 import { postInfoSchema } from "../models/post";
@@ -5,7 +10,6 @@ import { z } from "zod";
 
 const c = initContract();
 export const userContract = c.router({
-    // example:
     getInfo: {
         method: "GET",
         path: "/api/user/info",

@@ -1,4 +1,7 @@
-// construct all subroutes into one "api" route
+/**
+ * Name: Routes (Main)
+ * Description: Construct all TS-REST subrouters into one "API router"
+ */
 
 import { initServer } from "@ts-rest/express";
 import { apiContract } from "#/shared/contracts";

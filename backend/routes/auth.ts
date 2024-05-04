@@ -1,6 +1,8 @@
 /**
- * This file uses code from the lucia-auth guide: https://lucia-auth.com/
- * These are explicitly stated before the pieces of code
+ * Name: Auth Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (Auth Contract)
+ * Attribution: This file uses code from the lucia-auth guide: https://lucia-auth.com/
+ *              These are explicitly stated before the pieces of code
  */
 
 import { initServer } from "@ts-rest/express";

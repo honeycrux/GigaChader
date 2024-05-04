@@ -1,4 +1,7 @@
-/* Server-specific media handlers to perform actions on the (server-agnostic) storage */
+/**
+ * Name: Media Handlers
+ * Description: Implements server-specific media handlers to perform actions on the (server-agnostic) storage
+ */
 
 import { deleteBlob, downloadBlob, uploadBlob } from "./storage";
 import crypto from "crypto";
@@ -23,6 +26,8 @@ const storagePathToUrl = (name: string) => `/image/${name}`;
 
 const urlToStoragePath = (url: string) => url.replace(/^\/image\//, "");
 
+/* Below provides checks for media upload type */
+
 export type SupportedMediaType = "IMAGE" | "VIDEO";
 const allSupportedTypes: SupportedMediaType[] = ["IMAGE", "VIDEO"];
 
@@ -41,13 +46,14 @@ export function checkMediaUpload(input: CheckUploadProps): SupportedMediaType | 
     return typeUpper;
 }
 
+/* Upload image and returns the new url */
+
 interface CompressUploadProps {
     container: ExistingContainerName;
     file: Express.Multer.File;
     type: SupportedMediaType;
     maxPixelSize: number;
 }
-// Uploads image and returns the new url
 export async function compressAndUploadMedia(input: CompressUploadProps) {
     const type = input.type;
     let filebuf = input.file.buffer;
@@ -77,20 +83,22 @@ export async function compressAndUploadMedia(input: CompressUploadProps) {
     };
 }
 
+/* Download media using url */
+
 interface DownloadProps {
     url: string;
 }
-// Download media using url
 export async function downloadMedia(input: DownloadProps) {
     const blobName = urlToStoragePath(input.url);
     console.log(blobName);
     return await downloadBlob(blobName);
 }
 
+/* Delete media using url */
+
 interface DeleteProps {
     url: string;
 }
-// Delete media using url
 export async function deleteMedia(input: DeleteProps) {
     const blobName = urlToStoragePath(input.url);
     return await deleteBlob(blobName);

@@ -1,8 +1,14 @@
+/**
+ * Name: Crypto Service Utilities
+ * Description: Proivde utilities to support crypto features
+ */
+
 import { CryptoInfo } from "#/shared/models/crypto";
 import { Prisma } from "@prisma/client";
 import { prismaClient } from "../data/db";
 import axios from "axios";
-import { cryptoInfoFindOne } from "../objects/crypto";
+
+/* Utilities ot fetch crypto information using Coincap API */
 
 type CoincapAsset = {
     id: string;
@@ -19,7 +25,7 @@ type CoincapAsset = {
     explorer: string;
 };
 
-async function fetchCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
+async function fetchAllCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
     const assetsUrl = "https://api.coincap.io/v2/assets";
     const limit = 2000;
     let cryptoinfo: Prisma.CryptoCreateInput[] = [];
@@ -52,30 +58,48 @@ async function fetchCoincapAssets(): Promise<Omit<CryptoInfo, "updatedAt">[]> {
     return cryptoinfo;
 }
 
-async function fetchCoincapAsset(id: string): Promise<Omit<CryptoInfo, "updatedAt"> | null> {
-    if (id.trim() === "") {
-        return null;
+export async function fetchSelectedCoincapAssets(ids: string[]): Promise<Record<string, Omit<CryptoInfo, "updatedAt">> | null> {
+    ids = ids.filter((id) => id.trim() !== "");
+    if (ids.length < 1) {
+        return {};
     }
     const assetsUrl = "https://api.coincap.io/v2/assets/";
-    const response = await axios.get<{ data: CoincapAsset }>(`${assetsUrl}/${id}`);
+    const response = await axios.get<{ data: CoincapAsset[] }>(`${assetsUrl}`, {
+        params: { ids: ids },
+    });
     if (!("data" in response)) {
         return null;
     }
-    const { id: cryptoId, symbol, name, priceUsd } = response.data.data;
-    return {
-        cryptoId,
-        symbol,
-        name,
-        priceUsd: Number(priceUsd),
-    };
+    const result: Record<string, Omit<CryptoInfo, "updatedAt">> = {};
+    for (const cryptoData of response.data.data) {
+        const { id: cryptoId, symbol, name, priceUsd } = cryptoData;
+        const data = {
+            cryptoId,
+            symbol,
+            name,
+            priceUsd: Number(priceUsd),
+        };
+        // place into database
+        prismaClient.crypto.update({
+            data: data,
+            where: {
+                cryptoId: cryptoId,
+            },
+        });
+        result[cryptoId] = data;
+    }
+
+    return result;
 }
+
+/* Check the updatedness of the list of cryptos on our database, which expires in one day. Fetch from Coincap and update if necessary. */
 
 function readLastUpdatedData(value: Prisma.JsonValue): number {
     return (value as { lastUpdated: number }).lastUpdated;
 }
 
 export async function checkExchange() {
-    const expiryPeriod = 24 * 60 * 60 * 1000;
+    const expiryPeriod = 24 * 60 * 60 * 1000; // one day
     const currentTime = new Date();
     let systemdata = await prismaClient.systemMetadata.findUnique({
         where: {
@@ -89,7 +113,7 @@ export async function checkExchange() {
             expiry: readLastUpdatedData(systemdata.value) + expiryPeriod,
         };
     }
-    const assetsdata = await fetchCoincapAssets();
+    const assetsdata = await fetchAllCoincapAssets();
     if (!assetsdata) {
         return false;
     }
@@ -122,12 +146,9 @@ export async function checkExchange() {
     };
 }
 
-// get full crypto list for internal use (currently for textual topic identification)
+/* Get full crypto list for internal use (currently for textual topic identification) */
+
 export async function getFullCryptoList() {
-    const res = await checkExchange();
-    if (!res) {
-        return null;
-    }
     const cryptoList = await prismaClient.crypto.findMany({
         select: {
             cryptoId: true,
@@ -136,28 +157,4 @@ export async function getFullCryptoList() {
         },
     });
     return cryptoList;
-}
-
-export async function fetchCrypto(cryptoId: string): Promise<CryptoInfo | null> {
-    const check = await checkExchange();
-    if (!check) {
-        return null;
-    }
-
-    const currentTime = new Date();
-    const data = await cryptoInfoFindOne({ cryptoId });
-    if (!data) {
-        return null;
-    }
-    if (currentTime.valueOf() - data.updatedAt.valueOf() < 5 * 60 * 1000) {
-        // data was already updated past 5 minutes
-        return data;
-    }
-    const freshdata = await fetchCoincapAsset(data.cryptoId);
-    if (!freshdata) {
-        return null;
-    }
-    const result = await cryptoInfoFindOne({ cryptoId });
-
-    return result;
 }

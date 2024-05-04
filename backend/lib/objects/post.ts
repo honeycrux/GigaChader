@@ -1,10 +1,15 @@
-// This file defines standard query functions for: Post
-// These are useful for getting results for standard response types.
+/**
+ * Name: Post Standard Objects
+ * Description: Creates a set of common query functions that returns some standard object types from Post Models
+ *              These are useful for getting results for response types.
+ */
 
 import { PostInfo, SimplePostInfo } from "#/shared/models/post";
 import { Prisma } from "@prisma/client";
 import { prismaClient } from "../data/db";
 import { simpleUserInfoFindManyAsRecord } from "./user";
+
+/* Standard query functions for PostInfo */
 
 const postInfoSelectObj = {
     id: true,
@@ -182,6 +187,8 @@ export async function postInfoFindOne(props: { postId: string; requesterId: stri
     }
     return data[0];
 }
+
+/* Standard query functions for SimplePostInfo */
 
 const simplePostInfoSelectObj = {
     id: true,

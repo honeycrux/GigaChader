@@ -1,3 +1,9 @@
+/**
+ * Name: Test Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (Test Contract)
+ *              (This file implements routes purposed for testing only)
+ */
+
 import { apiContract } from "#/shared/contracts";
 import { analysePostContent } from "@/lib/helpers/textual";
 import { initServer } from "@ts-rest/express";

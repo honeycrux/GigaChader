@@ -1,9 +1,10 @@
 /**
- * This file uses code from the lucia-auth guide: https://lucia-auth.com/
- * These are explicitly stated before the pieces of code
+ * Name: Auth Middlewares
+ * Description: Provide middlewares to facilitate user authentication and authorization
+ * Attribution: This file uses code from the lucia-auth guide: https://lucia-auth.com/
+ *              These are explicitly stated before the pieces of code
  */
 
-// src/middleware.ts
 import { Request, Response, NextFunction } from "express";
 import { lucia } from "@/lib/helpers/auth";
 import { verifyRequestOrigin } from "lucia";
@@ -11,7 +12,7 @@ import { verifyRequestOrigin } from "lucia";
 import type { User, Session } from "lucia";
 import { Role } from "@prisma/client";
 
-/* App-level middleware */
+/* App-level middleware to enforce CSRF protection for security */
 export async function csrfProtection(req: Request, res: Response, next: NextFunction) {
     console.log("[middleware] csrfProtection");
     if (req.method === "GET") {

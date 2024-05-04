@@ -1,3 +1,8 @@
+/**
+ * Name: Example of Media Upload
+ * Description: Provide a code example of how to handle media upload in the route implementation
+ */
+
 // import { profileUploadMiddleware, ProfileUploadFiles } from "@/middlewares/mediaUpload";
 // import { checkMediaUpload, compressAndUploadMedia } from "@/lib/data/mediaHandler";
 

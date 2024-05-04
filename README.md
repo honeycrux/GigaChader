@@ -1,6 +1,6 @@
 # Gigachader
 
-Gigachader is a social media platform project. Gigachader is a platform for crypto enthusiasts to share their passion and knowledge. This platform includes ways for users to post content, interact with others, and share their crypto investment strategies.
+Gigachader is a social media platform project, an online social media platform (“content-oriented application”) dedicated to cryptocurrency enthusiasts who also enjoy the Internet meme culture. Inspired by Twitter and Threads, users on the platform gather to share insights, discuss strategies, as well as posting various meme pictures and videos.
 
 ## Features
 See your feeds on Home. Find out the latest posts from everyone on Global.  
@@ -10,7 +10,7 @@ Like, post, repost, and save posts to bookmark. Share your thoughts in the comme
 ![alt text](/images/feature-commenting.png) ![alt text](/images/feature-bookmarks.png)
 
 Find people, posts, hashtags, and topics on Search.  
-![alt text](/images/feature-search.png) ![alt text](/images/feature-search-topics.png) ![alt text](/images/feature-search-tags.png)
+![alt text](/images/feature-search.png) ![alt text](/images/feature-search-tags.png) ![alt text](/images/feature-search-topics.png)
 
 Discover trending posts, hashtags, and topics.  
 ![alt text](/images/feature-discover-posts.png) ![alt text](/images/feature-discover-tags.png) ![alt text](/images/feature-discover-topics.png)
@@ -21,34 +21,18 @@ Check your notifications. Never miss out on interactions.
 Bookmark your favourite crypto currencies. Follow their latest prices.  
 ![alt text](/images/feature-cryptobm.png) ![alt text](/images/feature-cryptobm-edit.png)
 
-Connect with and follow other people.  
+Follow and connect with other people.  
 ![alt text](/images/feature-profile.png) ![alt text](/images/feature-followuser.png)
 
-Customize your profile. Build a Flexfolio and share your investment strategies.  
+Customize your profile, build a Flexfolio and share your investment strategies.  
 ![alt text](/images/feature-flexfolio.png) ![alt text](/images/feature-flexfolio-edit.png)
 
-Be an admin and moderate users and posts. (Post management is not completed.)  
+Be an admin and moderate users and posts. (Post management is not usable at the moment.)  
 ![alt text](/images/feature-manageuser.png) ![alt text](/images/feature-managepost.png)
 
-## Structure
+## Install & Run
+This project will not run locally without .env files containing databases login credentials.
 
-This is a monorepo containing several folders:
-- `frontend/`: Web server
-  - `app/`: [Next app router](https://nextjs.org/docs/app/building-your-application/routing)
-  - `components/`: Web components
-  - `lib/`: Useful functionalities you define
-- `backend/`: Backend services
-  - `server.ts`: The main file to run the express server
-  - `jobs.ts`: The main file to schedule cron jobs
-  - `prisma/`: Database schema
-  - `routes/`: Routes and functionalities of the API
-  - `lib/`: Useful functionalities you define
-- `shared/`: Resources shared between `frontend/` and `backend/`
-  - `contracts/`: [TS-REST contracts](https://ts-rest.com/docs/core/) to provide typings for API communications
-  - `models/`: Zod schemas and typescript models for some standardized request/response types used in contracts
-- `images/`: (Images used in README files)
-
-## Installation, Starting
 Installing dependencies:
 - At the project root folder, run `npm install`. This will run:
   - installation on the project root folder, which runs afterwards, in parallel:
@@ -61,12 +45,33 @@ Running:
   - `frontend:dev`, equivallent to `npm run dev` on the frontend, starting the server;
   - `backend:dev`, equivallent to `npm run dev` on the backend, running in parallel:
     - `dev:server`, which runs the `server.ts` file; and
-    - `dev: jobs`, which runs the `jobs.ts` file.
-- To run for production, replace "dev" with "start".
+    - `dev:jobs`, which runs the `jobs.ts` file.
+- To run for production, replace "dev" with "start". Remember you need to run the build step before this. See below for the build step.
 
 Building:
-- Frontend requires `npm run build`
-- Backend requires no building step
+- Frontend: `npm run build`
+- Backend runs with tsx and requires no build (transpile) step
+
+## Structure
+
+This is a monorepo containing several folders:
+- `frontend/`: Web server
+  - `app/`: [Next app router](https://nextjs.org/docs/app/building-your-application/routing)
+  - `components/`: Web components
+  - `lib/`: Useful (shared) functionalities you define
+  - `providers/`: Custom providers, mainly context providers
+  - `public/`: Public assets
+- `backend/`: Backend services
+  - `server.ts`: The main file to run the express server
+  - `jobs.ts`: The main file to schedule cron jobs
+  - `prisma/`: Database schema
+  - `routes/`: Routes and functionalities of the API
+  - `middlewares/`: [Express middlewares](https://expressjs.com/en/guide/using-middleware.html)
+  - `lib/`: Useful (shared) functionalities you define
+- `shared/`: Resources shared between `frontend/` and `backend/`
+  - `contracts/`: [TS-REST contracts](https://ts-rest.com/docs/core/) to provide typings for API communications
+  - `models/`: Zod schemas and typescript models for some standardized request/response types used in contracts
+- `images/`: (Images used in README files)
 
 ## Developer Notes
 These are technical details for developers.

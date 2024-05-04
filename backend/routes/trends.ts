@@ -1,3 +1,8 @@
+/**
+ * Name: Trends Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (Trends Contract)
+ */
+
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { cryptoInfoFindManyAsRecord } from "@/lib/objects/crypto";

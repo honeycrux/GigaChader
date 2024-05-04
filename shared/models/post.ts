@@ -1,3 +1,8 @@
+/**
+ * Name: Post Shared Models
+ * Description: Create common zod schemas and types
+ */
+
 import { z } from "zod";
 import { simpleUserInfoSchema } from "./user";
 

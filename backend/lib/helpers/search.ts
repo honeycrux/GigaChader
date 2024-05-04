@@ -1,6 +1,13 @@
+/**
+ * Name: Search Utilities
+ * Description: Provide utility functions for searching
+ */
+
 import { prismaClient } from "../data/db";
 import { postInfoFindManyOrdered } from "../objects/post";
 import { simpleUserInfoFindManyOrdered } from "../objects/user";
+
+/* Search users */
 
 type SearchUserProps = {
     query: string;
@@ -31,6 +38,8 @@ export async function searchUser({ query, from, limit, previliged }: SearchUserP
     const userinfo = await simpleUserInfoFindManyOrdered({ username: userlist });
     return userinfo;
 }
+
+/* Search posts */
 
 type SearchPostProps = {
     query: string;

@@ -1,3 +1,8 @@
+/**
+ * Name: Example of Validate User
+ * Description: Provide a code example of how to validate a user using middleware in the route implementation
+ */
+
 // import { getPersonalUserInfo } from "@/lib/user/user";
 // import { validateUser } from "@/middlewares/auth";
 

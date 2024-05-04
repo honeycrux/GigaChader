@@ -1,3 +1,8 @@
+/**
+ * Name: Admin Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (Admin Contract)
+ */
+
 import { apiContract } from "#/shared/contracts";
 import { prismaClient } from "@/lib/data/db";
 import { lucia } from "@/lib/helpers/auth";
@@ -11,7 +16,7 @@ export const adminRouter = s.router(apiContract.admin, {
     suspendUser: {
         middleware: [protectRoute.admin],
         handler: async ({ res, body: { username, set } }) => {
-            const prerequest = await prismaClient.user.findUnique({
+            const checkuser = await prismaClient.user.findUnique({
                 select: {
                     suspended: true,
                 },
@@ -19,13 +24,13 @@ export const adminRouter = s.router(apiContract.admin, {
                     username: username,
                 },
             });
-            if (!prerequest) {
+            if (!checkuser) {
                 return {
                     status: 400,
                     body: { error: `User ${username} does not exist` },
                 };
             }
-            if (set !== prerequest.suspended) {
+            if (set !== checkuser.suspended) {
                 const data = await prismaClient.user.update({
                     select: {
                         id: true,
@@ -76,7 +81,7 @@ export const adminRouter = s.router(apiContract.admin, {
     suspendPost: {
         middleware: [protectRoute.admin],
         handler: async ({ res, body: { postId, set } }) => {
-            const prerequest = await prismaClient.post.findUnique({
+            const checkpost = await prismaClient.post.findUnique({
                 select: {
                     suspended: true,
                 },
@@ -84,13 +89,13 @@ export const adminRouter = s.router(apiContract.admin, {
                     id: postId,
                 },
             });
-            if (!prerequest) {
+            if (!checkpost) {
                 return {
                     status: 400,
                     body: { error: `Post with id ${postId} does not exist` },
                 };
             }
-            if (set !== prerequest.suspended) {
+            if (set !== checkpost.suspended) {
                 const data = await prismaClient.post.update({
                     select: {
                         suspended: true,

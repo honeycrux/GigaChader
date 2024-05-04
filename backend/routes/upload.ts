@@ -1,5 +1,9 @@
+/**
+ * Name: Upload Routes
+ * Description: Implement TS-REST subrouter for a TS-REST subcontract (Upload Contract)
+ */
+
 import { apiContract } from "#/shared/contracts";
-import { prismaClient } from "@/lib/data/db";
 import { checkMediaUpload, compressAndUploadMedia, SupportedMediaType } from "@/lib/data/mediaHandler";
 import { createExpirableMediaStash } from "@/lib/helpers/expirables";
 import { protectRoute } from "@/middlewares/auth";

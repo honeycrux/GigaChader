@@ -1,10 +1,15 @@
-// This file defines standard query functions for: User
-// These are useful for getting results for standard response types.
+/**
+ * Name: User Standard Objects
+ * Description: Creates a set of common query functions that returns some standard object types from User Models
+ *              These are useful for getting results for response types.
+ */
 
 import { prismaClient } from "../data/db";
 import { PersonalUserInfo, SimpleUserInfo, UserProfile } from "#/shared/models/user";
 import { cryptoInfoFindManyAsRecord } from "./crypto";
 import { Prisma } from "@prisma/client";
+
+/* Standard query functions for PersonalUserInfo */
 
 const personalUserInfoSelectObj = {
     username: true,
@@ -106,6 +111,8 @@ export async function personalUserInfoFindOne(props: { username: string }): Prom
     }
     return data[0];
 }
+
+/* Standard query functions for UserProfile */
 
 const userProfileSelectObj = {
     username: true,
@@ -232,6 +239,8 @@ export async function userProfileFindOne(props: { username: string; requesterId:
     }
     return data[0];
 }
+
+/* Standard query functions for SimpleUserInfo */
 
 const simpleUserInfoSelectObj = {
     username: true,

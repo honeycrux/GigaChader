@@ -1,3 +1,8 @@
+/**
+ * Name: Crypto Shared Models
+ * Description: Create common zod schemas and types
+ */
+
 import { z } from "zod";
 
 export const cryptoInfoSchema = z.object({
