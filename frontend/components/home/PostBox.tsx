@@ -129,6 +129,14 @@ const PostBox = ({
   const handleRepostSubmit = async () => {
     console.log(id, typeof id);
 
+    // reject empty post
+    if (repostContent.trim() === "") {
+      if (toast.current) {
+        toast.current.show({ severity: "info", summary: "Cannot post", detail: "Your post must have text content" });
+      }
+      return;
+    }
+
     const res = await apiClient.post.postCreate({
       body: {
         content: repostContent,

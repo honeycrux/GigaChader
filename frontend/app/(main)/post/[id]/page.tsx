@@ -46,6 +46,14 @@ const PostDetails = ({ params }: { params: { id: string } }) => {
 
   // submit a comment to backend
   const handleCommentSubmit = async () => {
+    // reject empty post
+    if (commentContent.trim() === "") {
+      if (toast.current) {
+        toast.current.show({ severity: "info", summary: "Cannot post", detail: "Your post must have text content" });
+      }
+      return;
+    }
+
     if (!post) {
       return;
     }
