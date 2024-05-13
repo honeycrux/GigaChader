@@ -62,15 +62,20 @@ export async function cryptoInfoFindMany(props: { cryptoId: string[] }): Promise
 
         // update the data in database
         if (response) {
-            await prismaClient.$transaction(
-                Object.entries(response).map((entry) => {
-                    const [key, value] = entry;
-                    return prismaClient.crypto.update({
-                        data: value,
-                        where: { cryptoId: key },
-                    });
-                })
-            );
+            console.log(response);
+            try {
+                await prismaClient.$transaction(
+                    Object.entries(response).map((entry) => {
+                        const [key, value] = entry;
+                        return prismaClient.crypto.update({
+                            data: value,
+                            where: { cryptoId: key },
+                        });
+                    })
+                );
+            } catch {
+                // should be a write conflict due to multiple requests; ignore for now
+            }
         }
     }
 

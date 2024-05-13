@@ -1,6 +1,6 @@
 # Gigachader
 
-Gigachader is a social media platform project, an online social media platform (“content-oriented application”) dedicated to cryptocurrency enthusiasts who also enjoy the Internet meme culture. Inspired by Twitter and Threads, users on the platform gather to share insights, discuss strategies, as well as posting various meme pictures and videos.
+Gigachader is a social media platform project, an online social media platform dedicated to cryptocurrency enthusiasts who also enjoy the Internet meme culture. Inspired by Twitter and Threads, users on the platform gather to share insights, discuss strategies, as well as posting various meme pictures and videos.
 
 ## Features
 See your feeds on Home. Find out the latest posts from everyone on Global.  
@@ -38,18 +38,18 @@ Installing dependencies:
   - installation on the project root folder, which runs afterwards, in parallel:
     - `install:frontend`, equivallent to `npm install` on the frontend folder; and
     - `install:backend`, equivallent to `npm install` on the backend folder, which runs afterwards:
-      - `npm run prisma:gen` to re-generate the prisma client.
+      - `prisma:gen` to re-generate the prisma client.
 
 Running:
 - At the project root folder, run `npm run dev`. This will run, in parallel:
-  - `frontend:dev`, equivallent to `npm run dev` on the frontend, starting the server;
-  - `backend:dev`, equivallent to `npm run dev` on the backend, running in parallel:
+  - `frontend:dev`, equivallent to `npm run dev` on the frontend folder, starting the web server;
+  - `backend:dev`, equivallent to `npm run dev` on the backend folder, running in parallel:
     - `dev:server`, which runs the `server.ts` file; and
     - `dev:jobs`, which runs the `jobs.ts` file.
 - To run for production, replace "dev" with "start". Remember you need to run the build step before this. See below for the build step.
 
 Building:
-- Frontend: `npm run build`
+- Frontend: Go to frontend folder and run `npm run build`
 - Backend runs with tsx and requires no build (transpile) step
 
 ## Structure
@@ -59,19 +59,19 @@ This is a monorepo containing several folders:
   - `app/`: [Next app router](https://nextjs.org/docs/app/building-your-application/routing)
   - `components/`: Web components
   - `lib/`: Useful (shared) functionalities you define
-  - `providers/`: Custom providers, mainly context providers
+  - `providers/`: Custom providers you define (e.g. context providers)
   - `public/`: Public assets
 - `backend/`: Backend services
   - `server.ts`: The main file to run the express server
   - `jobs.ts`: The main file to schedule cron jobs
+  - `lib/`: Useful (shared) functionalities you define
+  - `middlewares/`: [Express middlewares](https://expressjs.com/en/guide/using-middleware.html)
   - `prisma/`: Database schema
   - `routes/`: Routes and functionalities of the API
-  - `middlewares/`: [Express middlewares](https://expressjs.com/en/guide/using-middleware.html)
-  - `lib/`: Useful (shared) functionalities you define
+- `images/`: (Images used in README files)
 - `shared/`: Resources shared between `frontend/` and `backend/`
   - `contracts/`: [TS-REST contracts](https://ts-rest.com/docs/core/) to provide typings for API communications
   - `models/`: Zod schemas and typescript models for some standardized request/response types used in contracts
-- `images/`: (Images used in README files)
 
 ## Developer Notes
 These are technical details for developers.
@@ -130,7 +130,7 @@ When using storage programmatically from routes, please use defined functions on
 See `backend/routes/(example-of-media-upload).ts` as an example for defining a route that needs to handle image uploading.
 
 ### Backend: Database Model & Migration
-To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`, and update the database schema by running `npx prisma db push`.
+To change the database model, change the prisma model file (`backend/prisma/schema.prisma`). Then, update the code type definition by running `npx prisma generate`, and update the database schema by running `npx prisma db push`. (Commands have to be run on the backend.)
 
 [Other tips for working with Prisma+MongoDB](https://www.prisma.io/docs/orm/overview/databases/mongodb/)
 
