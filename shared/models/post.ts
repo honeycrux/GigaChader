@@ -35,6 +35,7 @@ const basePostInfoSchema = z.object({
     commentCount: z.number(),
     saveCount: z.number(),
     likedByRequester: z.boolean().nullable(),
+    editedByModerator: z.boolean(),
     savedByRequester: z.boolean().nullable(),
 });
 
@@ -64,6 +65,7 @@ export const simplePostInfoSchema = z.object({
     author: simpleUserInfoSchema,
     repostingPostId: z.string().nullable(),
     parentPostId: z.string().nullable(),
+    editedByModerator: z.boolean(),
 });
 
 export type SimplePostInfo = z.infer<typeof simplePostInfoSchema>;
@@ -84,3 +86,23 @@ export const postCreationPropsSchema = z.object({
 });
 
 export type PostCreationProps = z.infer<typeof postCreationPropsSchema>;
+
+export const postModifyPropsSchema = z.object({
+    postId: z.string(),
+    content: z.optional(z.string()),
+    repostingPostId: z.optional(z.string()),
+    parentPostId: z.optional(z.string()),
+    removeRepostingPost: z.optional(z.boolean()),
+    removeParentPost: z.optional(z.boolean()),
+    userMedia: z.optional(
+        z.array(
+            z.object({
+                url: z.string(),
+                type: userMediaTypeSchema,
+                altText: z.optional(z.string()),
+            })
+        )
+    ),
+});
+
+export type PostModifyProps = z.infer<typeof postModifyPropsSchema>;

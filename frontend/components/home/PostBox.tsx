@@ -41,6 +41,7 @@ const PostBox = ({
     createdAt,
     commentCount,
     likeCount,
+    editedByModerator,
     likedByRequester,
     userMedia,
     savedByRequester,
@@ -287,6 +288,7 @@ const PostBox = ({
                     ))}
                   </div>
                 )}
+                {editedByModerator && <div className="text-gray-600 italic">(Edited by moderator)</div>}
               </>
             )}
             {/* if is reposting, display the reposted post */}

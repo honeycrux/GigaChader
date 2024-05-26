@@ -360,8 +360,7 @@ const Profile = ({ params }: { params: { username?: string[] } }) => {
                   </div> */}
                 <p className="text-xl">Bio</p>
                 <div className="flex w-96">
-                  <InputTextarea className="w-full" value={editBio} maxLength={1000}
-                  onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
+                  <InputTextarea className="w-full" value={editBio} maxLength={1000} onChange={(e) => setEditBio(e.target.value)} rows={4} autoResize />
                 </div>
                 <p>Text length: {editBio.length}/1000</p>
               </div>

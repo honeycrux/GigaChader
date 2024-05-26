@@ -6,7 +6,7 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { simpleUserInfoSchema } from "../models/user";
-import { postInfoSchema } from "../models/post";
+import { postCreationPropsSchema, postInfoSchema, postModifyPropsSchema, simplePostInfoSchema } from "../models/post";
 
 const c = initContract();
 export const adminContract = c.router({
@@ -44,6 +44,16 @@ export const adminContract = c.router({
             }),
         },
         summary: "Suspend a post",
+    },
+
+    opModifyPost: {
+        method: "POST",
+        path: "/api/admin/modify-post",
+        body: postModifyPropsSchema,
+        responses: {
+            200: simplePostInfoSchema.nullable(),
+        },
+        summary: "Modify a post",
     },
 
     opListUsers: {

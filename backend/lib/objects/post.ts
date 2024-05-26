@@ -32,6 +32,7 @@ const postInfoSelectObj = {
     repostingPostId: true,
     repostChainIds: true,
     parentPostId: true,
+
     _count: {
         select: {
             postLikes: {
@@ -50,6 +51,11 @@ const postInfoSelectObj = {
             },
             repostedOnPosts: true,
             childPosts: true,
+            moderationHits: {
+                where: {
+                    descriptor: "MODIFY_POST",
+                },
+            },
         },
     },
 } satisfies Prisma.PostSelect;
@@ -163,9 +169,10 @@ export async function postInfoFindMany(props: { postId: string[]; requesterId: s
             postCryptoTopics: postCryptoTopics.map((topic) => topic.cryptoId),
             author: authordata[author.username],
             likeCount: _count.postLikes,
-            saveCount: _count.postSaves,
             repostCount: _count.repostedOnPosts,
             commentCount: _count.childPosts,
+            saveCount: _count.postSaves,
+            editedByModerator: _count.moderationHits > 0,
             likedByRequester: props.requesterId ? !!likemap[post.id] : null,
             savedByRequester: props.requesterId ? !!savemap[post.id] : null,
         };
@@ -224,6 +231,16 @@ const simplePostInfoSelectObj = {
     repostingPostId: true,
     repostChainIds: true,
     parentPostId: true,
+
+    _count: {
+        select: {
+            moderationHits: {
+                where: {
+                    descriptor: "MODIFY_POST",
+                },
+            },
+        },
+    },
 } satisfies Prisma.PostSelect;
 
 export async function simplePostInfoFindMany(props: { postId: string[] }): Promise<SimplePostInfo[]> {
@@ -240,9 +257,10 @@ export async function simplePostInfoFindMany(props: { postId: string[] }): Promi
     const authordata = await simpleUserInfoFindManyAsRecord({ username: authorlist });
 
     const simplePostInfo = data.map((post) => {
-        const { postHashtags, postCryptoTopics, author, ...rest } = post;
+        const { _count, postHashtags, postCryptoTopics, author, ...rest } = post;
         return {
             ...rest,
+            editedByModerator: _count.moderationHits > 0,
             postHashtags: postHashtags.map((tag) => tag.tagText),
             postCryptoTopics: postCryptoTopics.map((topic) => topic.cryptoId),
             author: authordata[author.username],

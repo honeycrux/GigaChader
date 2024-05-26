@@ -7,6 +7,8 @@ import { Button } from "primereact/button";
 import { apiClient } from "@/lib/apiClient";
 import { SimpleUserInfo } from "#/shared/models/user";
 import { useAuthContext } from "@/providers/auth-provider";
+import Link from "next/link";
+import { siteLinkBuilder } from "@/lib/utils";
 
 // page for suspending users
 const UserManagement = () => {
@@ -165,7 +167,11 @@ const UserManagement = () => {
                 searchResult.map((user, index) => (
                   <tr className="hover:bg-gray-100 border-b border-gray-300 py-10" key={index}>
                     {/* <td className="px-8 py-4">{user.id}</td> */}
-                    <td className="px-8 py-4">{user.username}</td>
+                    <td className="px-8 py-4">
+                      <Link href={siteLinkBuilder.profile({ username: user.username })} className="text-orange1 hover:underline">
+                        {user.username}
+                      </Link>
+                    </td>
                     <td className="px-8 py-4">{user.displayName}</td>
                     <td className="px-8 py-4">{user.suspended.toString()}</td>
                     <td className="px-8 py-4 flex space-x-4">
