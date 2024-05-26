@@ -23,6 +23,7 @@ const postInfoSelectObj = {
     },
     postCryptoTopics: true,
     textualContexts: true,
+    suspended: true,
     author: {
         select: {
             username: true,
@@ -33,8 +34,20 @@ const postInfoSelectObj = {
     parentPostId: true,
     _count: {
         select: {
-            postLikes: true,
-            postSaves: true,
+            postLikes: {
+                where: {
+                    user: {
+                        suspended: false,
+                    },
+                },
+            },
+            postSaves: {
+                where: {
+                    user: {
+                        suspended: false,
+                    },
+                },
+            },
             repostedOnPosts: true,
             childPosts: true,
         },
@@ -192,11 +205,25 @@ export async function postInfoFindOne(props: { postId: string; requesterId: stri
 
 const simplePostInfoSelectObj = {
     id: true,
+    content: true,
+    createdAt: true,
+    userMedia: true,
+    postHashtags: {
+        select: {
+            tagText: true,
+        },
+    },
+    postCryptoTopics: true,
+    textualContexts: true,
+    suspended: true,
     author: {
         select: {
             username: true,
         },
     },
+    repostingPostId: true,
+    repostChainIds: true,
+    parentPostId: true,
 } satisfies Prisma.PostSelect;
 
 export async function simplePostInfoFindMany(props: { postId: string[] }): Promise<SimplePostInfo[]> {
@@ -213,9 +240,11 @@ export async function simplePostInfoFindMany(props: { postId: string[] }): Promi
     const authordata = await simpleUserInfoFindManyAsRecord({ username: authorlist });
 
     const simplePostInfo = data.map((post) => {
-        const { author, ...rest } = post;
+        const { postHashtags, postCryptoTopics, author, ...rest } = post;
         return {
             ...rest,
+            postHashtags: postHashtags.map((tag) => tag.tagText),
+            postCryptoTopics: postCryptoTopics.map((topic) => topic.cryptoId),
             author: authordata[author.username],
         };
     });

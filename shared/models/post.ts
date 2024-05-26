@@ -26,6 +26,7 @@ const basePostInfoSchema = z.object({
     postHashtags: z.array(z.string()),
     postCryptoTopics: z.array(z.string()),
     textualContexts: z.array(textualContextSchema),
+    suspended: z.boolean(),
     author: simpleUserInfoSchema,
     repostingPostId: z.string().nullable(),
     parentPostId: z.string().nullable(),
@@ -48,7 +49,21 @@ export const postInfoSchema: z.ZodType<PostInfo> = basePostInfoSchema.extend({
 
 export const simplePostInfoSchema = z.object({
     id: z.string(),
+    content: z.string(),
+    createdAt: z.date(),
+    userMedia: z.array(
+        z.object({
+            url: z.string(),
+            type: userMediaTypeSchema,
+        })
+    ),
+    postHashtags: z.array(z.string()),
+    postCryptoTopics: z.array(z.string()),
+    textualContexts: z.array(textualContextSchema),
+    suspended: z.boolean(),
     author: simpleUserInfoSchema,
+    repostingPostId: z.string().nullable(),
+    parentPostId: z.string().nullable(),
 });
 
 export type SimplePostInfo = z.infer<typeof simplePostInfoSchema>;

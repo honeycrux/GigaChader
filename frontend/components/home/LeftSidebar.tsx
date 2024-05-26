@@ -44,6 +44,8 @@ const LeftSidebar = () => {
       setSelectedButton("Bookmarks");
     } else if (pathname.includes("crypto")) {
       setSelectedButton("Crypto");
+    } else {
+      // setSelectedButton("");
     }
   }, [pathname]); // Re-run the effect when `pathname` changes
 

@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image } from "primereact/image";
 import { Avatar } from "primereact/avatar";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 import { Dialog } from "primereact/dialog";
-import { PostInfo, SimplePostInfo } from "#/shared/models/post";
+import { PostInfo } from "#/shared/models/post";
 import { SimpleUserInfo } from "#/shared/models/user";
 import SimpleUserBox from "./SimpleUserBox";
 
@@ -45,6 +45,7 @@ const PostBox = ({
     userMedia,
     savedByRequester,
     repostingPost,
+    suspended,
   } = postInfo;
 
   const toast = useRef<Toast>(null);
@@ -191,71 +192,102 @@ const PostBox = ({
     }
   };
 
+  /**
+   * Author
+   */
+  const avatarElement = (
+    /* if author has avatar, display it, else display placeholder */
+    <Avatar
+      className="mr-2"
+      image={!author.suspended && author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
+      shape="circle"
+      size="large"
+      pt={{ image: { className: "object-cover" } }}
+    />
+  );
+  const authorInfoElement = (
+    <>
+      {author.displayName} &nbsp;
+      <span className="text-gray-600">@{author.username}</span>
+    </>
+  );
+
+  /**
+   * Other stuff
+   */
+  const canInteract = !suspended && !author.suspended;
+
   return (
     <div className="flex flex-col w-full bg-orange2 rounded-2xl p-4">
       <Toast ref={toast}></Toast>
       <div className="flex">
         <div className="flex flex-col items-center">
-          <Link href={`/profile/${author.username}`}>
-            {/* if author has avatar, display it, else display placeholder */}
-            <Avatar
-              className="mr-2"
-              image={author.avatarUrl ? process.env.NEXT_PUBLIC_BACKEND_URL + author.avatarUrl : "/placeholder_profilePic_white-bg.jpg"}
-              shape="circle"
-              size="large"
-              pt={{ image: { className: "object-cover" } }}
-            />
-          </Link>
+          {author.suspended ? avatarElement : <Link href={`/profile/${author.username}`}>{avatarElement}</Link>}
           <div className="relative mt-2 grow w-0.5 rounded-full bg-gray-600" />
         </div>
         <div className="whitespace-pre-wrap">
+          {author.suspended ? (
+            "Unknown User"
+          ) : (
+            <div>
+              {author.suspended ? (
+                authorInfoElement
+              ) : (
+                <Link className="mr-2 hover:underline" href={`/profile/${author.username}`}>
+                  {authorInfoElement}
+                </Link>
+              )}
+            </div>
+          )}
           <div>
-            <Link className="mr-2 hover:underline" href={`/profile/${author.username}`}>
-              {author.displayName} &nbsp;
-              <span className="text-gray-600">@{author.username}</span>
-            </Link>
-          </div>
-          <div>
-            <p>
-              {textualContexts
-                ? textualContexts.map((context, index) => {
-                  // if context is a link, display it as a link
-                  if (context.href) {
-                    return (
-                      <Link key={index} href={context.href} className="text-orange1 hover:underline">
-                        {context.text}
-                      </Link>
-                    );
-                  } else {
-                    return <span key={index}>{context.text}</span>;
-                  }
-                })
-                : content}
-            </p>
-            {/* show image or video if any */}
-            {userMedia && userMedia.length > 0 && (
-              <div className="flex flex-wrap">
-                {userMedia.map((media: { url: string; type: string }, index: number) => (
-                  <div key={index} className="my-2">
-                    {media.type === "IMAGE" ? (
-                      <Image
-                        src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url}
-                        alt="image"
-                        preview
-                        pt={{
-                          image: { className: "rounded-lg" },
-                        }}
-                      />
-                    ) : (
-                      <video controls>
-                        <source src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} type="video/mp4" />
-                        {/* if browser does not support video tag, display this message */}
-                        <span>Your browser does not support the video tag.</span>
-                      </video>
-                    )}
+            {author.suspended ? (
+              <div className="text-gray-600 italic">(This post cannot be viewed)</div>
+            ) : suspended ? (
+              <div className="text-gray-600 italic">(This post was deleted by a moderator)</div>
+            ) : (
+              <>
+                <p>
+                  {textualContexts
+                    ? textualContexts.map((context, index) => {
+                        // if context is a link, display it as a link
+                        if (context.href) {
+                          return (
+                            <Link key={index} href={context.href} className="text-orange1 hover:underline">
+                              {context.text}
+                            </Link>
+                          );
+                        } else {
+                          return <span key={index}>{context.text}</span>;
+                        }
+                      })
+                    : content}
+                </p>
+                {/* show image or video if any */}
+                {userMedia && userMedia.length > 0 && (
+                  <div className="flex flex-wrap">
+                    {userMedia.map((media: { url: string; type: string }, index: number) => (
+                      <div key={index} className="my-2">
+                        {media.type === "IMAGE" ? (
+                          <Image
+                            src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url}
+                            alt="image"
+                            preview
+                            pt={{
+                              image: { className: "rounded-lg" },
+                            }}
+                          />
+                        ) : (
+                          <video controls>
+                            <source src={process.env.NEXT_PUBLIC_BACKEND_URL + media.url} type="video/mp4" />
+                            {/* if browser does not support video tag, display this message */}
+                            <span>Your browser does not support the video tag.</span>
+                          </video>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
             {/* if is reposting, display the reposted post */}
             {repostingPost && (
@@ -265,7 +297,7 @@ const PostBox = ({
             )}
           </div>
           {/* if is logged in, display like, comment, repost, bookmark buttons */}
-          {bButtonvisible && (
+          {bButtonvisible && canInteract && (
             <div className="inline-flex [&>*]:mr-2 items-end">
               {currentUserName && <Image src={heartPath} width="24" alt="heart" onClick={handleHeartClick} className="cursor-pointer" />}
               {/* <Link href={bVisitParentPost && parentPostId ? `/post/${parentPostId}` : `/post/${id}`}> */}
@@ -294,14 +326,13 @@ const PostBox = ({
         </div>
       </div>
       <p className="text-gray-600">{formatDate(createdAt.toString())}</p>
-      {parentPostId &&
-        (parentPostId !== currentPostPageId && (
-          <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">
-            Go to parent post
-          </Link>
-        ))}
+      {parentPostId && parentPostId !== currentPostPageId && (
+        <Link href={`/post/${parentPostId}`} className="text-gray-600 hover:underline">
+          Go to parent post
+        </Link>
+      )}
 
-        {/* abandoned comment box design */}
+      {/* abandoned comment box design */}
       {bShowCommentBox && (
         <div className="flex flex-col w-full">
           <p className="text-xl">Comment</p>
@@ -320,8 +351,7 @@ const PostBox = ({
         }}
         footer={dialogFooter}
       >
-        <InputTextarea className="w-full" value={repostContent} maxLength={1000}
-          onChange={(e) => setRepostContent(e.target.value)} rows={6} autoResize />
+        <InputTextarea className="w-full" value={repostContent} maxLength={1000} onChange={(e) => setRepostContent(e.target.value)} rows={6} autoResize />
 
         <PostBox post={postInfo} bButtonvisible={false} />
       </Dialog>

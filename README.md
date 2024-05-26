@@ -3,7 +3,7 @@
 Gigachader is a social media platform project, an online social media platform dedicated to cryptocurrency enthusiasts who also enjoy the Internet meme culture. Inspired by Twitter and Threads, users on the platform gather to share insights, discuss strategies, as well as posting various meme pictures and videos.
 
 ## Features
-See your feeds on Home. Find out the latest posts from everyone on Global.  
+See your feeds on Home. Find out the latest posts from everyone on Global. More posts load as you scroll down.  
 ![alt text](/images/feature-home.png) ![alt text](/images/feature-global.png)
 
 Like, post, repost, and save posts to bookmark. Share your thoughts in the comments.  
@@ -27,7 +27,7 @@ Follow and connect with other people.
 Customize your profile, build a Flexfolio and share your investment strategies.  
 ![alt text](/images/feature-flexfolio.png) ![alt text](/images/feature-flexfolio-edit.png)
 
-Be an admin and moderate users and posts. (Post management is not usable at the moment.)  
+Be an admin and moderate users and posts.
 ![alt text](/images/feature-manageuser.png) ![alt text](/images/feature-managepost.png)
 
 ## Install & Run

@@ -32,3 +32,32 @@ export function fakeFetchPost(id: string) {
 //
 //   return auth;
 // }
+
+/* Function to make links to every place on the site */
+
+type SiteLinkKey = "login" | "signup" | "onboarding" | "home" | "global" | "discover" | "search" | "activity" | "profile" | "bookmarks" | "crypto" | "post";
+
+function makeSiteLinkFunction<Params extends Record<string, string | number>>(callback: (params: Params) => string) {
+  return callback;
+}
+
+export const siteLinkBuilder = {
+  login: makeSiteLinkFunction<{}>(() => "/"),
+  signup: makeSiteLinkFunction<{}>(() => "/signup"),
+  onboarding: makeSiteLinkFunction<{}>(() => "/onboarding"),
+  home: makeSiteLinkFunction<{}>(() => "/home"),
+  global: makeSiteLinkFunction<{}>(() => "/global"),
+  discover: makeSiteLinkFunction<{}>(() => "/discover"),
+  search: makeSiteLinkFunction<{ searchKey?: string }>((params) => {
+    return params.searchKey ? `/search/${params.searchKey}` : `/search`;
+  }),
+  activity: makeSiteLinkFunction<{}>(() => "/activity"),
+  profile: makeSiteLinkFunction<{ username?: string }>((params) => {
+    return params.username ? `/profile/${params.username}` : `/profile`;
+  }),
+  bookmarks: makeSiteLinkFunction<{}>(() => "/bookmarks"),
+  crypto: makeSiteLinkFunction<{}>(() => "/crypto"),
+  post: makeSiteLinkFunction<{ postId: string }>((params) => {
+    return `/post/${params.postId}`;
+  }),
+} satisfies Record<SiteLinkKey, (params: any) => string>;

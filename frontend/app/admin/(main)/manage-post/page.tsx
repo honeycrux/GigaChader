@@ -1,11 +1,16 @@
 "use client";
 
 import { InputText } from "primereact/inputtext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { useAuthContext } from "@/providers/auth-provider";
+import { SimplePostInfo } from "#/shared/models/post";
+import { apiClient } from "@/lib/apiClient";
+import Link from "next/link";
+import { siteLinkBuilder } from "@/lib/utils";
+
 interface ActionOption {
   name: string;
   code: string;
@@ -15,10 +20,32 @@ interface ActionOption {
 const PostMangement = () => {
   const { user } = useAuthContext();
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
-  const actions: ActionOption[] = [
+  const [selectedPost, setSelectedPost] = useState<{
+    postId: string;
+    deleted: boolean;
+    index: number;
+  } | null>(null);
+  const actions: (deleted: boolean) => ActionOption[] = (deleted: boolean) => [
     { name: "Edit", code: "ED" },
-    { name: "Suspend", code: "SP" },
+    { name: deleted ? "Undelete" : "Delete", code: "SP" },
   ];
+  const [searchText, setSearchText] = useState("");
+  const [searchResult, setSearchResult] = useState<SimplePostInfo[] | null>(null);
+
+  useEffect(() => {
+    // abuse search function to list all users
+    handleSearch("");
+  }, []);
+
+  // submit search query to backend
+  const handleSearch = async (searchParams: string) => {
+    setSearchText(searchParams);
+    const searchResult = await apiClient.admin.opListPosts({ query: { query: searchParams } });
+    if (searchResult.status === 200 && searchResult.body) {
+      console.log(searchResult.body);
+      setSearchResult(searchResult.body);
+    }
+  };
 
   const actionTemplate = (option: ActionOption) => {
     return (
@@ -29,12 +56,34 @@ const PostMangement = () => {
   };
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const onActionChange = (e: DropdownChangeEvent) => {
+  const onActionChange = (postId: string, deleted: boolean, index: number) => (e: DropdownChangeEvent) => {
+    setSelectedPost({ postId, deleted, index });
     setSelectedAction(e.value);
     if (e.value.code === "SP") {
       setShowConfirmDialog(true);
     }
   };
+
+  async function handlePostDeletion() {
+    if (!selectedPost) {
+      return;
+    }
+    const { postId, deleted, index } = selectedPost;
+    const newValue = !deleted;
+    const res = await apiClient.admin.suspendPost({
+      body: { postId, set: newValue },
+    });
+    console.log(res);
+    if (res.status === 200 && res.body.success) {
+      if (searchResult) {
+        searchResult[index].suspended = newValue;
+      }
+      setSearchResult(searchResult);
+    }
+    setShowConfirmDialog(false);
+    setSelectedAction(null);
+    handleSearch(searchText);
+  }
 
   const renderFooter = () => {
     return (
@@ -44,6 +93,7 @@ const PostMangement = () => {
           icon="pi pi-check"
           onClick={() => {
             /* handle removal logic here */
+            handlePostDeletion();
           }}
           autoFocus
         />
@@ -76,7 +126,13 @@ const PostMangement = () => {
           </div>
           <hr className="border-gray-1000 mb-2 " /> {/* This adds a grey line */}
           <p className="text-xl mb-2 ml-6">Search</p> {/* This adds the "Search" text */}
-          <InputText className="border p-2 rounded-md mb-4 ml-6 mt-1 w-[95%] " placeholder="Search..." /> {/* This adds a search box */}
+          <InputText
+            className="border p-2 rounded-md mb-4 ml-6 mt-1 w-[95%] "
+            value={searchText}
+            placeholder="Search..."
+            onChange={(e) => handleSearch(e.target.value)}
+          />{" "}
+          {/* This adds a search box */}
           {/* this part for the table */}
           <table className="table-auto border-collapse w-full">
             <thead>
@@ -84,41 +140,43 @@ const PostMangement = () => {
                 <th className="px-8 py-2">PostID</th>
                 <th className="px-8 py-2">Username</th>
                 <th className="px-8 py-2">Post content</th>
+                <th className="px-8 py-2">Status</th>
                 <th className="px-8 py-2">Action</th>
               </tr>
             </thead>
             <tbody className="text-sm font-normal text-gray-700">
-              <tr className=" border-b border-gray-300 py-10">
-                <td className="px-8 py-4">Post ID-------------</td>
-                <td className="px-8 py-4">Username</td>
-                <td className="px-8 py-4">Post content</td>
-                <td className="px-8 py-4">
-                  <Dropdown
-                    className="border border-gray-300 py-0 rounded-lg"
-                    value={selectedAction}
-                    options={actions}
-                    onChange={onActionChange}
-                    itemTemplate={actionTemplate}
-                    optionLabel="name"
-                    placeholder="Choose an action"
-                  />
-
-                  <Dialog
-                    header="Confirmation"
-                    visible={showConfirmDialog}
-                    style={{ width: "50vw" }}
-                    footer={renderFooter()}
-                    onHide={() => setShowConfirmDialog(false)}
-                  >
-                    Do you want to suspend this post?
-                  </Dialog>
-                </td>
-              </tr>
+              {searchResult &&
+                searchResult.map((post, index) => (
+                  <tr key={index} className=" border-b border-gray-300 py-10">
+                    <td className="px-8 py-4">
+                      <Link href={siteLinkBuilder.post({ postId: post.id })} className="text-orange1 hover:underline">
+                        {post.id}
+                      </Link>
+                    </td>
+                    <td className="px-8 py-4">{post.author.username}</td>
+                    <td className="px-8 py-4">{post.content}</td>
+                    <td className="px-8 py-4">{post.suspended ? "Deleted" : "OK"}</td>
+                    <td className="px-8 py-4">
+                      <Dropdown
+                        className="border border-gray-300 py-0 rounded-lg"
+                        value={null}
+                        options={actions(post.suspended)}
+                        onChange={onActionChange(post.id, post.suspended, index)}
+                        itemTemplate={actionTemplate}
+                        optionLabel="name"
+                        placeholder="Choose an action"
+                      />
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
       </main>
       {/* main content end */}
+      <Dialog header="Confirmation" visible={showConfirmDialog} style={{ width: "50vw" }} footer={renderFooter()} onHide={() => setShowConfirmDialog(false)}>
+        Do you want to {selectedPost && selectedPost.deleted ? "undelete" : "delete"} this post?
+      </Dialog>
     </>
   );
 };

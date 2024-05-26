@@ -25,7 +25,7 @@ const UserManagement = () => {
   // submit search query to backend
   const handleSearch = async (searchParams: string) => {
     setSearchText(searchParams);
-    const searchResult = await apiClient.user.userSearch({ query: { query: searchParams } });
+    const searchResult = await apiClient.admin.opListUsers({ query: { query: searchParams } });
     if (searchResult.status === 200 && searchResult.body) {
       console.log(searchResult.body);
       setSearchResult(searchResult.body);
