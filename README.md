@@ -134,9 +134,6 @@ To change the database model, change the prisma model file (`backend/prisma/sche
 
 [Other tips for working with Prisma+MongoDB](https://www.prisma.io/docs/orm/overview/databases/mongodb/)
 
-The ER diagram shall be kept up-to-date with respect to the development of application:  
-![Entity relation diagram](/images/entity-relation-diagram.jpg)
-
 ### Changes to Environment Variables
 Environment variables are modifiable values that will affect how the process behave. The env file can contain sensitive information such as credentials.
 
