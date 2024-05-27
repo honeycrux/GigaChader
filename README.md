@@ -27,7 +27,7 @@ Follow and connect with other people.
 Customize your profile, build a Flexfolio and share your investment strategies.  
 ![alt text](/images/feature-flexfolio.png) ![alt text](/images/feature-flexfolio-edit.png)
 
-Be an admin and moderate users and posts.
+Be an admin and moderate users and posts.  
 ![alt text](/images/feature-manageuser.png) ![alt text](/images/feature-managepost.png)
 
 ## Install & Run
