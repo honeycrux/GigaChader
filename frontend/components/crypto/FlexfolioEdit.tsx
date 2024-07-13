@@ -199,7 +199,30 @@ const FlexfolioEdit = ({ bEditFlexfolioDiagVisible, onExit, onSave }: Props) => 
               </p>
             </Dialog>
             <DataTable value={addedItems} editMode="cell" className="w-full">
-              <Column field="crypto.name" header="Name"></Column>
+              <Column body={(data: CryptoHolding ) =>{
+                return(
+                  <div className=" flex flex-row items-center space-x-3">
+                        <img 
+                            src= {"https://assets.coincap.io/assets/icons/"+ data.crypto.symbol.toLowerCase()+ "@2x.png"}
+                            onError={({ currentTarget }) => {
+                              currentTarget.onerror = null; // prevents looping
+                              currentTarget.src="https://coincap.io/static/logo_mark.png";
+                            }}
+                            alt="crypto image" 
+                            className=" size-7 "
+                        />
+                      
+                      
+                        <p className="text-lg text-black font-bold">{data.crypto.name}</p>
+                     
+
+                      
+                    </div>
+                );
+                }
+                } header="Name" 
+              >
+              </Column>
               <Column field="crypto.symbol" header="Symbol"></Column>
               <Column field="amount" header="Amount" editor={(editInput) => amountCellEditor(editInput)} onCellEditComplete={amountCellEditComplete}></Column>
               <Column

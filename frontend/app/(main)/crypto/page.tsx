@@ -2,7 +2,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { useAuthContext } from "@/providers/auth-provider";
 import { Button } from "primereact/button";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState,  } from "react";
 import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
@@ -26,6 +26,7 @@ function Crypto() {
   const [bDeleteBookmarkDiagVisible, setbDeleteBookmarkDiagVisible] = useState<boolean>(false);
   const [addedItems, setAddedItems] = useState<CryptoInfo[]>([]);
   const [cryptoUpdatedTime, setCryptoUpdatedTime] = useState<string>("");
+  // const [imageError, setimageError] = useState<boolean>(false);
 
   // save the updated crypto bookmarks to the backend
   async function handleSave() {
@@ -120,6 +121,7 @@ function Crypto() {
     </div>
   );
 
+  
   return (
     <div className="flex w-full overflow-y-auto justify-center min-h-full">
       <Dialog
@@ -178,17 +180,34 @@ function Crypto() {
         <div className="flex w-full gap-9">
           {cryptoBookmarks && (
             <div className="w-full space-y-2">
-              {cryptoBookmarks.map((result, index) => (
+              {cryptoBookmarks.map((result, index) => {
+                
+                return(
                 <Card
                   key={index}
                   pt={{
                     content: { className: "p-0" },
                   }}
                 >
+                  
                   <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-lg text-black font-bold">{result.name}</p>
-                      <p className="text-sm text-gray-500">{result.symbol}</p>
+                    <div className=" flex flex-row items-center space-x-3">
+                        <img 
+                            src= {"https://assets.coincap.io/assets/icons/"+ result.symbol.toLowerCase()+ "@2x.png"}
+                            onError={({ currentTarget }) => {
+                              currentTarget.onerror = null; // prevents looping
+                              currentTarget.src="https://coincap.io/static/logo_mark.png";
+                            }}
+                            alt="crypto image" 
+                            className=" size-8 "
+                        />
+                      
+                      <div>
+                        <p className="text-lg text-black font-bold">{result.name}</p>
+                        <p className="text-sm text-gray-500">{result.symbol}</p>
+                      </div>
+
+                      
                     </div>
                     <div className=" flex flex-row items-center">
                       <p className="text-lg text-black font-bold">${result.priceUsd}</p>
@@ -204,7 +223,8 @@ function Crypto() {
                     </div>
                   </div>
                 </Card>
-              ))}
+                );
+                })}
             </div>
           )}
         </div>

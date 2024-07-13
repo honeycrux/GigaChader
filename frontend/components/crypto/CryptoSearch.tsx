@@ -84,9 +84,20 @@ const CryptoSearch = ({ cryptoList, onEdit }: Props) => {
                       }}
                     >
                       <div className="flex justify-between items-center">
-                        <div>
-                          <p className="text-lg text-black font-bold">{result.name}</p>
-                          <p className="text-sm text-gray-500">{result.symbol}</p>
+                        <div className=" flex flex-row items-center space-x-3">
+                          <img 
+                              src= {"https://assets.coincap.io/assets/icons/"+ result.symbol.toLowerCase()+ "@2x.png"}
+                              onError={({ currentTarget }) => {
+                                currentTarget.onerror = null; // prevents looping
+                                currentTarget.src="https://coincap.io/static/logo_mark.png";
+                              }}
+                              alt="crypto image" 
+                              className=" size-7 "
+                          />
+                          <div>
+                            <p className="text-lg text-black font-bold">{result.name}</p>
+                            <p className="text-sm text-gray-500">{result.symbol}</p>
+                          </div>
                         </div>
 
                         <p className="text-lg text-black font-bold">${result.priceUsd}</p>
