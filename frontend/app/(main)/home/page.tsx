@@ -13,6 +13,7 @@ import { ClientInferResponseBody } from "@ts-rest/core";
 import { apiContract } from "#/shared/contracts";
 import InfiniteScroll from "react-infinite-scroll-component";
 
+
 type FollowedPostsResponse = ClientInferResponseBody<typeof apiContract.user.getFeeds, 200>;
 
 // show all posts from users that the logged in user follows
@@ -308,6 +309,8 @@ const Home = () => {
         </div>
       </main>
       {/* main content end */}
+
+     
     </>
   );
 };

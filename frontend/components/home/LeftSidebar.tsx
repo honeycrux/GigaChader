@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthContext } from "@/providers/auth-provider";
 
-type TabSelectValue = "Home" | "Search" | "Discover" | "Global" | "Activity" | "Profile" | "Bookmarks" | "Crypto";
+type TabSelectValue = "Home" | "Search" | "Discover" | "Global" | "Activity" | "Profile" | "Bookmarks" ;
+
+{/* "Crypto"*/}
 
 const LeftSidebar = () => {
   const [selectedButton, setSelectedButton] = useState<TabSelectValue | "">("");
@@ -42,12 +44,14 @@ const LeftSidebar = () => {
       setSelectedButton("Profile");
     } else if (pathname.includes("bookmarks")) {
       setSelectedButton("Bookmarks");
-    } else if (pathname.includes("crypto")) {
-      setSelectedButton("Crypto");
     } else {
       // setSelectedButton("");
     }
   }, [pathname]); // Re-run the effect when `pathname` changes
+
+    {/*else if (pathname.includes("crypto")) {
+      setSelectedButton("Crypto");
+    } */}
 
   return (
     <>
@@ -158,7 +162,7 @@ const LeftSidebar = () => {
           </button>
         )}
 
-        {!bIsGuest && (
+        {/* {!bIsGuest && (
           <button
             className={`flex items-center my-2 w-full py-2 h-14 pl-5 rounded-lg ${selectedButton === "Crypto" ? "bg-orange1 text-white" : " text-black"}`}
             onClick={() => {
@@ -169,7 +173,7 @@ const LeftSidebar = () => {
             <i className=" pi pi-bitcoin text-2xl"></i>
             <span className="ml-3 text-2xl">Crypto</span>
           </button>
-        )}
+        )} */}
       </aside>
 
       {/* sidebar end */}

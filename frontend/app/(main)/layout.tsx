@@ -4,6 +4,8 @@ import "@/app/theme/theme.css";
 import "@/app/theme/custom-styles.css";
 import HeaderNavbar from "@/components/home/HeaderNavbar";
 import LeftSidebar from "@/components/home/LeftSidebar";
+import RightSidebar from "@/components/home/RightSidebar";
+// import { Button } from "primereact/button";
 
 // define general layout with HeaderNavbar on top, LeftSidebar on left, and main content in the middle
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +17,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LeftSidebar />
         <div className="flex flex-col w-full items-center">{children}</div>
       </div>
+
+       {/* righ sidebar start */}
+       <div className="fixed bottom-4 right-5">
+        <RightSidebar/>
+      </div>
+      {/* right sidebar end */}
     </div>
   );
 }
